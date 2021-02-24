@@ -1,9 +1,11 @@
 import pathlib
 import platform
 from   typing          import Optional
-from   pydantic        import BaseModel, ValidationError
+from   unittest.mock   import sentinel
+from   pydantic        import BaseModel, SecretStr, ValidationError
 import pytest
-from   outgoing.config import DirectoryPath, FilePath, Path
+from   pytest_mock     import MockerFixture
+from   outgoing.config import DirectoryPath, FilePath, Password, Path
 
 if platform.system() == "Windows":
     home_var = "USERPROFILE"
@@ -56,3 +58,34 @@ def test_dirpath_not_directory(tmp_path: pathlib.Path) -> None:
     (tmp_path / "foo").touch()
     with pytest.raises(ValidationError):
         Paths(dirpath=tmp_path / "foo")
+
+
+class Password01(Password):
+    host_field = "host"
+    username_field = "username"
+
+class Config01(BaseModel):
+    configpath: Path
+    host: str
+    username: str
+    password: Password01
+
+
+def test_password_fetch_fields(mocker: MockerFixture) -> None:
+    m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    cfg = Config01(
+        configpath="foo/bar",
+        host="example.com",
+        username="me",
+        password=sentinel.PASSWORD,
+    )
+    assert cfg.configpath == pathlib.Path("foo/bar")
+    assert cfg.host == "example.com"
+    assert cfg.username == "me"
+    assert cfg.password == SecretStr("12345")
+    m.assert_called_once_with(
+        sentinel.PASSWORD,
+        host="example.com",
+        username="me",
+        configpath=pathlib.Path("foo/bar"),
+    )
