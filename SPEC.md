@@ -96,6 +96,7 @@
         
         - `password = { keyring = {} }`
         - `password = { keyring = { service = "foo", username = "bar" } }`
+        - `password = { keyring = { service = "foo", username = "bar", backend = "foo.bar", keyring-path = "quux/baz" } }`
         - `password = { file = "~/path/to/file" }`
         - `password = { env = "ENV_VAR" }`
         - `password = { netrc = {} }`
