@@ -25,7 +25,6 @@ class MboxSender(BaseModel):
         exc_tb: Optional[TracebackType],
     ) -> None:
         self._mbox.close()
-        pass
 
     def send(self, msg: EmailMessage) -> None:
         self._mbox.add(msg)
