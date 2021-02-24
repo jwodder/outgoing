@@ -1,29 +1,35 @@
 import os
-from   typing import List, Sequence, Union
+from   typing import List, Optional, Sequence
+from   .util  import AnyPath
 
 class Error(Exception):
     pass
 
 class InvalidConfigError(Error):
-    def __init__(self, details: str, configpath: Union[str, os.PathLike, None] = None):
+    def __init__(self, details: str, configpath: Optional[AnyPath] = None):
         self.details: str = details
-        self.configpath: Union[str, os.PathLike, None] = configpath
+        self.configpath: Optional[AnyPath] = configpath
 
     def __str__(self) -> str:
         s = ""
         if self.configpath is not None:
-            s += f"{self.configpath}: "
+            s += f"{os.fsdecode(self.configpath)}: "
         s += f"Invalid configuration: {self.details}"
         return s
 
 
 class InvalidPasswordError(InvalidConfigError):
-    pass
+    def __str__(self) -> str:
+        s = ""
+        if self.configpath is not None:
+            s += f"{os.fsdecode(self.configpath)}: "
+        s += f"Invalid password configuration: {self.details}"
+        return s
 
 
 class MissingConfigError(Error):
-    def __init__(self, configpaths: Sequence[Union[str, os.PathLike]]):
-        self.configpaths: List[Union[str, os.PathLike]] = list(configpaths)
+    def __init__(self, configpaths: Sequence[AnyPath]):
+        self.configpaths: List[AnyPath] = list(configpaths)
 
     def __str__(self) -> str:
         return (

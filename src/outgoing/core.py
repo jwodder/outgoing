@@ -11,6 +11,7 @@ import entrypoints
 import toml
 from   .errors       import InvalidConfigError, InvalidPasswordError, \
                                 MissingConfigError
+from   .util         import AnyPath
 
 if sys.version_info[:2] >= (3, 8):
     from typing import Protocol
@@ -45,14 +46,14 @@ def get_default_configpath() -> Path:
     return Path(appdirs.user_config_dir("outgoing", "jwodder"), "outgoing.toml")
 
 def from_config_file(
-    path: Union[str, os.PathLike, None] = None,
+    path: Optional[AnyPath] = None,
     section: Optional[str] = DEFAULT_CONFIG_SECTION,
     fallback: bool = True,
 ) -> SenderManager:
     if path is None:
         configpath = get_default_configpath()
     else:
-        configpath = Path(path)
+        configpath = Path(os.fsdecode(path))
     data: Any
     try:
         if configpath.suffix == ".toml":
@@ -92,7 +93,7 @@ def from_config_file(
 
 def from_dict(
     data: Dict[str, Any],
-    configpath: Union[str, os.PathLike, None] = None,
+    configpath: Optional[AnyPath] = None,
 ) -> SenderManager:
     try:
         method = data["method"]
