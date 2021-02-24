@@ -1,7 +1,7 @@
 import pathlib
 import platform
 from   typing          import Optional
-from   pydantic        import BaseModel
+from   pydantic        import BaseModel, ValidationError
 import pytest
 from   outgoing.config import DirectoryPath, FilePath, Path
 
@@ -38,3 +38,21 @@ def test_path_explicit_none() -> None:
     assert obj.path is None
     assert obj.filepath is None
     assert obj.dirpath is None
+
+def test_filepath_not_exists(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(ValidationError):
+        Paths(filepath=tmp_path / "nowhere")
+
+def test_dirpath_not_exists(tmp_path: pathlib.Path) -> None:
+    with pytest.raises(ValidationError):
+        Paths(dirpath=tmp_path / "nowhere")
+
+def test_filepath_not_file(tmp_path: pathlib.Path) -> None:
+    (tmp_path / "foo").mkdir()
+    with pytest.raises(ValidationError):
+        Paths(filepath=tmp_path / "foo")
+
+def test_dirpath_not_directory(tmp_path: pathlib.Path) -> None:
+    (tmp_path / "foo").touch()
+    with pytest.raises(ValidationError):
+        Paths(dirpath=tmp_path / "foo")
