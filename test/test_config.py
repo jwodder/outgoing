@@ -1,5 +1,8 @@
+import pathlib
 import platform
+from   typing          import Optional
 from   pydantic        import BaseModel
+import pytest
 from   outgoing.config import DirectoryPath, FilePath, Path
 
 if platform.system() == "Windows":
@@ -12,7 +15,10 @@ class Paths(BaseModel):
     filepath: Optional[FilePath]
     dirpath: Optional[DirectoryPath]
 
-def test_path_expanduser(monkeypatch, tmp_path):
+def test_path_expanduser(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+) -> None:
     (tmp_path / "foo").mkdir()
     (tmp_path / "foo" / "bar.txt").touch()
     monkeypatch.setenv(home_var, str(tmp_path))
@@ -21,13 +27,13 @@ def test_path_expanduser(monkeypatch, tmp_path):
     assert obj.filepath == tmp_path / "foo" / "bar.txt"
     assert obj.dirpath == tmp_path / "foo"
 
-def test_path_default_none():
+def test_path_default_none() -> None:
     obj = Paths()
     assert obj.path is None
     assert obj.filepath is None
     assert obj.dirpath is None
 
-def test_path_explicit_none():
+def test_path_explicit_none() -> None:
     obj = Paths(path=None, filepath=None, dirpath=None)
     assert obj.path is None
     assert obj.filepath is None

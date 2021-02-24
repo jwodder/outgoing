@@ -1,4 +1,3 @@
-import os.path
 import pathlib
 from   typing              import Any, Dict, TYPE_CHECKING, Union
 import pydantic
@@ -19,21 +18,23 @@ else:
 
         @classmethod
         def __get_validators__(cls) -> 'CallableGenerator':
-            yield path_expanduser
             yield path_validator
+            yield path_expanduser
 
     class FilePath(pydantic.FilePath):
         @classmethod
         def __get_validators__(cls) -> 'CallableGenerator':
+            yield path_validator
             yield path_expanduser
             yield from super().__get_validators__()
 
     class DirectoryPath(pydantic.DirectoryPath):
         @classmethod
         def __get_validators__(cls) -> 'CallableGenerator':
+            yield path_validator
             yield path_expanduser
             yield from super().__get_validators__()
 
 
-def path_expanduser(v: Any) -> str:
-    return os.path.expanduser(v)
+def path_expanduser(v: pathlib.Path) -> pathlib.Path:
+    return v.expanduser()
