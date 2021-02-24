@@ -157,3 +157,21 @@ def test_password_callable_fields(mocker: MockerFixture) -> None:
         username="me@example.com",
         configpath=pathlib.Path("foo/bar"),
     )
+
+def test_password_host_and_host_field() -> None:
+    with pytest.raises(RuntimeError) as excinfo:
+        type(
+            'PasswordTest',
+            (Password,),
+            {"host": "api.example.com", "host_field": "host"},
+        )
+    assert str(excinfo.value) == "host and host_field are mutually exclusive"
+
+def test_password_username_and_username_field() -> None:
+    with pytest.raises(RuntimeError) as excinfo:
+        type(
+            'PasswordTest',
+            (Password,),
+            {"username": "me", "username_field": "username"},
+        )
+    assert str(excinfo.value) == "username and username_field are mutually exclusive"

@@ -1,5 +1,7 @@
 import pathlib
-from   typing              import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Union
+from   typing              import (
+    Any, ClassVar, Dict, Optional, TYPE_CHECKING, Tuple, Union, cast
+)
 import pydantic
 from   pydantic.validators import path_validator
 from   .                   import core
@@ -37,10 +39,30 @@ else:
             yield from super().__get_validators__()
 
 
+class PasswordMeta(type):
+    def __new__(
+        metacls,
+        name: str,
+        bases: Tuple[type, ...],
+        namespace: Dict[str, Any],
+    ) -> "PasswordMeta":
+        if (
+            namespace.get("host") is not None
+            and namespace.get("host_field") is not None
+        ):
+            raise RuntimeError("host and host_field are mutually exclusive")
+        if (
+            namespace.get("username") is not None
+            and namespace.get("username_field") is not None
+        ):
+            raise RuntimeError("username and username_field are mutually exclusive")
+        return cast(PasswordMeta, super().__new__(metacls, name, bases, namespace))
+
+
 # We have to implement Password configuration via explicit subclassing as using
 # a function instead à la pydantic's conlist() leads to mypy errors; cf.
 # <https://github.com/samuelcolvin/pydantic/issues/975>
-class Password(pydantic.SecretStr):
+class Password(pydantic.SecretStr, metaclass=PasswordMeta):
     host: ClassVar[Any] = None
     host_field: ClassVar[Optional[str]] = None
     username: ClassVar[Any] = None
@@ -55,17 +77,13 @@ class Password(pydantic.SecretStr):
     def resolve(cls, v: Any, values: Dict[str, Any]) -> str:
         host = cls.host
         host_field = cls.host_field
-        if host is not None and host_field is not None:
-            raise RuntimeError("host and host_field are mutually exclusive")
-        elif host_field is not None:
+        if host_field is not None:
             host = values.get(host_field)
         elif callable(host):
             host = host(values)
         username = cls.username
         username_field = cls.username_field
-        if username is not None and username_field is not None:
-            raise RuntimeError("username and username_field are mutually exclusive")
-        elif username_field is not None:
+        if username_field is not None:
             username = values.get(username_field)
         elif callable(username):
             username = username(values)
