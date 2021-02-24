@@ -9,3 +9,13 @@ __author__       = 'John Thorvald Wodder II'
 __author_email__ = 'outgoing@varonathe.org'
 __license__      = 'MIT'
 __url__          = 'https://github.com/jwodder/outgoing'
+
+from .core import from_config_file, from_dict, get_default_configpath, \
+                    resolve_password
+
+__all__ = [
+    "from_config_file",
+    "from_dict",
+    "get_default_configpath",
+    "resolve_password",
+]
