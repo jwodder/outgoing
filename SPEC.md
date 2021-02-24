@@ -46,8 +46,8 @@
 
     - Sender objects must support the following:
         - use as a context manager
-        - a `send(msg: EmailMessage)` method (for calling within the context
-          manager; calling outside the manager is undefined)
+        - a `send(msg: EmailMessage) -> Any` method (for calling within the
+          context manager; calling outside the manager is undefined)
 
     - The library provides the following functions for constructing senders:
         - `sender_from_dict(d: dict, configpath=None)`
@@ -86,7 +86,7 @@
         - [unknown sending method]
         - [unknown password provider]
         - [invalid password spec]
-        - [e-mail structure not supported by sending method]
+        - [invalid e-mail/e-mail structure not supported by sending method]
         - [sending error?]
 
 - Configuration is read from a TOML file, so that type information is available
@@ -111,7 +111,3 @@
 - Should the config file support multiple "profiles"?
 
 - cf. `marrow.mailer`? `mailshake`?
-
-- TODO:
-    - Make path types resolve themselves relative to configpath (when set) or
-      the current directory

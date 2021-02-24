@@ -23,12 +23,14 @@ else:
         def __get_validators__(cls) -> 'CallableGenerator':
             yield path_validator
             yield path_expanduser
+            yield path_resolve
 
     class FilePath(pydantic.FilePath):
         @classmethod
         def __get_validators__(cls) -> 'CallableGenerator':
             yield path_validator
             yield path_expanduser
+            yield path_resolve
             yield from super().__get_validators__()
 
     class DirectoryPath(pydantic.DirectoryPath):
@@ -36,6 +38,7 @@ else:
         def __get_validators__(cls) -> 'CallableGenerator':
             yield path_validator
             yield path_expanduser
+            yield path_resolve
             yield from super().__get_validators__()
 
 
@@ -97,3 +100,9 @@ class Password(pydantic.SecretStr, metaclass=PasswordMeta):
 
 def path_expanduser(v: pathlib.Path) -> pathlib.Path:
     return v.expanduser()
+
+def path_resolve(v: pathlib.Path, values: Dict[str, Any]) -> pathlib.Path:
+    configpath = values.get("configpath")
+    if configpath is not None:
+        v = pathlib.Path(configpath).parent / v
+    return v.resolve()

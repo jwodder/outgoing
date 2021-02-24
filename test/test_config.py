@@ -60,12 +60,56 @@ def test_dirpath_not_directory(tmp_path: pathlib.Path) -> None:
         Paths(dirpath=tmp_path / "foo")
 
 
+class ResolvingPaths(BaseModel):
+    configpath: Optional[Path]
+    path: Path
+    filepath: FilePath
+    dirpath: DirectoryPath
+
+
+def test_path_resolve_to_configpath(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+) -> None:
+    (tmp_path / "bar" / "foo").mkdir(parents=True)
+    (tmp_path / "bar" / "foo" / "bar.txt").touch()
+    monkeypatch.chdir(tmp_path)
+    obj = ResolvingPaths(
+        configpath="bar/quux.txt",
+        path="nowhere",
+        filepath="foo/bar.txt",
+        dirpath="foo",
+    )
+    assert obj.configpath == tmp_path / "bar" / "quux.txt"
+    assert obj.path == tmp_path / "bar" / "nowhere"
+    assert obj.filepath == tmp_path / "bar" / "foo" / "bar.txt"
+    assert obj.dirpath == tmp_path / "bar" / "foo"
+
+def test_path_resolve_to_curdir(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+) -> None:
+    (tmp_path / "foo").mkdir()
+    (tmp_path / "foo" / "bar.txt").touch()
+    monkeypatch.chdir(tmp_path)
+    obj = ResolvingPaths(
+        configpath=None,
+        path="nowhere",
+        filepath="foo/bar.txt",
+        dirpath="foo",
+    )
+    assert obj.configpath is None
+    assert obj.path == tmp_path / "nowhere"
+    assert obj.filepath == tmp_path / "foo" / "bar.txt"
+    assert obj.dirpath == tmp_path / "foo"
+
+
 class Password01(Password):
     host_field = "host"
     username_field = "username"
 
 class Config01(BaseModel):
-    configpath: Path
+    configpath: pathlib.Path
     host: str
     username: str
     password: Password01
@@ -96,7 +140,7 @@ class Password02(Password):
     username = "mylogin"
 
 class Config02(BaseModel):
-    configpath: Path
+    configpath: pathlib.Path
     host: str
     username: str
     password: Password02
@@ -133,7 +177,7 @@ class Password03(Password):
 
 
 class Config03(BaseModel):
-    configpath: Path
+    configpath: pathlib.Path
     host: str
     username: str
     password: Password03
