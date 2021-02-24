@@ -4,37 +4,38 @@ import os
 from   pathlib       import Path
 import sys
 from   types         import TracebackType
-from   typing        import Any, Dict, Optional, TYPE_CHECKING, Type, Union, cast
+from   typing        import Any, Dict, Optional, Type, Union, cast
 import appdirs
 import entrypoints
 import toml
 from   .errors       import InvalidConfigError, MissingConfigError
 
-if TYPE_CHECKING:
-    if sys.version_info[:2] >= (3, 8):
-        from typing import Protocol
-    else:
-        from typing_extensions import Protocol
-
-    class Sender(Protocol):
-        def send(self, msg: EmailMessage) -> Any:
-            ...
-
-    class SenderManager(Protocol):
-        def __enter__(self) -> Sender:
-            ...
-
-        def __exit__(
-            self,
-            exc_type: Optional[Type[BaseException]],
-            exc_val: Optional[BaseException],
-            exc_tb: Optional[TracebackType],
-        ) -> Optional[bool]:
-            ...
+if sys.version_info[:2] >= (3, 8):
+    from typing import Protocol
+else:
+    from typing_extensions import Protocol
 
 DEFAULT_CONFIG_SECTION = "outgoing"
 
 SENDER_GROUP = "outgoing.senders"
+
+class Sender(Protocol):
+    def send(self, msg: EmailMessage) -> Any:
+        ...
+
+
+class SenderManager(Protocol):
+    def __enter__(self) -> Sender:
+        ...
+
+    def __exit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc_val: Optional[BaseException],
+        exc_tb: Optional[TracebackType],
+    ) -> Optional[bool]:
+        ...
+
 
 def get_default_configpath() -> Path:
     return Path(appdirs.user_config_dir("outgoing", "jwodder"), "outgoing.toml")
@@ -43,7 +44,7 @@ def from_config_file(
     path: Union[str, os.PathLike, None] = None,
     section: Optional[str] = DEFAULT_CONFIG_SECTION,
     fallback: bool = True,
-) -> "SenderManager":
+) -> SenderManager:
     if path is None:
         configpath = get_default_configpath()
     else:
@@ -88,7 +89,7 @@ def from_config_file(
 def from_dict(
     data: Dict[str, Any],
     configpath: Union[str, os.PathLike, None] = None,
-) -> "SenderManager":
+) -> SenderManager:
     try:
         method = data["method"]
     except KeyError:
@@ -105,7 +106,7 @@ def from_dict(
         )
     sender_cls = ep.load()
     try:
-        return cast("SenderManager", sender_cls(configpath=configpath, **data))
+        return cast(SenderManager, sender_cls(configpath=configpath, **data))
     except ValueError as e:
         raise InvalidConfigError(str(e), configpath=configpath)
     except InvalidConfigError as e:
