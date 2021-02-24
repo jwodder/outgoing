@@ -17,6 +17,10 @@ class InvalidConfigError(Error):
         return s
 
 
+class InvalidPasswordError(InvalidConfigError):
+    pass
+
+
 class MissingConfigError(Error):
     def __init__(self, configpaths: Sequence[Union[str, os.PathLike]]):
         self.configpaths: List[Union[str, os.PathLike]] = list(configpaths)

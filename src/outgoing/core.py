@@ -1,4 +1,5 @@
 from   email.message import EmailMessage
+import inspect
 import json
 import os
 from   pathlib       import Path
@@ -8,7 +9,8 @@ from   typing        import Any, Dict, Optional, Type, Union, cast
 import appdirs
 import entrypoints
 import toml
-from   .errors       import InvalidConfigError, MissingConfigError
+from   .errors       import InvalidConfigError, InvalidPasswordError, \
+                                MissingConfigError
 
 if sys.version_info[:2] >= (3, 8):
     from typing import Protocol
@@ -18,6 +20,8 @@ else:
 DEFAULT_CONFIG_SECTION = "outgoing"
 
 SENDER_GROUP = "outgoing.senders"
+
+PASSWORD_PROVIDER_GROUP = "outgoing.password_providers"
 
 class Sender(Protocol):
     def send(self, msg: EmailMessage) -> Any:
@@ -107,7 +111,7 @@ def from_dict(
     sender_cls = ep.load()
     try:
         return cast(SenderManager, sender_cls(configpath=configpath, **data))
-    except ValueError as e:
+    except (TypeError, ValueError) as e:
         raise InvalidConfigError(str(e), configpath=configpath)
     except InvalidConfigError as e:
         if e.configpath is None:
@@ -115,9 +119,42 @@ def from_dict(
         raise e
 
 def resolve_password(
-    spec: Union[str, Dict[str, Any]],
+    password: Union[str, Dict[str, Any]],
     host: Optional[str] = None,
     username: Optional[str] = None,
     configpath: Union[str, Path, None] = None,
 ) -> str:
-    raise NotImplementedError
+    if isinstance(password, str):
+        return password
+    elif len(password) != 1:
+        raise InvalidPasswordError(
+            "Password must be either a string or an object with exactly one field"
+        )
+    (provider, spec), = password.items()
+    try:
+        ep = entrypoints.get_single(PASSWORD_PROVIDER_GROUP, provider)
+    except entrypoints.NoSuchEntryPoint:
+        raise InvalidPasswordError(
+            f"Unsupported password provider {provider!r}",
+            configpath=configpath,
+        )
+    provider_func = ep.load()
+    available_kwargs = {
+        "host": host,
+        "username": username,
+        "configpath": configpath,
+    }
+    kwargs = {}
+    sig = inspect.signature(provider_func)
+    for param in sig.parameters.values():
+        if (
+            param.kind in (param.POSITIONAL_OR_KEYWORD, param.KEYWORD_ONLY)
+            and param.name in available_kwargs
+        ):
+            kwargs[param.name] = available_kwargs[param.name]
+        elif param.kind is param.VAR_KEYWORD:
+            kwargs.update(available_kwargs)
+    try:
+        return cast(str, provider_func(spec=spec, **kwargs))
+    except (TypeError, ValueError) as e:
+        raise InvalidPasswordError(str(e))
