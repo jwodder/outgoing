@@ -111,3 +111,7 @@
 - Should the config file support multiple "profiles"?
 
 - cf. `marrow.mailer`? `mailshake`?
+
+- TODO:
+    - Make path types resolve themselves relative to configpath (when set) or
+      the current directory

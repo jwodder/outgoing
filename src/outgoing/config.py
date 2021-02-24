@@ -37,6 +37,9 @@ else:
             yield from super().__get_validators__()
 
 
+# We have to implement Password configuration via explicit subclassing as using
+# a function instead à la pydantic's conlist() leads to mypy errors; cf.
+# <https://github.com/samuelcolvin/pydantic/issues/975>
 class Password(pydantic.SecretStr):
     host: ClassVar[Any] = None
     host_field: ClassVar[Optional[str]] = None

@@ -1,6 +1,6 @@
 import pathlib
 import platform
-from   typing          import Optional
+from   typing          import Any, Dict, Optional
 from   unittest.mock   import sentinel
 from   pydantic        import BaseModel, SecretStr, ValidationError
 import pytest
@@ -87,5 +87,73 @@ def test_password_fetch_fields(mocker: MockerFixture) -> None:
         sentinel.PASSWORD,
         host="example.com",
         username="me",
+        configpath=pathlib.Path("foo/bar"),
+    )
+
+
+class Password02(Password):
+    host = "api.example.com"
+    username = "mylogin"
+
+class Config02(BaseModel):
+    configpath: Path
+    host: str
+    username: str
+    password: Password02
+
+
+def test_password_constant_fields(mocker: MockerFixture) -> None:
+    m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    cfg = Config02(
+        configpath="foo/bar",
+        host="example.com",
+        username="me",
+        password=sentinel.PASSWORD,
+    )
+    assert cfg.configpath == pathlib.Path("foo/bar")
+    assert cfg.host == "example.com"
+    assert cfg.username == "me"
+    assert cfg.password == SecretStr("12345")
+    m.assert_called_once_with(
+        sentinel.PASSWORD,
+        host="api.example.com",
+        username="mylogin",
+        configpath=pathlib.Path("foo/bar"),
+    )
+
+
+class Password03(Password):
+    @classmethod
+    def host(cls, values: Dict[str, Any]) -> str:
+        return f"http:{values['host']}"
+
+    @classmethod
+    def username(cls, values: Dict[str, Any]) -> str:
+        return f"{values['username']}@{values['host']}"
+
+
+class Config03(BaseModel):
+    configpath: Path
+    host: str
+    username: str
+    password: Password03
+
+
+def test_password_callable_fields(mocker: MockerFixture) -> None:
+    m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    cfg = Config03(
+        configpath="foo/bar",
+        host="example.com",
+        username="me",
+        password=sentinel.PASSWORD,
+    )
+    assert cfg.configpath == pathlib.Path("foo/bar")
+    assert cfg.host == "example.com"
+    assert cfg.username == "me"
+    assert cfg.password == SecretStr("12345")
+    m.assert_called_once_with(
+        sentinel.PASSWORD,
+        host="http:example.com",
+        username="me@example.com",
         configpath=pathlib.Path("foo/bar"),
     )
