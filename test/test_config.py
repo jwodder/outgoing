@@ -1,5 +1,5 @@
 import pathlib
-from typing import Any, Dict, Optional
+from typing import Any, Dict, Optional, Union
 from unittest.mock import sentinel
 from pydantic import BaseModel, SecretStr, ValidationError
 import pytest
@@ -101,6 +101,25 @@ def test_path_resolve_to_curdir(
         dirpath="foo",
     )
     assert obj.configpath is None
+    assert obj.path == tmp_path / "nowhere"
+    assert obj.filepath == tmp_path / "foo" / "bar.txt"
+    assert obj.dirpath == tmp_path / "foo"
+
+
+def test_path_resolve_absolute_configpath(
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+) -> None:
+    (tmp_path / "foo").mkdir(parents=True)
+    (tmp_path / "foo" / "bar.txt").touch()
+    monkeypatch.chdir(tmp_path)
+    obj = ResolvingPaths(
+        configpath="bar/quux.txt",
+        path=tmp_path / "nowhere",
+        filepath=tmp_path / "foo" / "bar.txt",
+        dirpath=tmp_path / "foo",
+    )
+    assert obj.configpath == tmp_path / "bar" / "quux.txt"
     assert obj.path == tmp_path / "nowhere"
     assert obj.filepath == tmp_path / "foo" / "bar.txt"
     assert obj.dirpath == tmp_path / "foo"
@@ -239,3 +258,166 @@ def test_netrc_config(mocker: MockerFixture) -> None:
     )
     assert cfg.get_username_password() == (sentinel.USERNAME, sentinel.PASSWORD)
     m.assert_called_once_with("api.example.com", username="myname", path=None)
+
+
+@pytest.mark.parametrize("username", [None, "myname"])
+def test_netrc_config_path(
+    mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    tmp_path: pathlib.Path,
+    username: Optional[str],
+) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
+    )
+    (tmp_path / "foo.txt").touch()
+    monkeypatch.chdir(tmp_path)
+    cfg = NetrcConfig(
+        netrc="foo.txt",
+        host="api.example.com",
+        username=username,
+    )
+    assert cfg.get_username_password() == (sentinel.USERNAME, sentinel.PASSWORD)
+    m.assert_called_once_with(
+        "api.example.com", username=username, path=tmp_path / "foo.txt"
+    )
+
+
+@pytest.mark.parametrize("username", [None, "myname"])
+def test_netrc_config_path_expanduser(
+    mocker: MockerFixture, tmp_home: pathlib.Path, username: Optional[str]
+) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
+    )
+    (tmp_home / "foo.txt").touch()
+    cfg = NetrcConfig(
+        netrc="~/foo.txt",
+        host="api.example.com",
+        username=username,
+    )
+    assert cfg.get_username_password() == (sentinel.USERNAME, sentinel.PASSWORD)
+    m.assert_called_once_with(
+        "api.example.com", username=username, path=tmp_home / "foo.txt"
+    )
+
+
+@pytest.mark.parametrize("username", [None, "myname"])
+def test_netrc_config_path_configpath(
+    mocker: MockerFixture, tmp_path: pathlib.Path, username: Optional[str]
+) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
+    )
+    (tmp_path / "foo.txt").touch()
+    cfg = NetrcConfig(
+        configpath=tmp_path / "quux.txt",
+        netrc="foo.txt",
+        host="api.example.com",
+        username=username,
+    )
+    assert cfg.get_username_password() == (sentinel.USERNAME, sentinel.PASSWORD)
+    m.assert_called_once_with(
+        "api.example.com", username=username, path=tmp_path / "foo.txt"
+    )
+
+
+@pytest.mark.parametrize("username", [None, "myname"])
+def test_netrc_config_no_such_path(
+    mocker: MockerFixture, tmp_path: pathlib.Path, username: Optional[str]
+) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
+    )
+    with pytest.raises(ValidationError):
+        NetrcConfig(
+            netrc=tmp_path / "foo.txt",
+            host="api.example.com",
+            username=username,
+        )
+    m.assert_not_called()
+
+
+def test_netrc_config_password_no_username(mocker: MockerFixture) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
+    )
+    with pytest.raises(ValidationError) as excinfo:
+        NetrcConfig(
+            netrc=False,
+            host="api.example.com",
+            username=None,
+            password="12345",
+        )
+    assert "Password cannot be given without username" in str(excinfo.value)
+    m.assert_not_called()
+
+
+@pytest.mark.parametrize("netrc", [True, "foo.txt"])
+def test_netrc_config_password_netrc(
+    mocker: MockerFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    netrc: Union[bool, str],
+    tmp_path: pathlib.Path,
+) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
+    )
+    (tmp_path / "foo.txt").touch()
+    monkeypatch.chdir(tmp_path)
+    with pytest.raises(ValidationError) as excinfo:
+        NetrcConfig(
+            netrc=netrc,
+            host="api.example.com",
+            username="myname",
+            password="12345",
+        )
+    assert "netrc cannot be set when a password is present" in str(excinfo.value)
+    m.assert_not_called()
+
+
+def test_netrc_config_no_netrc(mocker: MockerFixture) -> None:
+    m1 = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    m2 = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
+    )
+    cfg = NetrcConfig(
+        configpath="foo/bar",
+        netrc=False,
+        host="api.example.com",
+        username="myname",
+        password=sentinel.PASSWORD,
+    )
+    assert cfg.password == SecretStr("12345")
+    assert cfg.get_username_password() == ("myname", "12345")
+    m1.assert_called_once_with(
+        sentinel.PASSWORD,
+        host="api.example.com",
+        username="myname",
+        configpath=pathlib.Path("foo/bar").resolve(),
+    )
+    m2.assert_not_called()
+
+
+def test_netrc_config_nothing(mocker: MockerFixture) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
+    )
+    cfg = NetrcConfig(
+        configpath="foo/bar",
+        netrc=False,
+        host="api.example.com",
+        username=None,
+        password=None,
+    )
+    assert cfg.password is None
+    assert cfg.get_username_password() is None
+    m.assert_not_called()

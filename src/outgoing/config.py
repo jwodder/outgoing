@@ -102,12 +102,12 @@ class NetrcPassword(Password):
 
 class NetrcConfig(pydantic.BaseModel):
     configpath: Optional[Path]
-    netrc: Union[pydantic.StrictBool, Path]
+    netrc: Union[pydantic.StrictBool, FilePath]
     host: str
     username: Optional[str]
     password: Optional[NetrcPassword]
 
-    @pydantic.root_validator
+    @pydantic.root_validator(skip_on_failure=True)
     def _forbid_netrc_if_password(
         cls,  # noqa: B902
         values: Dict[str, Any],
@@ -116,7 +116,7 @@ class NetrcConfig(pydantic.BaseModel):
             raise ValueError("netrc cannot be set when a password is present")
         return values
 
-    @pydantic.root_validator
+    @pydantic.root_validator(skip_on_failure=True)
     def _require_username_if_password(
         cls,  # noqa: B902
         values: Dict[str, Any],
@@ -131,8 +131,7 @@ class NetrcConfig(pydantic.BaseModel):
         if password is not None:
             assert username is not None, "Password is set but username is not"
             return (username, password.get_secret_value())
-        else:
-            assert self.netrc, "Neither password nor netrc set"
+        elif self.netrc:
             rcpath = self.netrc
             path: Optional[Path]
             if isinstance(rcpath, bool):
@@ -140,3 +139,5 @@ class NetrcConfig(pydantic.BaseModel):
             else:
                 path = rcpath
             return core.lookup_netrc(self.host, username=username, path=path)
+        else:
+            return None
