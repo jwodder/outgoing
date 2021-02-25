@@ -1,5 +1,5 @@
 """
-Abstract interface for different e-mail methods
+Common interface for different e-mail methods
 
 Visit <https://github.com/jwodder/outgoing> for more information.
 """
