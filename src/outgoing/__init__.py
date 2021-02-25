@@ -1,6 +1,14 @@
 """
 Common interface for different e-mail methods
 
+``outgoing`` provides a common interface to multiple different e-mail sending
+methods (SMTP, sendmail, mbox, etc.).  Just construct a sender from a
+configuration file or object, pass it an ``EmailMessage`` instance, and let the
+magical internet daemons take care of the rest.
+
+``outgoing`` itself provides support for only basic sending methods; additional
+methods are provided by other packages.
+
 Visit <https://github.com/jwodder/outgoing> for more information.
 """
 
