@@ -93,7 +93,7 @@
     - The "password" field can then be supplied as either a string (for the
       actual password) or a dict with one key, giving the name of the provider
       method, e.g.:
-        
+
         - `password = { keyring = {} }`
         - `password = { keyring = { service = "foo", username = "bar" } }`
         - `password = { keyring = { service = "foo", username = "bar", backend = "foo.bar", keyring-path = "quux/baz" } }`

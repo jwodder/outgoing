@@ -1,9 +1,10 @@
-from   email.message import EmailMessage
+from email.message import EmailMessage
 import mailbox
-from   types         import TracebackType
-from   typing        import Any, Dict, Optional, Type
-from   pydantic      import BaseModel, PrivateAttr
-from   ..config      import Path
+from types import TracebackType
+from typing import Any, Dict, Optional, Type
+from pydantic import BaseModel, PrivateAttr
+from ..config import Path
+
 
 class MboxSender(BaseModel):
     configpath: Optional[Path] = None

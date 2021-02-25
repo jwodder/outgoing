@@ -1,9 +1,10 @@
-from   email.message import EmailMessage
+from email.message import EmailMessage
 import subprocess
-from   types         import TracebackType
-from   typing        import Optional, Type
-from   pydantic      import BaseModel
-from   ..config      import Path
+from types import TracebackType
+from typing import Optional, Type
+from pydantic import BaseModel
+from ..config import Path
+
 
 class CommandSender(BaseModel):
     configpath: Optional[Path] = None

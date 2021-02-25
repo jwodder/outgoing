@@ -1,8 +1,9 @@
-from   netrc   import netrc
+from netrc import netrc
 import os
-from   typing  import Any, Optional
-from   .errors import InvalidPasswordError
-from   .util   import AnyPath, resolve_path
+from typing import Any, Optional
+from .errors import InvalidPasswordError
+from .util import AnyPath, resolve_path
+
 
 def env_provider(spec: str) -> str:
     try:
@@ -10,9 +11,11 @@ def env_provider(spec: str) -> str:
     except KeyError:
         raise InvalidPasswordError(f"Environment variable {spec!r} not set")
 
+
 def file_provider(spec: AnyPath, configpath: Optional[AnyPath] = None) -> str:
     filepath = resolve_path(spec, configpath)
     return filepath.read_text().strip()
+
 
 def netrc_provider(
     spec: Any,
@@ -46,9 +49,7 @@ def netrc_provider(
         raise InvalidPasswordError("Netrc username must be a string")
     auth = rc.authenticators(host)
     if auth is None:
-        raise InvalidPasswordError(
-            "No matching or default entry found in netrc file"
-        )
+        raise InvalidPasswordError("No matching or default entry found in netrc file")
     elif username is not None and auth[0] != username:
         raise InvalidPasswordError(
             f"Username mismatch in netrc: config says {username},"

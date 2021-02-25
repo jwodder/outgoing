@@ -1,10 +1,8 @@
 import pathlib
-from   typing              import (
-    Any, ClassVar, Dict, Optional, TYPE_CHECKING, Tuple, Union, cast
-)
+from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Tuple, Union, cast
 import pydantic
-from   pydantic.validators import path_validator
-from   .                   import core
+from pydantic.validators import path_validator
+from . import core
 
 if TYPE_CHECKING:
     from pydantic.typing import CallableGenerator
@@ -14,20 +12,21 @@ if TYPE_CHECKING:
     DirectoryPath = Union[pathlib.Path, str]
 
 else:
+
     class Path(pathlib.Path):
         @classmethod
         def __modify_schema__(cls, field_schema: Dict[str, Any]) -> None:
-            field_schema.update(format='file-path')
+            field_schema.update(format="file-path")
 
         @classmethod
-        def __get_validators__(cls) -> 'CallableGenerator':
+        def __get_validators__(cls) -> "CallableGenerator":
             yield path_validator
             yield path_expanduser
             yield path_resolve
 
     class FilePath(pydantic.FilePath):
         @classmethod
-        def __get_validators__(cls) -> 'CallableGenerator':
+        def __get_validators__(cls) -> "CallableGenerator":
             yield path_validator
             yield path_expanduser
             yield path_resolve
@@ -35,7 +34,7 @@ else:
 
     class DirectoryPath(pydantic.DirectoryPath):
         @classmethod
-        def __get_validators__(cls) -> 'CallableGenerator':
+        def __get_validators__(cls) -> "CallableGenerator":
             yield path_validator
             yield path_expanduser
             yield path_resolve
@@ -72,7 +71,7 @@ class Password(pydantic.SecretStr, metaclass=PasswordMeta):
     username_field: ClassVar[Optional[str]] = None
 
     @classmethod
-    def __get_validators__(cls) -> 'CallableGenerator':
+    def __get_validators__(cls) -> "CallableGenerator":
         yield cls.resolve
         yield from super().__get_validators__()
 
@@ -100,6 +99,7 @@ class Password(pydantic.SecretStr, metaclass=PasswordMeta):
 
 def path_expanduser(v: pathlib.Path) -> pathlib.Path:
     return v.expanduser()
+
 
 def path_resolve(v: pathlib.Path, values: Dict[str, Any]) -> pathlib.Path:
     configpath = values.get("configpath")

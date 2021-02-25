@@ -1,10 +1,10 @@
-from   email.message import EmailMessage
+from email.message import EmailMessage
 import smtplib
 import sys
-from   types         import TracebackType
-from   typing        import Any, Dict, Optional, Type
-from   pydantic      import BaseModel, PrivateAttr, root_validator
-from   ..config      import Password, Path
+from types import TracebackType
+from typing import Any, Dict, Optional, Type
+from pydantic import BaseModel, PrivateAttr, root_validator
+from ..config import Password, Path
 
 if sys.version_info[:2] >= (3, 8):
     from typing import Literal
@@ -12,6 +12,7 @@ else:
     from typing_extensions import Literal
 
 STARTTLS = "starttls"
+
 
 class SMTPPassword(Password):
     host_field = "host"
@@ -33,9 +34,7 @@ class SMTPSender(BaseModel):
         values: Dict[str, Any],
     ) -> Dict[str, Any]:
         if (values.get("username") is None) != (values.get("password") is None):
-            raise ValueError(
-                "Username cannot be given without password and vice versa"
-            )
+            raise ValueError("Username cannot be given without password and vice versa")
         return values
 
     def __init__(self, **data: Dict[str, Any]) -> None:

@@ -1,9 +1,11 @@
 import os
-from   typing import List, Optional, Sequence
-from   .util  import AnyPath
+from typing import List, Optional, Sequence
+from .util import AnyPath
+
 
 class Error(Exception):
     pass
+
 
 class InvalidConfigError(Error):
     def __init__(self, details: str, configpath: Optional[AnyPath] = None):
@@ -32,7 +34,6 @@ class MissingConfigError(Error):
         self.configpaths: List[AnyPath] = list(configpaths)
 
     def __str__(self) -> str:
-        return (
-            "outgoing configuration not found in files: "
-            + ", ".join(map(str, self.configpaths))
+        return "outgoing configuration not found in files: " + ", ".join(
+            map(str, self.configpaths)
         )

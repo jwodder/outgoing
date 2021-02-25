@@ -1,21 +1,23 @@
 import pathlib
 import platform
-from   typing          import Any, Dict, Optional
-from   unittest.mock   import sentinel
-from   pydantic        import BaseModel, SecretStr, ValidationError
+from typing import Any, Dict, Optional
+from unittest.mock import sentinel
+from pydantic import BaseModel, SecretStr, ValidationError
 import pytest
-from   pytest_mock     import MockerFixture
-from   outgoing.config import DirectoryPath, FilePath, Password, Path
+from pytest_mock import MockerFixture
+from outgoing.config import DirectoryPath, FilePath, Password, Path
 
 if platform.system() == "Windows":
     home_var = "USERPROFILE"
 else:
     home_var = "HOME"
 
+
 class Paths(BaseModel):
     path: Optional[Path]
     filepath: Optional[FilePath]
     dirpath: Optional[DirectoryPath]
+
 
 def test_path_expanduser(
     monkeypatch: pytest.MonkeyPatch,
@@ -29,11 +31,13 @@ def test_path_expanduser(
     assert obj.filepath == tmp_path / "foo" / "bar.txt"
     assert obj.dirpath == tmp_path / "foo"
 
+
 def test_path_default_none() -> None:
     obj = Paths()
     assert obj.path is None
     assert obj.filepath is None
     assert obj.dirpath is None
+
 
 def test_path_explicit_none() -> None:
     obj = Paths(path=None, filepath=None, dirpath=None)
@@ -41,18 +45,22 @@ def test_path_explicit_none() -> None:
     assert obj.filepath is None
     assert obj.dirpath is None
 
+
 def test_filepath_not_exists(tmp_path: pathlib.Path) -> None:
     with pytest.raises(ValidationError):
         Paths(filepath=tmp_path / "nowhere")
+
 
 def test_dirpath_not_exists(tmp_path: pathlib.Path) -> None:
     with pytest.raises(ValidationError):
         Paths(dirpath=tmp_path / "nowhere")
 
+
 def test_filepath_not_file(tmp_path: pathlib.Path) -> None:
     (tmp_path / "foo").mkdir()
     with pytest.raises(ValidationError):
         Paths(filepath=tmp_path / "foo")
+
 
 def test_dirpath_not_directory(tmp_path: pathlib.Path) -> None:
     (tmp_path / "foo").touch()
@@ -85,6 +93,7 @@ def test_path_resolve_to_configpath(
     assert obj.filepath == tmp_path / "bar" / "foo" / "bar.txt"
     assert obj.dirpath == tmp_path / "bar" / "foo"
 
+
 def test_path_resolve_to_curdir(
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: pathlib.Path,
@@ -107,6 +116,7 @@ def test_path_resolve_to_curdir(
 class Password01(Password):
     host_field = "host"
     username_field = "username"
+
 
 class Config01(BaseModel):
     configpath: pathlib.Path
@@ -138,6 +148,7 @@ def test_password_fetch_fields(mocker: MockerFixture) -> None:
 class Password02(Password):
     host = "api.example.com"
     username = "mylogin"
+
 
 class Config02(BaseModel):
     configpath: pathlib.Path
@@ -202,19 +213,21 @@ def test_password_callable_fields(mocker: MockerFixture) -> None:
         configpath=pathlib.Path("foo/bar"),
     )
 
+
 def test_password_host_and_host_field() -> None:
     with pytest.raises(RuntimeError) as excinfo:
         type(
-            'PasswordTest',
+            "PasswordTest",
             (Password,),
             {"host": "api.example.com", "host_field": "host"},
         )
     assert str(excinfo.value) == "host and host_field are mutually exclusive"
 
+
 def test_password_username_and_username_field() -> None:
     with pytest.raises(RuntimeError) as excinfo:
         type(
-            'PasswordTest',
+            "PasswordTest",
             (Password,),
             {"username": "me", "username_field": "username"},
         )

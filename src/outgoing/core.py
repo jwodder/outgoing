@@ -1,17 +1,16 @@
-from   email.message import EmailMessage
+from email.message import EmailMessage
 import inspect
 import json
 import os
-from   pathlib       import Path
+from pathlib import Path
 import sys
-from   types         import TracebackType
-from   typing        import Any, Dict, Optional, Type, Union, cast
+from types import TracebackType
+from typing import Any, Dict, Optional, Type, Union, cast
 import appdirs
 import entrypoints
 import toml
-from   .errors       import InvalidConfigError, InvalidPasswordError, \
-                                MissingConfigError
-from   .util         import AnyPath
+from .errors import InvalidConfigError, InvalidPasswordError, MissingConfigError
+from .util import AnyPath
 
 if sys.version_info[:2] >= (3, 8):
     from typing import Protocol
@@ -23,6 +22,7 @@ DEFAULT_CONFIG_SECTION = "outgoing"
 SENDER_GROUP = "outgoing.senders"
 
 PASSWORD_PROVIDER_GROUP = "outgoing.password_providers"
+
 
 class Sender(Protocol):
     def send(self, msg: EmailMessage) -> Any:
@@ -44,6 +44,7 @@ class SenderManager(Protocol):
 
 def get_default_configpath() -> Path:
     return Path(appdirs.user_config_dir("outgoing", "jwodder"), "outgoing.toml")
+
 
 def from_config_file(
     path: Optional[AnyPath] = None,
@@ -91,6 +92,7 @@ def from_config_file(
         )
     return from_dict(data, configpath=configpath)
 
+
 def from_dict(
     data: Dict[str, Any],
     configpath: Optional[AnyPath] = None,
@@ -119,6 +121,7 @@ def from_dict(
             e.configpath = configpath
         raise e
 
+
 def resolve_password(
     password: Union[str, Dict[str, Any]],
     host: Optional[str] = None,
@@ -131,7 +134,7 @@ def resolve_password(
         raise InvalidPasswordError(
             "Password must be either a string or an object with exactly one field"
         )
-    (provider, spec), = password.items()
+    ((provider, spec),) = password.items()
     try:
         ep = entrypoints.get_single(PASSWORD_PROVIDER_GROUP, provider)
     except entrypoints.NoSuchEntryPoint:

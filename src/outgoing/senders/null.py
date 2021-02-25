@@ -1,8 +1,9 @@
-from   email.message import EmailMessage
-from   types         import TracebackType
-from   typing        import Optional, Type
-from   pydantic      import BaseModel
-from   ..config      import Path
+from email.message import EmailMessage
+from types import TracebackType
+from typing import Optional, Type
+from pydantic import BaseModel
+from ..config import Path
+
 
 class NullSender(BaseModel):
     configpath: Optional[Path] = None
