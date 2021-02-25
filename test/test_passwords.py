@@ -1,6 +1,8 @@
 from pathlib import Path
 import platform
+from unittest.mock import sentinel
 import pytest
+from pytest_mock import MockerFixture
 from outgoing import resolve_password
 from outgoing.errors import InvalidPasswordError
 
@@ -85,85 +87,49 @@ def test_file_password_expanduser_configpath(
     )
 
 
-def test_netrc(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    (tmp_path / ".netrc").write_text(
-        "machine api.example.com\nlogin myname\npassword hunter2\n"
+def test_netrc(mocker: MockerFixture) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
     )
-    (tmp_path / ".netrc").chmod(0o600)
-    monkeypatch.setenv(home_var, str(tmp_path))
     assert (
         resolve_password(
             {"netrc": {}},
             host="api.example.com",
             username="myname",
         )
-        == "hunter2"
+        is sentinel.PASSWORD
     )
+    m.assert_called_once_with("api.example.com", username="myname", path=None)
 
 
-def test_netrc_host_override(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
-    (tmp_path / ".netrc").write_text(
-        "machine api.example.com\n"
-        "login myname\n"
-        "password hunter2\n"
-        "\n"
-        "machine mx.egg-sample.nil\n"
-        "login myname\n"
-        "password 12345\n"
+def test_netrc_host_override(mocker: MockerFixture) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
     )
-    (tmp_path / ".netrc").chmod(0o600)
-    monkeypatch.setenv(home_var, str(tmp_path))
     assert (
         resolve_password(
             {"netrc": {"host": "mx.egg-sample.nil"}},
             host="api.example.com",
             username="myname",
         )
-        == "12345"
+        is sentinel.PASSWORD
     )
+    m.assert_called_once_with("mx.egg-sample.nil", username="myname", path=None)
 
 
-def test_netrc_username_mismatch(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    (tmp_path / ".netrc").write_text(
-        "machine api.example.com\nlogin myname\npassword hunter2\n"
+def test_netrc_host_username_override(mocker: MockerFixture) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
     )
-    (tmp_path / ".netrc").chmod(0o600)
-    monkeypatch.setenv(home_var, str(tmp_path))
-    with pytest.raises(InvalidPasswordError) as excinfo:
-        resolve_password(
-            {"netrc": {}},
-            host="api.example.com",
-            username="myself",
-        )
-    assert str(excinfo.value) == (
-        "Invalid password configuration: Username mismatch in netrc:"
-        " config says myself, but netrc says myname"
-    )
-
-
-def test_netrc_host_username_override(
-    monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
-) -> None:
-    (tmp_path / ".netrc").write_text(
-        "machine api.example.com\n"
-        "login myname\n"
-        "password hunter2\n"
-        "\n"
-        "machine mx.egg-sample.nil\n"
-        "login myself\n"
-        "password 12345\n"
-    )
-    (tmp_path / ".netrc").chmod(0o600)
-    monkeypatch.setenv(home_var, str(tmp_path))
     assert (
         resolve_password(
             {"netrc": {"host": "mx.egg-sample.nil", "username": "myself"}},
             host="api.example.com",
             username="myname",
         )
-        == "12345"
+        is sentinel.PASSWORD
     )
+    m.assert_called_once_with("mx.egg-sample.nil", username="myself", path=None)

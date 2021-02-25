@@ -1,15 +1,16 @@
 from email.message import EmailMessage
 import inspect
 import json
+from netrc import netrc
 import os
 from pathlib import Path
 import sys
 from types import TracebackType
-from typing import Any, Dict, Optional, Type, Union, cast
+from typing import Any, Dict, Optional, Tuple, Type, Union, cast
 import appdirs
 import entrypoints
 import toml
-from .errors import InvalidConfigError, InvalidPasswordError, MissingConfigError
+from . import errors
 from .util import AnyPath
 
 if sys.version_info[:2] >= (3, 8):
@@ -63,7 +64,7 @@ def from_config_file(
             with configpath.open("r") as fp:
                 data = json.load(fp)
         else:
-            raise InvalidConfigError(
+            raise errors.InvalidConfigError(
                 "Unsupported file extension",
                 configpath=configpath,
             )
@@ -71,7 +72,7 @@ def from_config_file(
         data = None
     if section is not None:
         if not isinstance(data, dict):
-            raise InvalidConfigError(
+            raise errors.InvalidConfigError(
                 "Toplevel structure must be a dict/object",
                 configpath=configpath,
             )
@@ -80,13 +81,13 @@ def from_config_file(
         if fallback and configpath != get_default_configpath():
             try:
                 return from_config_file(fallback=False)
-            except MissingConfigError as e:
+            except errors.MissingConfigError as e:
                 e.configpaths.append(configpath)
                 raise e
         else:
-            raise MissingConfigError([configpath])
+            raise errors.MissingConfigError([configpath])
     if not isinstance(data, dict):
-        raise InvalidConfigError(
+        raise errors.InvalidConfigError(
             "Toplevel structure must be a dict/object",
             configpath=configpath,
         )
@@ -100,14 +101,14 @@ def from_dict(
     try:
         method = data["method"]
     except KeyError:
-        raise InvalidConfigError(
+        raise errors.InvalidConfigError(
             "Required 'method' field not present",
             configpath=configpath,
         )
     try:
         ep = entrypoints.get_single(SENDER_GROUP, method)
     except entrypoints.NoSuchEntryPoint:
-        raise InvalidConfigError(
+        raise errors.InvalidConfigError(
             f"Unsupported method {method!r}",
             configpath=configpath,
         )
@@ -115,8 +116,8 @@ def from_dict(
     try:
         return cast(SenderManager, sender_cls(configpath=configpath, **data))
     except (TypeError, ValueError) as e:
-        raise InvalidConfigError(str(e), configpath=configpath)
-    except InvalidConfigError as e:
+        raise errors.InvalidConfigError(str(e), configpath=configpath)
+    except errors.InvalidConfigError as e:
         if e.configpath is None:
             e.configpath = configpath
         raise e
@@ -131,14 +132,14 @@ def resolve_password(
     if isinstance(password, str):
         return password
     elif len(password) != 1:
-        raise InvalidPasswordError(
+        raise errors.InvalidPasswordError(
             "Password must be either a string or an object with exactly one field"
         )
     ((provider, spec),) = password.items()
     try:
         ep = entrypoints.get_single(PASSWORD_PROVIDER_GROUP, provider)
     except entrypoints.NoSuchEntryPoint:
-        raise InvalidPasswordError(
+        raise errors.InvalidPasswordError(
             f"Unsupported password provider {provider!r}",
             configpath=configpath,
         )
@@ -161,4 +162,27 @@ def resolve_password(
     try:
         return cast(str, provider_func(spec=spec, **kwargs))
     except (TypeError, ValueError) as e:
-        raise InvalidPasswordError(str(e))
+        raise errors.InvalidPasswordError(str(e))
+
+
+def lookup_netrc(
+    host: str, username: Optional[str] = None, path: Optional[AnyPath] = None
+) -> Tuple[str, str]:
+    if path is None:
+        rc = netrc()
+    else:
+        rc = netrc(os.fsdecode(path))
+    auth = rc.authenticators(host)
+    if auth is None:
+        raise errors.NetrcLookupError(
+            f"No entry for {host!r} or default found in netrc file"
+        )
+    elif username is not None and auth[0] != username:
+        raise errors.NetrcLookupError(
+            f"Username mismatch in netrc: expected {username!r},"
+            f" but netrc says {auth[0]!r}"
+        )
+    password = auth[2]
+    if password is None:
+        raise errors.NetrcLookupError("No password given in netrc entry")
+    return (auth[0], password)

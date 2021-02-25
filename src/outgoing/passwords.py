@@ -1,6 +1,6 @@
-from netrc import netrc
 import os
 from typing import Any, Optional
+from . import core
 from .errors import InvalidPasswordError
 from .util import AnyPath, resolve_path
 
@@ -33,12 +33,8 @@ def netrc_provider(
         path = spec.get("path")
     else:
         raise InvalidPasswordError("netrc password spec must be a string or object")
-    if path is None:
-        rc = netrc()
-    elif not isinstance(path, (str, bytes, os.PathLike)):
+    if path is not None and not isinstance(path, (str, bytes, os.PathLike)):
         raise InvalidPasswordError("netrc path must be a string")
-    else:
-        rc = netrc(str(resolve_path(path, configpath)))
     host = spec.get("host", host)
     if host is None:
         raise InvalidPasswordError("No host specified for netrc lookup")
@@ -47,14 +43,4 @@ def netrc_provider(
     username = spec.get("username", username)
     if not (username is None or isinstance(username, str)):
         raise InvalidPasswordError("Netrc username must be a string")
-    auth = rc.authenticators(host)
-    if auth is None:
-        raise InvalidPasswordError("No matching or default entry found in netrc file")
-    elif username is not None and auth[0] != username:
-        raise InvalidPasswordError(
-            f"Username mismatch in netrc: config says {username},"
-            f" but netrc says {auth[0]}"
-        )
-    elif auth[2] is None:
-        raise InvalidPasswordError("No password given in netrc entry")
-    return auth[2]
+    return core.lookup_netrc(host, username=username, path=path)[1]

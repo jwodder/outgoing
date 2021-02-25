@@ -37,3 +37,7 @@ class MissingConfigError(Error):
         return "outgoing configuration not found in files: " + ", ".join(
             map(str, self.configpaths)
         )
+
+
+class NetrcLookupError(Error):
+    pass
