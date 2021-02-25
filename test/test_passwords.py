@@ -1,15 +1,9 @@
 from pathlib import Path
-import platform
 from unittest.mock import sentinel
 import pytest
 from pytest_mock import MockerFixture
 from outgoing import resolve_password
 from outgoing.errors import InvalidPasswordError
-
-if platform.system() == "Windows":
-    home_var = "USERPROFILE"
-else:
-    home_var = "HOME"
 
 
 def test_string_password() -> None:
@@ -63,25 +57,23 @@ def test_file_password_configpath_relative(tmp_path: Path) -> None:
 
 def test_file_password_expanduser(
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
+    tmp_home: Path,
 ) -> None:
-    (tmp_path / "foo.txt").write_text(" hunter2\n")
-    monkeypatch.setenv(home_var, str(tmp_path))
+    (tmp_home / "foo.txt").write_text(" hunter2\n")
     assert resolve_password({"file": "~/foo.txt"}) == "hunter2"
 
 
 def test_file_password_expanduser_configpath(
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path: Path,
+    tmp_home: Path,
 ) -> None:
-    (tmp_path / "foo.txt").write_text(" hunter2\n")
-    (tmp_path / "bar").mkdir()
-    (tmp_path / "bar" / "foo.txt").write_text("prey3\n")
-    monkeypatch.setenv(home_var, str(tmp_path))
+    (tmp_home / "foo.txt").write_text(" hunter2\n")
+    (tmp_home / "bar").mkdir()
+    (tmp_home / "bar" / "foo.txt").write_text("prey3\n")
     assert (
         resolve_password(
             {"file": "~/foo.txt"},
-            configpath=tmp_path / "bar" / "quux.txt",
+            configpath=tmp_home / "bar" / "quux.txt",
         )
         == "hunter2"
     )

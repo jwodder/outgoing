@@ -1,16 +1,10 @@
 import pathlib
-import platform
 from typing import Any, Dict, Optional
 from unittest.mock import sentinel
 from pydantic import BaseModel, SecretStr, ValidationError
 import pytest
 from pytest_mock import MockerFixture
 from outgoing.config import DirectoryPath, FilePath, Password, Path
-
-if platform.system() == "Windows":
-    home_var = "USERPROFILE"
-else:
-    home_var = "HOME"
 
 
 class Paths(BaseModel):
@@ -21,15 +15,14 @@ class Paths(BaseModel):
 
 def test_path_expanduser(
     monkeypatch: pytest.MonkeyPatch,
-    tmp_path: pathlib.Path,
+    tmp_home: pathlib.Path,
 ) -> None:
-    (tmp_path / "foo").mkdir()
-    (tmp_path / "foo" / "bar.txt").touch()
-    monkeypatch.setenv(home_var, str(tmp_path))
+    (tmp_home / "foo").mkdir()
+    (tmp_home / "foo" / "bar.txt").touch()
     obj = Paths(path="~/nowhere", filepath="~/foo/bar.txt", dirpath="~/foo")
-    assert obj.path == tmp_path / "nowhere"
-    assert obj.filepath == tmp_path / "foo" / "bar.txt"
-    assert obj.dirpath == tmp_path / "foo"
+    assert obj.path == tmp_home / "nowhere"
+    assert obj.filepath == tmp_home / "foo" / "bar.txt"
+    assert obj.dirpath == tmp_home / "foo"
 
 
 def test_path_default_none() -> None:
