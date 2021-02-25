@@ -184,5 +184,7 @@ def lookup_netrc(
         )
     password = auth[2]
     if password is None:
+        # mypy says this can happen, but the actual implementation in CPython
+        # says otherwise.
         raise errors.NetrcLookupError("No password given in netrc entry")
     return (auth[0], password)
