@@ -11,6 +11,7 @@ __license__ = "MIT"
 __url__ = "https://github.com/jwodder/outgoing"
 
 from .core import (
+    DEFAULT_CONFIG_SECTION,
     from_config_file,
     from_dict,
     get_default_configpath,
@@ -19,6 +20,7 @@ from .core import (
 )
 
 __all__ = [
+    "DEFAULT_CONFIG_SECTION",
     "from_config_file",
     "from_dict",
     "get_default_configpath",
