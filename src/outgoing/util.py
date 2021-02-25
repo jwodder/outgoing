@@ -9,4 +9,4 @@ def resolve_path(path: AnyPath, configpath: Optional[AnyPath] = None) -> Path:
     p = Path(os.fsdecode(path)).expanduser()
     if configpath is not None:
         p = Path(os.fsdecode(configpath)).parent / p
-    return p
+    return p.resolve()
