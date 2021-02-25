@@ -272,6 +272,18 @@ a context manager to open it up, and then call its ``send()`` method for each
 top of the file for an example.
 
 
+Command-Line Program
+--------------------
+
+You can use ``outgoing`` to send fully-composed e-mails directly from the
+command line with the ``outgoing`` command.  Save your e-mail as a complete
+``message/rfc822`` document and then run ``outgoing path/to/email/file`` to
+send it using the configuration in the default config file (or specify another
+config file with the ``--config`` option).  Multiple files can be passed to the
+command at once to send multiple e-mails.  If no files are specified on the
+command line, the command reads an e-mail from standard input.
+
+
 Writing Extensions
 ==================
 
