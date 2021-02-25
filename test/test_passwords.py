@@ -1,7 +1,5 @@
 from pathlib import Path
-from unittest.mock import sentinel
 import pytest
-from pytest_mock import MockerFixture
 from outgoing import resolve_password
 from outgoing.errors import InvalidPasswordError
 
@@ -77,51 +75,3 @@ def test_file_password_expanduser_configpath(
         )
         == "hunter2"
     )
-
-
-def test_netrc(mocker: MockerFixture) -> None:
-    m = mocker.patch(
-        "outgoing.core.lookup_netrc",
-        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
-    )
-    assert (
-        resolve_password(
-            {"netrc": {}},
-            host="api.example.com",
-            username="myname",
-        )
-        is sentinel.PASSWORD
-    )
-    m.assert_called_once_with("api.example.com", username="myname", path=None)
-
-
-def test_netrc_host_override(mocker: MockerFixture) -> None:
-    m = mocker.patch(
-        "outgoing.core.lookup_netrc",
-        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
-    )
-    assert (
-        resolve_password(
-            {"netrc": {"host": "mx.egg-sample.nil"}},
-            host="api.example.com",
-            username="myname",
-        )
-        is sentinel.PASSWORD
-    )
-    m.assert_called_once_with("mx.egg-sample.nil", username="myname", path=None)
-
-
-def test_netrc_host_username_override(mocker: MockerFixture) -> None:
-    m = mocker.patch(
-        "outgoing.core.lookup_netrc",
-        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
-    )
-    assert (
-        resolve_password(
-            {"netrc": {"host": "mx.egg-sample.nil", "username": "myself"}},
-            host="api.example.com",
-            username="myname",
-        )
-        is sentinel.PASSWORD
-    )
-    m.assert_called_once_with("mx.egg-sample.nil", username="myself", path=None)

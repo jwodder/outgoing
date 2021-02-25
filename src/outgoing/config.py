@@ -1,8 +1,8 @@
 import pathlib
 from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Tuple, Union, cast
 import pydantic
-from pydantic.validators import path_validator
 from . import core
+from .util import AnyPath, resolve_path
 
 if TYPE_CHECKING:
     from pydantic.typing import CallableGenerator
@@ -20,23 +20,17 @@ else:
 
         @classmethod
         def __get_validators__(cls) -> "CallableGenerator":
-            yield path_validator
-            yield path_expanduser
             yield path_resolve
 
     class FilePath(pydantic.FilePath):
         @classmethod
         def __get_validators__(cls) -> "CallableGenerator":
-            yield path_validator
-            yield path_expanduser
             yield path_resolve
             yield from super().__get_validators__()
 
     class DirectoryPath(pydantic.DirectoryPath):
         @classmethod
         def __get_validators__(cls) -> "CallableGenerator":
-            yield path_validator
-            yield path_expanduser
             yield path_resolve
             yield from super().__get_validators__()
 
@@ -97,12 +91,52 @@ class Password(pydantic.SecretStr, metaclass=PasswordMeta):
         )
 
 
-def path_expanduser(v: pathlib.Path) -> pathlib.Path:
-    return v.expanduser()
+def path_resolve(v: AnyPath, values: Dict[str, Any]) -> pathlib.Path:
+    return resolve_path(v, values.get("configpath"))
 
 
-def path_resolve(v: pathlib.Path, values: Dict[str, Any]) -> pathlib.Path:
-    configpath = values.get("configpath")
-    if configpath is not None:
-        v = pathlib.Path(configpath).parent / v
-    return v.resolve()
+class NetrcPassword(Password):
+    host_field = "host"
+    username_field = "username"
+
+
+class NetrcConfig(pydantic.BaseModel):
+    configpath: Optional[Path]
+    netrc: Union[pydantic.StrictBool, Path]
+    host: str
+    username: Optional[str]
+    password: Optional[NetrcPassword]
+
+    @pydantic.root_validator
+    def _forbid_netrc_if_password(
+        cls,  # noqa: B902
+        values: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        if values["password"] is not None and values["netrc"]:
+            raise ValueError("netrc cannot be set when a password is present")
+        return values
+
+    @pydantic.root_validator
+    def _require_username_if_password(
+        cls,  # noqa: B902
+        values: Dict[str, Any],
+    ) -> Dict[str, Any]:
+        if values["password"] is not None and values["username"] is None:
+            raise ValueError("Password cannot be given without username")
+        return values
+
+    def get_username_password(self) -> Optional[Tuple[str, str]]:
+        username = self.username
+        password = self.password
+        if password is not None:
+            assert username is not None, "Password is set but username is not"
+            return (username, password.get_secret_value())
+        else:
+            assert self.netrc, "Neither password nor netrc set"
+            rcpath = self.netrc
+            path: Optional[Path]
+            if isinstance(rcpath, bool):
+                path = None
+            else:
+                path = rcpath
+            return core.lookup_netrc(self.host, username=username, path=path)

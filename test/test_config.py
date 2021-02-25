@@ -4,7 +4,7 @@ from unittest.mock import sentinel
 from pydantic import BaseModel, SecretStr, ValidationError
 import pytest
 from pytest_mock import MockerFixture
-from outgoing.config import DirectoryPath, FilePath, Password, Path
+from outgoing.config import DirectoryPath, FilePath, NetrcConfig, Password, Path
 
 
 class Paths(BaseModel):
@@ -225,3 +225,17 @@ def test_password_username_and_username_field() -> None:
             {"username": "me", "username_field": "username"},
         )
     assert str(excinfo.value) == "username and username_field are mutually exclusive"
+
+
+def test_netrc_config(mocker: MockerFixture) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, sentinel.PASSWORD),
+    )
+    cfg = NetrcConfig(
+        netrc=True,
+        host="api.example.com",
+        username="myname",
+    )
+    assert cfg.get_username_password() == (sentinel.USERNAME, sentinel.PASSWORD)
+    m.assert_called_once_with("api.example.com", username="myname", path=None)
