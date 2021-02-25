@@ -35,8 +35,10 @@ Installation
     python3 -m pip install git+https://github.com/jwodder/outgoing
 
 
-Example
-=======
+Examples
+========
+
+Sending an e-mail based on a configuration file:
 
 .. code:: python
 
@@ -44,7 +46,7 @@ Example
     import outgoing
 
     # Construct an EmailMessage object the standard Python way:
-    msg = EmailMessage
+    msg = EmailMessage()
     msg["Subject"] = "Meet me"
     msg["To"] = "my.beloved@love.love"
     msg["From"] = "me@here.qq"
@@ -66,6 +68,44 @@ Example
 
         # Now send that letter!
         sender.send(msg)
+
+
+Sending e-mails based on an explicit configuration structure:
+
+.. code:: python
+
+    from email.message import EmailMessage
+    import outgoing
+
+    msg1 = EmailMessage()
+    msg1["Subject"] = "No."
+    msg1["To"] = "me@here.qq"
+    msg1["From"] = "my.beloved@love.love"
+    msg1.set_content(
+        "Hot pockets?  Thou disgusteth me.\n"
+        "\n"
+        "Pineapple pizza or RIOT.\n"
+    )
+
+    msg2 = EmailMessage()
+    msg2["Subject"] = "I'd like to place an order."
+    msg2["To"] = "pete@za.aa"
+    msg2["From"] = "my.beloved@love.love"
+    msg2.set_content(
+        "I need the usual.  Twelve Hawaiian Abominations to go, please.\n"
+    )
+
+    SENDING_CONFIG = {
+        "method": "smtp",
+        "host": "smtp.love.love",
+        "username": "my.beloved",
+        "password": {"env": "SMTP_PASSWORD"},
+        "ssl": "starttls",
+    }
+
+    with outgoing.from_dict(SENDING_CONFIG) as sender:
+        sender.send(msg1)
+        sender.send(msg2)
 
 
 Usage
@@ -268,8 +308,8 @@ it; otherwise, they will be resolved relative to the current directory.
 
 Once you have a sender object from one of the above functions, simply put it in
 a context manager to open it up, and then call its ``send()`` method for each
-``email.message.EmailMessage`` object you want to send.  See the example at the
-top of the file for an example.
+``email.message.EmailMessage`` object you want to send.  See the examples at
+the top of the README for examples.
 
 
 Command-Line Program
