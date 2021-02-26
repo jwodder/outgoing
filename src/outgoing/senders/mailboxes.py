@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 from email.message import EmailMessage
 import mailbox
 from types import TracebackType
-from typing import Any, Dict, List, Optional, Type, TypeVar, Union
+from typing import List, Optional, Type, TypeVar, Union
 from pydantic import BaseModel, PrivateAttr
 from ..config import Path
 
@@ -10,17 +10,14 @@ T = TypeVar("T", bound="MailboxSender")
 
 
 class MailboxSender(BaseModel, ABC):
-    _mbox: mailbox.Mailbox = PrivateAttr()
-
-    def __init__(self, **data: Dict[str, Any]) -> None:
-        super().__init__(**data)
-        self._mbox = self._makebox()
+    _mbox: Optional[mailbox.Mailbox] = PrivateAttr(None)
 
     @abstractmethod
     def _makebox(self) -> mailbox.Mailbox:
         ...
 
     def __enter__(self: T) -> T:
+        self._mbox = self._makebox()
         self._mbox.lock()
         return self
 
@@ -30,9 +27,13 @@ class MailboxSender(BaseModel, ABC):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
+        assert self._mbox is not None
+        self._mbox.unlock()
         self._mbox.close()
+        self._mbox = None
 
     def send(self, msg: EmailMessage) -> None:
+        assert self._mbox is not None, "Not inside a context"
         self._mbox.add(msg)
 
 

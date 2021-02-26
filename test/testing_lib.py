@@ -1,5 +1,7 @@
+import email
+from email import policy
 from email.message import EmailMessage
-from typing import Iterable, Optional
+from typing import IO, Iterable, Optional, cast
 import pytest
 
 
@@ -46,3 +48,7 @@ def assert_mimes_eq(msg1: EmailMessage, msg2: EmailMessage) -> None:
         body2 = msg2.get_content()
         if body1 != body2:
             pytest.fail(f"Contents differ: {body1!r} vs. {body2!r}")
+
+
+def msg_factory(fp: IO[bytes]) -> EmailMessage:
+    return cast(EmailMessage, email.message_from_binary_file(fp, policy=policy.default))

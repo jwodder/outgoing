@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import sys
 from types import TracebackType
-from typing import Any, Dict, Optional, Tuple, Type, Union, cast
+from typing import Any, Dict, Optional, Tuple, Type, TypeVar, Union, cast
 import appdirs
 import entrypoints
 import toml
@@ -24,14 +24,11 @@ SENDER_GROUP = "outgoing.senders"
 
 PASSWORD_PROVIDER_GROUP = "outgoing.password_providers"
 
+S = TypeVar("S", bound="Sender")
+
 
 class Sender(Protocol):
-    def send(self, msg: EmailMessage) -> Any:
-        ...
-
-
-class SenderManager(Protocol):
-    def __enter__(self) -> Sender:
+    def __enter__(self: S) -> S:
         ...
 
     def __exit__(
@@ -40,6 +37,9 @@ class SenderManager(Protocol):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
+        ...
+
+    def send(self, msg: EmailMessage) -> Any:
         ...
 
 
@@ -51,7 +51,7 @@ def from_config_file(
     path: Optional[AnyPath] = None,
     section: Optional[str] = DEFAULT_CONFIG_SECTION,
     fallback: bool = True,
-) -> SenderManager:
+) -> Sender:
     if path is None:
         configpath = get_default_configpath()
     else:
@@ -97,7 +97,7 @@ def from_config_file(
 def from_dict(
     data: Dict[str, Any],
     configpath: Optional[AnyPath] = None,
-) -> SenderManager:
+) -> Sender:
     try:
         method = data["method"]
     except KeyError:
@@ -114,7 +114,7 @@ def from_dict(
         )
     sender_cls = ep.load()
     try:
-        return cast(SenderManager, sender_cls(configpath=configpath, **data))
+        return cast(Sender, sender_cls(configpath=configpath, **data))
     except (TypeError, ValueError) as e:
         raise errors.InvalidConfigError(str(e), configpath=configpath)
     except errors.InvalidConfigError as e:
