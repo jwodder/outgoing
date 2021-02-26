@@ -35,9 +35,10 @@ def main(ctx: click.Context, message: List[IO[bytes]], config: Optional[str]) ->
     try:
         with from_config_file(config, fallback=False) as sender:
             for fp in message:
-                msg = message_from_bytes(fp.read(), policy=policy.default)
-            assert isinstance(msg, EmailMessage)
-            sender.send(msg)
+                with fp:
+                    msg = message_from_bytes(fp.read(), policy=policy.default)
+                assert isinstance(msg, EmailMessage)
+                sender.send(msg)
     except Error as e:
         ctx.fail(str(e))
 
