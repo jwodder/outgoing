@@ -364,7 +364,11 @@ Extension packages can define additional password provider methods.
 Python API
 ----------
 
-Outgoing provides the following functions for constructing e-mail senders:
+``outgoing`` provides the following functions for constructing e-mail sender
+objects.  Once you have a sender object, simply use it in a context manager to
+open it up, and then call its ``send()`` method with each
+``email.message.EmailMessage`` object you want to send.  See the examples at
+the top of the README for examples.
 
 .. code:: python
 
@@ -394,13 +398,6 @@ the default config file.
 Construct a sender object using the given ``data`` as the configuration.  If
 ``configpath`` is given, any paths in the ``data`` will be resolved relative to
 it; otherwise, they will be resolved relative to the current directory.
-
----
-
-Once you have a sender object from one of the above functions, simply put it in
-a context manager to open it up, and then call its ``send()`` method for each
-``email.message.EmailMessage`` object you want to send.  See the examples at
-the top of the README for examples.
 
 
 Command-Line Program
