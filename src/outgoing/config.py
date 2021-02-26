@@ -71,18 +71,18 @@ class Password(pydantic.SecretStr, metaclass=PasswordMeta):
 
     @classmethod
     def resolve(cls, v: Any, values: Dict[str, Any]) -> str:
-        host = cls.host
-        host_field = cls.host_field
-        if host_field is not None:
-            host = values.get(host_field)
-        elif callable(host):
-            host = host(values)
-        username = cls.username
-        username_field = cls.username_field
-        if username_field is not None:
-            username = values.get(username_field)
-        elif callable(username):
-            username = username(values)
+        if cls.host_field is not None:
+            host = values.get(cls.host_field)
+        elif callable(cls.host):
+            host = cls.host(values)
+        else:
+            host = cls.host
+        if cls.username_field is not None:
+            username = values.get(cls.username_field)
+        elif callable(cls.username):
+            username = cls.username(values)
+        else:
+            username = cls.username
         return core.resolve_password(
             v,
             host=host,
@@ -126,18 +126,15 @@ class NetrcConfig(pydantic.BaseModel):
         return values
 
     def get_username_password(self) -> Optional[Tuple[str, str]]:
-        username = self.username
-        password = self.password
-        if password is not None:
-            assert username is not None, "Password is set but username is not"
-            return (username, password.get_secret_value())
+        if self.password is not None:
+            assert self.username is not None, "Password is set but username is not"
+            return (self.username, self.password.get_secret_value())
         elif self.netrc:
-            rcpath = self.netrc
             path: Optional[Path]
-            if isinstance(rcpath, bool):
+            if isinstance(self.netrc, bool):
                 path = None
             else:
-                path = rcpath
-            return core.lookup_netrc(self.host, username=username, path=path)
+                path = self.netrc
+            return core.lookup_netrc(self.host, username=self.username, path=path)
         else:
             return None
