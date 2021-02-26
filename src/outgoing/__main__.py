@@ -18,6 +18,7 @@ from .errors import Error
     "--config",
     type=click.Path(dir_okay=False),
     default=get_default_configpath(),
+    help="Specify the outgoing configuration file to use",
     show_default=True,
 )
 @click.argument("message", type=click.File("rb"), nargs=-1)
