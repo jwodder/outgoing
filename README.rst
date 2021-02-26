@@ -17,6 +17,9 @@
 `GitHub <https://github.com/jwodder/outgoing>`_
 | `Issues <https://github.com/jwodder/outgoing/issues>`_
 
+.. contents::
+    :backlinks: top
+
 ``outgoing`` provides a common interface to multiple different e-mail sending
 methods (SMTP, sendmail, mbox, etc.).  Just construct a sender from a
 configuration file or object, pass it an ``EmailMessage`` instance, and let the
@@ -134,21 +137,28 @@ To find the exact path on your system, after installing ``outgoing``, run::
 Within the configuration file, all of the ``outgoing`` settings are contained
 within a table named "``outgoing``".  This table must include at least a
 ``method`` key giving the name of the sending method to use.  The rest of the
-table depends on the method chosen.  Unknown or inapplicable keys in the table
-are ignored.
+table depends on the method chosen (see below).  Unknown or inapplicable keys
+in the table are ignored.
 
 File & directory paths in the configuration file may start with a tilde (``~``)
 to refer to a path relative to the user's home directory.  Any relative paths
 are resolved relative to the location of the configuration file.
 
-``command`` method
-~~~~~~~~~~~~~~~~~~
+Sending Methods
+---------------
+
+``command``
+~~~~~~~~~~~
 
 The ``command`` method sends an e-mail by passing it as input to a command
-(e.g., ``sendmail``, sold separately).  The default command is ``sendmail -i
--t``.  A different command can be used by setting the ``command`` key to the
-command as a string.  This string will be interpreted by the shell, and so
-metacharacters like pipes and redirects have their special meanings.
+(e.g., ``sendmail``, sold separately).
+
+Configuration fields:
+
+``command`` : string (optional)
+    Specify the command to run to send e-mail.  The default command is
+    ``sendmail -i -t``.  This command will be interpreted by the shell, and so
+    metacharacters like pipes and redirects have their special meanings.
 
 Example ``command`` configuration:
 
@@ -159,28 +169,42 @@ Example ``command`` configuration:
     command = "/usr/local/bin/mysendmail -i -t"
 
 
-``smtp`` method
-~~~~~~~~~~~~~~~
+``smtp``
+~~~~~~~~
 
-The ``smtp`` method sends an e-mail to a server over SMTP.  The configuration
-keys for this method are:
+The ``smtp`` method sends an e-mail to a server over SMTP.
 
-============  =================================================================
-``host``      The server to connect to
-``ssl``       *(optional)* ``true``: Use SSL/TLS from the start to connect to
-              the server; ``false`` (default): Don't use SSL/TLS;
-              ``"starttls"``: Switch to SSL/TLS after connecting with the
-              STARTTLS command
-``port``      *(optional)* The port on the server to connect to; the default
-              depends on the value of ``ssl``: ``true`` — 465, ``false`` — 25,
-              ``"starttls"`` — 587
-``username``  *(optional)* Username to log into the server with
-``password``  *(optional)* Password to log into the server with; can be given
-              as either a string or a password specified (see "Passwords_")
-``netrc``     *(optional)* If ``true``, read the username & password from
-              ``~/.netrc`` instead of specifying them in the configuration
-              file; if a string, read them from the given netrc file
-============  =================================================================
+Configuration fields:
+
+``host`` : string (required)
+    The domain name or IP address of the server to connect to
+
+``ssl`` : boolean or ``"starttls"`` (optional)
+    - ``true``: Use SSL/TLS from the start of the connection
+    - ``false`` (default): Don't use SSL/TLS
+    - ``"starttls"``: After connecting, switch to SSL/TLS with the STARTTLS
+      command
+
+``port`` : integer (optional)
+    The port on the server to connect to; the default depends on the value of
+    ``ssl``:
+
+    - ``true`` — 465
+    - ``false`` — 25
+    - ``"starttls"`` — 587
+
+``username`` : string (optional)
+    Username to log into the server with
+
+``password`` : password (optional)
+    Password to log into the server with; can be given as either a string or a
+    password specifier (see "Passwords_")
+
+``netrc`` : boolean or filepath (optional)
+    If ``true``, read the username & password from ``~/.netrc`` instead of
+    specifying them in the configuration file.  If a filepath, read the
+    credentials from the given netrc file.  If ``false``, do not use a netrc
+    file.
 
 Example ``smtp`` configuration:
 
@@ -206,11 +230,15 @@ Another sample configuration:
     netrc = "~/secrets/net.rc"
 
 
-``mbox`` method
-~~~~~~~~~~~~~~~
+``mbox``
+~~~~~~~~
 
-The ``mbox`` method appends e-mails to an mbox file on the local machine.  It
-requires a ``path`` key giving the location of the mbox file to use.
+The ``mbox`` method appends e-mails to an mbox file on the local machine.
+
+Configuration fields:
+
+``path`` : filepath (required)
+    The location of the mbox file
 
 Example ``mbox`` configuration:
 
@@ -221,8 +249,70 @@ Example ``mbox`` configuration:
     path = "~/MAIL/inbox"
 
 
-``null`` method
-~~~~~~~~~~~~~~~
+``maildir``
+~~~~~~~~~~~
+
+The ``maildir`` method adds e-mails to a Maildir mailbox directory on the local
+machine.
+
+Configuration fields:
+
+``path`` : filepath (required)
+    The location of the Maildir mailbox
+
+``folder`` : string (optional)
+    A folder within the Maildir mailbox in which to place e-mails
+
+
+``mh``
+~~~~~~
+
+The ``mh`` method adds e-mails to an MH mailbox directory on the local machine.
+
+Configuration fields:
+
+``path`` : filepath (required)
+    The location of the MH mailbox
+
+``folder`` : string or list of strings (optional)
+    A folder within the Maildir mailbox in which to place e-mails; can be
+    either the name of a single folder or a path through nested folders &
+    subfolders
+
+Example configuration:
+
+.. code:: toml
+
+    [outgoing]
+    method = "mh"
+    path = "~/mail"
+    # Place e-mails inside the "work" folder inside the "important" folder:
+    folder = ["important", "work"]
+
+``mmdf``
+~~~~~~~~
+
+The ``mmdf`` method adds e-mails to an MMDF mailbox file on the local machine.
+
+Configuration fields:
+
+``path`` : filepath (required)
+    The location of the MMDF mailbox
+
+
+``babyl``
+~~~~~~~~~
+
+The ``babyl`` method adds e-mails to a Babyl mailbox file on the local machine.
+
+Configuration fields:
+
+``path`` : filepath (required)
+    The location of the Babyl mailbox
+
+
+``null``
+~~~~~~~~
 
 Goes nowhere, does nothing, ignores all configuration keys.
 
@@ -287,11 +377,12 @@ Outgoing provides the following functions for constructing e-mail senders:
 Read configuration from the table/field ``section`` (default "``outgoing``") in
 the file at ``path`` (default: the path returned by
 ``outgoing.get_default_configpath()``) and construct a sender object from the
-specification.  The file may be either TOML or JSON.  If ``section`` is
-``None``, the entire file, rather than only a single field, is used as the
-configuration.  If ``fallback`` is true, the file is not the default config
-file, and the file either does not exist or does not contain the given section,
-fall back to reading from the default section of the default config file.
+specification.  The file may be either TOML or JSON (type detected based on
+file extension).  If ``section`` is ``None``, the entire file, rather than only
+a single field, is used as the configuration.  If ``fallback`` is true, the
+file is not the default config file, and the file either does not exist or does
+not contain the given section, fall back to reading from the default section of
+the default config file.
 
 .. code:: python
 
