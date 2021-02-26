@@ -1,4 +1,5 @@
 from pathlib import Path
+import platform
 import smtplib
 from typing import Union
 from pydantic import SecretStr
@@ -14,6 +15,12 @@ from testing_lib import assert_emails_eq, message2email, test_email1
 @pytest.fixture
 def smtpd_use_ssl(monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("SMTPD_USE_SSL", "True")
+
+
+skip_pypy = pytest.mark.skipif(
+    platform.python_implementation() == "PyPy",
+    reason="https://github.com/bebleo/smtpdfix/issues/51",
+)
 
 
 def test_smtp_construct_default_ssl(
@@ -247,6 +254,7 @@ def test_smtp_fix_send_no_ssl_auth(
     assert_emails_eq(message2email(smtpd.messages[0]), test_email1)
 
 
+@skip_pypy
 def test_smtp_fix_send_ssl_no_auth(smtpd_use_ssl: None, smtpd: SMTPDFix) -> None:
     sender = from_dict(
         {"method": "smtp", "host": smtpd.hostname, "port": smtpd.port, "ssl": True}
@@ -257,6 +265,7 @@ def test_smtp_fix_send_ssl_no_auth(smtpd_use_ssl: None, smtpd: SMTPDFix) -> None
     assert_emails_eq(message2email(smtpd.messages[0]), test_email1)
 
 
+@skip_pypy
 @pytest.mark.xfail(
     raises=smtplib.SMTPNotSupportedError,
     reason="https://github.com/bebleo/smtpdfix/issues/10",
@@ -283,6 +292,7 @@ def test_smtp_fix_send_ssl_auth(
     assert_emails_eq(message2email(smtpd.messages[0]), test_email1)
 
 
+@skip_pypy
 def test_smtp_fix_send_starttls_no_auth(
     monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix
 ) -> None:
@@ -301,6 +311,7 @@ def test_smtp_fix_send_starttls_no_auth(
     assert_emails_eq(message2email(smtpd.messages[0]), test_email1)
 
 
+@skip_pypy
 def test_smtp_fix_send_starttls_auth(
     monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix
 ) -> None:
