@@ -142,7 +142,7 @@ in the table are ignored.
 
 File & directory paths in the configuration file may start with a tilde (``~``)
 to refer to a path relative to the user's home directory.  Any relative paths
-are resolved relative to the location of the configuration file.
+are resolved relative to the directory containing the configuration file.
 
 Sending Methods
 ---------------
@@ -348,7 +348,7 @@ single ``file`` key and the filepath as the value:
 The entire contents of the file, minus any leading or trailing whitespace, will
 then be used as the password.  As with paths elsewhere in the configuration
 file, the path may start with a tilde, and relative paths are resolved relative
-to the location of the configuration file.
+to the directory containing the configuration file.
 
 A password can also be read from an environment variable by specifying a table
 with a single ``env`` key and the name of the environment variable as the
@@ -397,7 +397,8 @@ the default config file.
 
 Construct a sender object using the given ``data`` as the configuration.  If
 ``configpath`` is given, any paths in the ``data`` will be resolved relative to
-it; otherwise, they will be resolved relative to the current directory.
+``configpath``'s parent directory; otherwise, they will be resolved relative to
+the current directory.
 
 
 Command-Line Program
