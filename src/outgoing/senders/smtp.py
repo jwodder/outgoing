@@ -3,7 +3,7 @@ import smtplib
 import sys
 from types import TracebackType
 from typing import Any, Dict, Optional, Type
-from pydantic import PrivateAttr
+from pydantic import PrivateAttr, validator
 from ..config import NetrcConfig
 
 if sys.version_info[:2] >= (3, 8):
@@ -15,23 +15,30 @@ STARTTLS = "starttls"
 
 
 class SMTPSender(NetrcConfig):
-    port: int = 0
     ssl: Literal[False, True, "starttls"] = False
-    _client: smtplib.SMTP = PrivateAttr()
+    port: int = 0
+    _client: Optional[smtplib.SMTP] = PrivateAttr(None)
 
-    def __init__(self, **data: Dict[str, Any]) -> None:
-        super().__init__(**data)
-        if self.ssl and self.ssl != STARTTLS:
-            if self.port == 0:
-                self.port = 465
-            self._client = smtplib.SMTP_SSL()
+    @validator("port", always=True)
+    def _set_default_port(cls, v: Any, values: Dict[str, Any]) -> Any:  # noqa: B902
+        if v == 0:
+            ssl = values.get("ssl")
+            if ssl is True:
+                return 465
+            elif ssl == STARTTLS:
+                return 587
+            else:
+                return 25
         else:
-            if self.port == 0:
-                self.port = 587 if self.ssl == STARTTLS else 25
-            self._client = smtplib.SMTP()
+            return v
 
     def __enter__(self) -> "SMTPSender":
-        self._client.connect(self.host, self.port)
+        # We need to pass the host & port to the constructor instead of calling
+        # connect() later due to <https://bugs.python.org/issue36094>.
+        if self.ssl is True:
+            self._client = smtplib.SMTP_SSL(self.host, self.port)
+        else:
+            self._client = smtplib.SMTP(self.host, self.port)
         if self.ssl == STARTTLS:
             self._client.starttls()
         auth = self.get_username_password()
@@ -45,7 +52,9 @@ class SMTPSender(NetrcConfig):
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> None:
+        assert self._client is not None
         self._client.quit()
 
     def send(self, msg: EmailMessage) -> None:
+        assert self._client is not None, "Not inside a context"
         self._client.send_message(msg)

@@ -1,6 +1,6 @@
 import email
 from email import policy
-from email.message import EmailMessage
+from email.message import EmailMessage, Message
 from typing import IO, Iterable, Optional, cast
 import pytest
 
@@ -52,6 +52,12 @@ def assert_mimes_eq(msg1: EmailMessage, msg2: EmailMessage) -> None:
 
 def msg_factory(fp: IO[bytes]) -> EmailMessage:
     return cast(EmailMessage, email.message_from_binary_file(fp, policy=policy.default))
+
+
+def message2email(msg: Message) -> EmailMessage:
+    return cast(
+        EmailMessage, email.message_from_bytes(bytes(msg), policy=policy.default)
+    )
 
 
 test_email1 = EmailMessage()

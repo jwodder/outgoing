@@ -102,7 +102,7 @@ class NetrcPassword(Password):
 
 class NetrcConfig(pydantic.BaseModel):
     configpath: Optional[Path]
-    netrc: Union[pydantic.StrictBool, FilePath]
+    netrc: Union[pydantic.StrictBool, FilePath] = False
     host: str
     username: Optional[str]
     password: Optional[NetrcPassword]
