@@ -4,7 +4,7 @@ from traceback import format_exception
 from click.testing import CliRunner, Result
 from pytest_mock import MockerFixture
 from outgoing.__main__ import main
-from testing_lib import assert_emails_eq
+from testing_lib import assert_emails_eq, test_email1, test_email2
 
 
 def show_result(r: Result) -> str:
@@ -15,7 +15,7 @@ def show_result(r: Result) -> str:
         return r.output
 
 
-def test_main_stdin(mocker: MockerFixture, test_email1: EmailMessage) -> None:
+def test_main_stdin(mocker: MockerFixture) -> None:
     m = mocker.patch("outgoing.senders.null.NullSender", autospec=True)
     runner = CliRunner()
     with runner.isolated_filesystem():
@@ -36,9 +36,7 @@ def test_main_stdin(mocker: MockerFixture, test_email1: EmailMessage) -> None:
     assert_emails_eq(sent, test_email1)
 
 
-def test_main_args(
-    mocker: MockerFixture, test_email1: EmailMessage, test_email2: EmailMessage
-) -> None:
+def test_main_args(mocker: MockerFixture) -> None:
     m = mocker.patch("outgoing.senders.null.NullSender", autospec=True)
     runner = CliRunner()
     with runner.isolated_filesystem():

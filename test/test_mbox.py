@@ -5,7 +5,7 @@ from typing import cast
 import pytest
 from outgoing import from_dict
 from outgoing.senders.mailboxes import MboxSender
-from testing_lib import assert_emails_eq, msg_factory
+from testing_lib import assert_emails_eq, msg_factory, test_email1
 
 
 def test_mbox_construct(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -25,9 +25,7 @@ def test_mbox_construct(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None
     assert sender._mbox is None
 
 
-def test_mbox_send(
-    monkeypatch: pytest.MonkeyPatch, test_email1: EmailMessage, tmp_path: Path
-) -> None:
+def test_mbox_send(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
     monkeypatch.chdir(tmp_path)
     sender = from_dict(
         {
