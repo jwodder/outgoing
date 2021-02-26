@@ -20,7 +20,7 @@ from .errors import Error
     default=get_default_configpath(),
     show_default=True,
 )
-@click.option("message", type=click.File("rb"), nargs=-1)
+@click.argument("message", type=click.File("rb"), nargs=-1)
 @click.pass_context
 def main(ctx: click.Context, message: List[IO[bytes]], config: Optional[str]) -> None:
     """
