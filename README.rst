@@ -155,10 +155,15 @@ The ``command`` method sends an e-mail by passing it as input to a command
 
 Configuration fields:
 
-``command`` : string (optional)
-    Specify the command to run to send e-mail.  The default command is
-    ``sendmail -i -t``.  This command will be interpreted by the shell, and so
-    metacharacters like pipes and redirects have their special meanings.
+``command`` : string or list of strings (optional)
+    Specify the command to run to send e-mail.  This can be either a single
+    command string that will be interpreted by the shell or a list of command
+    arguments that will be executed directly without any shell processing.  The
+    default command is ``sendmail -i -t``.
+
+    **Note:** Relative paths in the command will not be resolved by
+    ``outgoing`` (unlike other paths in the configuration file), as it is not
+    possible to reliably determine what is a path and what is not.
 
 Example ``command`` configuration:
 
@@ -166,7 +171,17 @@ Example ``command`` configuration:
 
     [outgoing]
     method = "command"
-    command = "/usr/local/bin/mysendmail -i -t"
+    command = ["/usr/local/bin/mysendmail", "-i", "-t"]
+
+Another sample configuration:
+
+.. code:: toml
+
+    [outgoing]
+    method = "command"
+    # A single string will be interpreted by the shell, so metacharacters like
+    # pipes have their special meanings:
+    command = "my-mail-munger | ~/some/dir/mysendmail"
 
 
 ``smtp``
