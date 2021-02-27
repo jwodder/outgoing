@@ -44,4 +44,4 @@ def main(ctx: click.Context, message: List[IO[bytes]], config: Optional[str]) ->
 
 
 if __name__ == "__main__":
-    main()
+    main()  # pragma: no cover
