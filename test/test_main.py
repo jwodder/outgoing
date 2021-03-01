@@ -2,9 +2,10 @@ from email.message import EmailMessage
 from pathlib import Path
 from traceback import format_exception
 from click.testing import CliRunner, Result
+from email2dict import email2dict
 from pytest_mock import MockerFixture
 from outgoing.__main__ import main
-from testing_lib import assert_emails_eq, test_email1, test_email2
+from testing_lib import test_email1, test_email2
 
 
 def show_result(r: Result) -> str:
@@ -33,7 +34,7 @@ def test_main_stdin(mocker: MockerFixture) -> None:
     assert instance.send.call_count == 1
     sent = instance.send.call_args[0][0]
     assert isinstance(sent, EmailMessage)
-    assert_emails_eq(sent, test_email1)
+    assert email2dict(sent) == email2dict(test_email1)
 
 
 def test_main_args(mocker: MockerFixture) -> None:
@@ -55,7 +56,7 @@ def test_main_args(mocker: MockerFixture) -> None:
     assert instance.send.call_count == 2
     sent1 = instance.send.call_args_list[0][0][0]
     assert isinstance(sent1, EmailMessage)
-    assert_emails_eq(sent1, test_email1)
+    assert email2dict(sent1) == email2dict(test_email1)
     sent2 = instance.send.call_args_list[1][0][0]
     assert isinstance(sent2, EmailMessage)
-    assert_emails_eq(sent2, test_email2)
+    assert email2dict(sent2) == email2dict(test_email2)

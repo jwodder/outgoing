@@ -1,12 +1,12 @@
-from email.message import EmailMessage
 from mailbox import MH
 from operator import itemgetter
 from pathlib import Path
-from typing import List, Union, cast
+from typing import List, Union
+from email2dict import email2dict
 import pytest
 from outgoing import from_dict
 from outgoing.senders.mailboxes import MHSender
-from testing_lib import assert_emails_eq, msg_factory, test_email1, test_email2
+from testing_lib import msg_factory, test_email1, test_email2
 
 
 @pytest.mark.parametrize("folder", [None, "work", ["important", "work"]])
@@ -48,7 +48,7 @@ def test_mh_send_no_folder_new_path(
     assert inbox.list_folders() == []
     msgs = list(inbox)
     assert len(msgs) == 1
-    assert_emails_eq(test_email1, cast(EmailMessage, msgs[0]))
+    assert email2dict(test_email1) == email2dict(msgs[0])
 
 
 def test_mh_send_folder_str_new_path(
@@ -70,7 +70,7 @@ def test_mh_send_folder_str_new_path(
     work = inbox.get_folder("work")
     msgs = list(work)
     assert len(msgs) == 1
-    assert_emails_eq(test_email1, cast(EmailMessage, msgs[0]))
+    assert email2dict(test_email1) == email2dict(msgs[0])
 
 
 def test_mh_send_folder_list_new_path(
@@ -94,7 +94,7 @@ def test_mh_send_folder_list_new_path(
     work = important.get_folder("work")
     msgs = list(work)
     assert len(msgs) == 1
-    assert_emails_eq(test_email1, cast(EmailMessage, msgs[0]))
+    assert email2dict(test_email1) == email2dict(msgs[0])
 
 
 def test_mh_send_no_folder_extant_path(
@@ -118,8 +118,8 @@ def test_mh_send_no_folder_extant_path(
     msgs = list(inbox)
     assert len(msgs) == 2
     msgs.sort(key=itemgetter("Subject"))
-    assert_emails_eq(test_email1, cast(EmailMessage, msgs[0]))
-    assert_emails_eq(test_email2, cast(EmailMessage, msgs[1]))
+    assert email2dict(test_email1) == email2dict(msgs[0])
+    assert email2dict(test_email2) == email2dict(msgs[1])
 
 
 def test_mh_send_folder_str_extant_path(
@@ -142,7 +142,7 @@ def test_mh_send_folder_str_extant_path(
     work = inbox.get_folder("work")
     msgs = list(work)
     assert len(msgs) == 1
-    assert_emails_eq(test_email2, cast(EmailMessage, msgs[0]))
+    assert email2dict(test_email2) == email2dict(msgs[0])
 
 
 def test_mh_send_extant_folder_str_extant_path(
@@ -166,8 +166,8 @@ def test_mh_send_extant_folder_str_extant_path(
     msgs = list(work)
     assert len(msgs) == 2
     msgs.sort(key=itemgetter("Subject"))
-    assert_emails_eq(test_email1, cast(EmailMessage, msgs[0]))
-    assert_emails_eq(test_email2, cast(EmailMessage, msgs[1]))
+    assert email2dict(test_email1) == email2dict(msgs[0])
+    assert email2dict(test_email2) == email2dict(msgs[1])
 
 
 def test_mh_send_folder_list_extant_path(
@@ -192,7 +192,7 @@ def test_mh_send_folder_list_extant_path(
     work = important.get_folder("work")
     msgs = list(work)
     assert len(msgs) == 1
-    assert_emails_eq(test_email2, cast(EmailMessage, msgs[0]))
+    assert email2dict(test_email2) == email2dict(msgs[0])
 
 
 def test_mh_send_partially_extant_folder_list(
@@ -219,4 +219,4 @@ def test_mh_send_partially_extant_folder_list(
     work = important.get_folder("work")
     msgs = list(work)
     assert len(msgs) == 1
-    assert_emails_eq(test_email2, cast(EmailMessage, msgs[0]))
+    assert email2dict(test_email2) == email2dict(msgs[0])

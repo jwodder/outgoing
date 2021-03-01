@@ -2,13 +2,16 @@ from pathlib import Path
 import platform
 import smtplib
 from typing import Union
+from email2dict import email2dict
 from pydantic import SecretStr
 import pytest
 from pytest_mock import MockerFixture
 from smtpdfix import SMTPDFix
 from outgoing import from_dict
 from outgoing.senders.smtp import SMTPSender
-from testing_lib import assert_emails_eq, message2email, test_email1
+from testing_lib import test_email1
+
+smtpdfix_headers = ["x-mailfrom", "x-peer", "x-rcptto"]
 
 
 # See <https://github.com/bebleo/smtpdfix/issues/50> for why this is necessary.
@@ -229,7 +232,10 @@ def test_smtp_fix_send_no_ssl_no_auth(smtpd: SMTPDFix) -> None:
     with sender:
         sender.send(test_email1)
     assert len(smtpd.messages) == 1
-    assert_emails_eq(message2email(smtpd.messages[0]), test_email1)
+    msgdict = email2dict(smtpd.messages[0])
+    for h in smtpdfix_headers:
+        msgdict["headers"].pop(h, None)
+    assert email2dict(test_email1) == msgdict
 
 
 def test_smtp_fix_send_no_ssl_auth(
@@ -251,7 +257,10 @@ def test_smtp_fix_send_no_ssl_auth(
     with sender:
         sender.send(test_email1)
     assert len(smtpd.messages) == 1
-    assert_emails_eq(message2email(smtpd.messages[0]), test_email1)
+    msgdict = email2dict(smtpd.messages[0])
+    for h in smtpdfix_headers:
+        msgdict["headers"].pop(h, None)
+    assert email2dict(test_email1) == msgdict
 
 
 @skip_pypy
@@ -262,7 +271,10 @@ def test_smtp_fix_send_ssl_no_auth(smtpd_use_ssl: None, smtpd: SMTPDFix) -> None
     with sender:
         sender.send(test_email1)
     assert len(smtpd.messages) == 1
-    assert_emails_eq(message2email(smtpd.messages[0]), test_email1)
+    msgdict = email2dict(smtpd.messages[0])
+    for h in smtpdfix_headers:
+        msgdict["headers"].pop(h, None)
+    assert email2dict(test_email1) == msgdict
 
 
 @skip_pypy
@@ -289,7 +301,10 @@ def test_smtp_fix_send_ssl_auth(
     with sender:
         sender.send(test_email1)
     assert len(smtpd.messages) == 1
-    assert_emails_eq(message2email(smtpd.messages[0]), test_email1)
+    msgdict = email2dict(smtpd.messages[0])
+    for h in smtpdfix_headers:
+        msgdict["headers"].pop(h, None)
+    assert email2dict(test_email1) == msgdict
 
 
 @skip_pypy
@@ -308,7 +323,10 @@ def test_smtp_fix_send_starttls_no_auth(
     with sender:
         sender.send(test_email1)
     assert len(smtpd.messages) == 1
-    assert_emails_eq(message2email(smtpd.messages[0]), test_email1)
+    msgdict = email2dict(smtpd.messages[0])
+    for h in smtpdfix_headers:
+        msgdict["headers"].pop(h, None)
+    assert email2dict(test_email1) == msgdict
 
 
 @skip_pypy
@@ -332,4 +350,7 @@ def test_smtp_fix_send_starttls_auth(
     with sender:
         sender.send(test_email1)
     assert len(smtpd.messages) == 1
-    assert_emails_eq(message2email(smtpd.messages[0]), test_email1)
+    msgdict = email2dict(smtpd.messages[0])
+    for h in smtpdfix_headers:
+        msgdict["headers"].pop(h, None)
+    assert email2dict(test_email1) == msgdict
