@@ -105,6 +105,10 @@ def from_dict(
             "Required 'method' field not present",
             configpath=configpath,
         )
+    if "configpath" in data:
+        # TODO: Emit warning
+        data = data.copy()
+        data.pop("configpath", None)
     try:
         ep = entrypoints.get_single(SENDER_GROUP, method)
     except entrypoints.NoSuchEntryPoint:
