@@ -70,10 +70,10 @@ def from_config_file(
             )
     except FileNotFoundError:
         data = None
-    if section is not None:
+    if data is not None and section is not None:
         if not isinstance(data, dict):
             raise errors.InvalidConfigError(
-                "Toplevel structure must be a dict/object",
+                "Top-level structure must be a dict/object",
                 configpath=configpath,
             )
         data = data.get(section)
@@ -88,7 +88,7 @@ def from_config_file(
             raise errors.MissingConfigError([configpath])
     if not isinstance(data, dict):
         raise errors.InvalidConfigError(
-            "Toplevel structure must be a dict/object",
+            "Section must be a dict/object",
             configpath=configpath,
         )
     return from_dict(data, configpath=configpath)
