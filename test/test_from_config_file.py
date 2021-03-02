@@ -8,7 +8,7 @@ from outgoing.senders.mailboxes import MaildirSender, MboxSender
 
 def test_from_default_config_file(tmp_home: Path) -> None:
     defconf = get_default_configpath()
-    assert defconf.is_relative_to(tmp_home)
+    defconf.relative_to(tmp_home)  # Lack of error is pre-3.9's is_relative_to
     defconf.parent.mkdir(parents=True, exist_ok=True)
     defconf.write_text('[outgoing]\nmethod = "mbox"\npath = "inbox"\n')
     sender = from_config_file()
@@ -21,7 +21,6 @@ def test_from_default_config_file(tmp_home: Path) -> None:
 
 def test_from_custom_config_file(tmp_home: Path) -> None:
     defconf = get_default_configpath()
-    assert defconf.is_relative_to(tmp_home)
     defconf.parent.mkdir(parents=True, exist_ok=True)
     defconf.write_text('[outgoing]\nmethod = "mbox"\npath = "inbox"\n')
     myconf = tmp_home / "foo.toml"
@@ -37,7 +36,6 @@ def test_from_custom_config_file(tmp_home: Path) -> None:
 
 def test_from_nonexistent_custom_config_file(tmp_home: Path) -> None:
     defconf = get_default_configpath()
-    assert defconf.is_relative_to(tmp_home)
     defconf.parent.mkdir(parents=True, exist_ok=True)
     defconf.write_text('[outgoing]\nmethod = "mbox"\npath = "inbox"\n')
     sender = from_config_file(tmp_home / "foo.toml")
@@ -50,7 +48,6 @@ def test_from_nonexistent_custom_config_file(tmp_home: Path) -> None:
 
 def test_from_nonexistent_custom_config_file_no_fallback(tmp_home: Path) -> None:
     defconf = get_default_configpath()
-    assert defconf.is_relative_to(tmp_home)
     defconf.parent.mkdir(parents=True, exist_ok=True)
     defconf.write_text('[outgoing]\nmethod = "mbox"\npath = "inbox"\n')
     with pytest.raises(MissingConfigError) as excinfo:
@@ -148,7 +145,6 @@ def test_from_none_section(tmp_path: Path) -> None:
 
 def test_from_no_section_custom_config_file(tmp_home: Path) -> None:
     defconf = get_default_configpath()
-    assert defconf.is_relative_to(tmp_home)
     defconf.parent.mkdir(parents=True, exist_ok=True)
     defconf.write_text('[outgoing]\nmethod = "mbox"\npath = "inbox"\n')
     (tmp_home / "foo.toml").write_text(
@@ -164,7 +160,6 @@ def test_from_no_section_custom_config_file(tmp_home: Path) -> None:
 
 def test_from_no_section_custom_config_file_no_fallback(tmp_home: Path) -> None:
     defconf = get_default_configpath()
-    assert defconf.is_relative_to(tmp_home)
     defconf.parent.mkdir(parents=True, exist_ok=True)
     defconf.write_text('[outgoing]\nmethod = "mbox"\npath = "inbox"\n')
     (tmp_home / "foo.toml").write_text(
