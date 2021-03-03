@@ -1,3 +1,4 @@
+from collections.abc import Mapping as MappingABC
 from email.message import EmailMessage
 import inspect
 import json
@@ -6,7 +7,7 @@ import os
 from pathlib import Path
 import sys
 from types import TracebackType
-from typing import Any, Dict, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import Any, Mapping, Optional, Tuple, Type, TypeVar, Union, cast
 import appdirs
 import entrypoints
 import toml
@@ -71,7 +72,7 @@ def from_config_file(
     except FileNotFoundError:
         data = None
     if data is not None and section is not None:
-        if not isinstance(data, dict):
+        if not isinstance(data, MappingABC):
             raise errors.InvalidConfigError(
                 "Top-level structure must be a dict/object",
                 configpath=configpath,
@@ -86,7 +87,7 @@ def from_config_file(
                 raise e
         else:
             raise errors.MissingConfigError([configpath])
-    if not isinstance(data, dict):
+    if not isinstance(data, MappingABC):
         raise errors.InvalidConfigError(
             "Section must be a dict/object",
             configpath=configpath,
@@ -95,7 +96,7 @@ def from_config_file(
 
 
 def from_dict(
-    data: Dict[str, Any],
+    data: Mapping[str, Any],
     configpath: Optional[AnyPath] = None,
 ) -> Sender:
     try:
@@ -107,7 +108,7 @@ def from_dict(
         )
     if "configpath" in data:
         # TODO: Emit warning
-        data = data.copy()
+        data = dict(data)
         data.pop("configpath", None)
     try:
         ep = entrypoints.get_single(SENDER_GROUP, method)
@@ -128,7 +129,7 @@ def from_dict(
 
 
 def resolve_password(
-    password: Union[str, Dict[str, Any]],
+    password: Union[str, Mapping[str, Any]],
     host: Optional[str] = None,
     username: Optional[str] = None,
     configpath: Union[str, Path, None] = None,

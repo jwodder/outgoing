@@ -1,4 +1,5 @@
 from base64 import b64decode
+from collections.abc import Mapping
 import os
 from typing import Any, Optional
 from dotenv import dotenv_values
@@ -44,7 +45,7 @@ class DotenvSpec(BaseModel):
 
 
 def dotenv_provider(spec: Any, configpath: Optional[AnyPath] = None) -> str:
-    if not isinstance(spec, dict):
+    if not isinstance(spec, Mapping):
         raise InvalidPasswordError("'dotenv' password specifier must be an object")
     ds = DotenvSpec(**{**spec, "configpath": configpath})
     if ds.file is None:
