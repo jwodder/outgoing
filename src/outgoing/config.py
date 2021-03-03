@@ -7,9 +7,9 @@ from .util import AnyPath, resolve_path
 if TYPE_CHECKING:
     from pydantic.typing import CallableGenerator
 
-    Path = Union[pathlib.Path, str]
-    FilePath = Union[pathlib.Path, str]
-    DirectoryPath = Union[pathlib.Path, str]
+    Path = pathlib.Path
+    FilePath = pathlib.Path
+    DirectoryPath = pathlib.Path
 
 else:
 
