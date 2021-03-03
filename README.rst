@@ -64,16 +64,15 @@ Sending an e-mail based on a configuration file:
     )
 
     # Construct a sender object based on the default config file.  (This
-    # assumes you've already populated your config file as described below.
-    # Alternatively, you can specify an explicit configuration by passing it to
-    # the `outgoing.from_dict()` method.)
+    # assumes you've already populated your config file as described below.)
     with outgoing.from_config_file() as sender:
-
         # Now send that letter!
         sender.send(msg)
 
 
-Sending e-mails based on an explicit configuration structure:
+As an alternative to using a configuration file, you can specify an explicit
+configuration by passing the configuration structure to the
+``outgoing.from_dict()`` method, like so:
 
 .. code:: python
 
@@ -379,6 +378,19 @@ value:
 .. code:: toml
 
     password = { env = "PROTOCOL_PASSWORD" }
+
+A password can also be read from a key in a ``.env``-style file as supported by
+python-dotenv_ like so:
+
+.. _python-dotenv: https://github.com/theskumar/python-dotenv
+
+.. code:: toml
+
+    password = { dotenv = { key = "NAME_OF_KEY_IN_FILE", file = "path/to/file" } }
+
+The ``file`` path is resolved following the same rules as other paths.  If the
+``file`` field is omitted, the given key will be looked up in a file named
+``.env`` in the same directory as the configuration file.
 
 Extension packages can define additional password provider methods.
 
