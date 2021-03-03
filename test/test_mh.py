@@ -42,7 +42,8 @@ def test_mh_send_no_folder_new_path(
         },
         configpath=str(tmp_path / "foo.txt"),
     )
-    with sender:
+    with sender as s:
+        assert sender is s
         sender.send(test_email1)
     inbox = MH("inbox", factory=msg_factory)  # type: ignore[arg-type]
     assert inbox.list_folders() == []

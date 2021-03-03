@@ -45,7 +45,8 @@ def test_command_send(
     sender = from_dict(
         {"method": "command", "command": command}, configpath=tmp_path / "foo.toml"
     )
-    with sender:
+    with sender as s:
+        assert sender is s
         sender.send(test_email1)
     m.assert_called_once_with(
         command,

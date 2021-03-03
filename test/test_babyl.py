@@ -33,7 +33,8 @@ def test_babyl_send_new_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
         },
         configpath=str(tmp_path / "foo.txt"),
     )
-    with sender:
+    with sender as s:
+        assert sender is s
         sender.send(test_email1)
     inbox = Babyl("inbox", factory=msg_factory)  # type: ignore[arg-type]
     inbox.lock()
