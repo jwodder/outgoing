@@ -1,22 +1,16 @@
 from email.message import EmailMessage
-from types import TracebackType
-from typing import Optional, Type
-from pydantic import BaseModel
+from typing import Optional
 from ..config import Path
+from ..util import OpenClosable
 
 
-class NullSender(BaseModel):
+class NullSender(OpenClosable):
     configpath: Optional[Path] = None
 
-    def __enter__(self) -> "NullSender":
-        return self
+    def open(self) -> None:
+        pass
 
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
+    def close(self) -> None:
         pass
 
     def send(self, msg: EmailMessage) -> None:

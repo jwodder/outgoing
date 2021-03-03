@@ -354,3 +354,14 @@ def test_smtp_fix_send_starttls_auth(
     for h in smtpdfix_headers:
         msgdict["headers"].pop(h, None)
     assert email2dict(test_email1) == msgdict
+
+
+def test_smtp_send_no_context(mocker: MockerFixture) -> None:
+    m = mocker.patch("smtplib.SMTP", autospec=True)
+    sender = from_dict({"method": "smtp", "host": "mx.example.com"})
+    sender.send(test_email1)
+    assert m.call_args_list == [mocker.call("mx.example.com", 25)]
+    assert m.return_value.method_calls == [
+        mocker.call.send_message(test_email1),
+        mocker.call.quit(),
+    ]

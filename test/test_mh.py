@@ -221,3 +221,20 @@ def test_mh_send_partially_extant_folder_list(
     msgs = list(work)
     assert len(msgs) == 1
     assert email2dict(test_email2) == email2dict(msgs[0])
+
+
+def test_mh_send_no_context(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    sender = from_dict(
+        {
+            "method": "mh",
+            "path": "inbox",
+        },
+        configpath=str(tmp_path / "foo.txt"),
+    )
+    sender.send(test_email1)
+    inbox = MH("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    assert inbox.list_folders() == []
+    msgs = list(inbox)
+    assert len(msgs) == 1
+    assert email2dict(test_email1) == email2dict(msgs[0])

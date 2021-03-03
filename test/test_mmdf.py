@@ -72,3 +72,23 @@ def test_mmdf_send_extant_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
     msgdict2 = email2dict(msgs[1])
     msgdict2["unixfrom"] = None
     assert email2dict(test_email2) == msgdict2
+
+
+def test_mmdf_send_no_context(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    sender = from_dict(
+        {
+            "method": "mmdf",
+            "path": "inbox",
+        },
+        configpath=str(tmp_path / "foo.txt"),
+    )
+    sender.send(test_email1)
+    inbox = MMDF("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox.lock()
+    msgs = list(inbox)
+    inbox.close()
+    assert len(msgs) == 1
+    msgdict = email2dict(msgs[0])
+    msgdict["unixfrom"] = None
+    assert email2dict(test_email1) == msgdict

@@ -56,3 +56,28 @@ def test_command_send(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
+
+
+@pytest.mark.parametrize(
+    "command,shell",
+    [
+        ("~/my/command --option", True),
+        (["~/my/command", "--option"], False),
+    ],
+)
+def test_command_send_no_context(
+    command: Union[str, List[str]], shell: bool, mocker: MockerFixture, tmp_path: Path
+) -> None:
+    m = mocker.patch("subprocess.run")
+    sender = from_dict(
+        {"method": "command", "command": command}, configpath=tmp_path / "foo.toml"
+    )
+    sender.send(test_email1)
+    m.assert_called_once_with(
+        command,
+        shell=shell,
+        input=bytes(test_email1),
+        check=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+    )

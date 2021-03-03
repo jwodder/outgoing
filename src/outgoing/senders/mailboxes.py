@@ -1,40 +1,36 @@
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 from email.message import EmailMessage
 import mailbox
-from types import TracebackType
-from typing import List, Optional, Type, TypeVar, Union
-from pydantic import BaseModel, PrivateAttr
+from typing import List, Optional, TypeVar, Union
+from pydantic import PrivateAttr
 from ..config import Path
+from ..util import OpenClosable
 
 T = TypeVar("T", bound="MailboxSender")
 
 
-class MailboxSender(BaseModel, ABC):
+class MailboxSender(OpenClosable):  # ABC inherited from OpenClosable
     _mbox: Optional[mailbox.Mailbox] = PrivateAttr(None)
 
     @abstractmethod
     def _makebox(self) -> mailbox.Mailbox:
         ...
 
-    def __enter__(self: T) -> T:
+    def open(self) -> None:
         self._mbox = self._makebox()
         self._mbox.lock()
-        return self
 
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        assert self._mbox is not None
+    def close(self) -> None:
+        if self._mbox is None:
+            raise ValueError("Mailbox is not open")
         self._mbox.unlock()
         self._mbox.close()
         self._mbox = None
 
     def send(self, msg: EmailMessage) -> None:
-        assert self._mbox is not None, "Not inside a context"
-        self._mbox.add(msg)
+        with self:
+            assert self._mbox is not None
+            self._mbox.add(msg)
 
 
 class MboxSender(MailboxSender):

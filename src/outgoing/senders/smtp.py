@@ -1,10 +1,10 @@
 from email.message import EmailMessage
 import smtplib
 import sys
-from types import TracebackType
-from typing import Any, Dict, Optional, Type
+from typing import Any, Dict, Optional
 from pydantic import PrivateAttr, validator
 from ..config import NetrcConfig
+from ..util import OpenClosable
 
 if sys.version_info[:2] >= (3, 8):
     from typing import Literal
@@ -14,7 +14,7 @@ else:
 STARTTLS = "starttls"
 
 
-class SMTPSender(NetrcConfig):
+class SMTPSender(NetrcConfig, OpenClosable):
     ssl: Literal[False, True, "starttls"] = False
     port: int = 0
     _client: Optional[smtplib.SMTP] = PrivateAttr(None)
@@ -32,7 +32,7 @@ class SMTPSender(NetrcConfig):
         else:
             return v
 
-    def __enter__(self) -> "SMTPSender":
+    def open(self) -> None:
         # We need to pass the host & port to the constructor instead of calling
         # connect() later due to <https://bugs.python.org/issue36094>.
         if self.ssl is True:
@@ -44,17 +44,14 @@ class SMTPSender(NetrcConfig):
         auth = self.get_username_password()
         if auth is not None:
             self._client.login(auth[0], auth[1])
-        return self
 
-    def __exit__(
-        self,
-        exc_type: Optional[Type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> None:
-        assert self._client is not None
+    def close(self) -> None:
+        if self._client is None:
+            raise ValueError("SMTPSender is not open")
         self._client.quit()
+        self._client = None
 
     def send(self, msg: EmailMessage) -> None:
-        assert self._client is not None, "Not inside a context"
-        self._client.send_message(msg)
+        with self:
+            assert self._client is not None
+            self._client.send_message(msg)
