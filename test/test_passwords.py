@@ -30,6 +30,14 @@ def test_env_password_not_set(monkeypatch: pytest.MonkeyPatch) -> None:
     )
 
 
+def test_env_password_not_string() -> None:
+    with pytest.raises(InvalidPasswordError) as excinfo:
+        resolve_password({"env": ["FOO"]})
+    assert str(excinfo.value) == (
+        "Invalid password configuration: 'env' password specifier must be a string"
+    )
+
+
 def test_file_password(tmp_path: Path) -> None:
     (tmp_path / "foo.txt").write_text(" hunter2\n")
     assert resolve_password({"file": str(tmp_path / "foo.txt")}) == "hunter2"
@@ -74,4 +82,21 @@ def test_file_password_expanduser_configpath(
             configpath=tmp_home / "bar" / "quux.txt",
         )
         == "hunter2"
+    )
+
+
+def test_file_password_not_string() -> None:
+    with pytest.raises(InvalidPasswordError) as excinfo:
+        resolve_password({"file": ["foo.txt"]})
+    assert str(excinfo.value) == (
+        "Invalid password configuration: 'file' password specifier must be a string"
+    )
+
+
+def test_file_password_not_string_configpath() -> None:
+    with pytest.raises(InvalidPasswordError) as excinfo:
+        resolve_password({"file": ["foo.txt"]}, configpath="bar.txt")
+    assert str(excinfo.value) == (
+        "bar.txt: Invalid password configuration: 'file' password specifier"
+        " must be a string"
     )
