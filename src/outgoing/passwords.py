@@ -1,3 +1,4 @@
+from base64 import b64decode
 import os
 from typing import Any, Optional
 from .errors import InvalidPasswordError
@@ -22,3 +23,12 @@ def file_provider(spec: Any, configpath: Optional[AnyPath] = None) -> str:
         )
     filepath = resolve_path(path, configpath)
     return filepath.read_text().strip()
+
+
+def base64_provider(spec: Any) -> str:
+    if not isinstance(spec, str):
+        raise InvalidPasswordError("'base64' password specifier must be a string")
+    try:
+        return b64decode(spec, validate=True).decode()
+    except Exception as e:
+        raise InvalidPasswordError(f"Could not decode base64 password: {e}")

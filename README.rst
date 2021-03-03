@@ -353,6 +353,13 @@ Using a string, naturally, supplies the value of that string as the password:
 
     password = "hunter2"
 
+For slightly more security, a password can be stored in base64 by specifying a
+table with a single ``base64`` key and the encoded password as the value:
+
+.. code:: toml
+
+    password = { base64 = "aHVudGVyMg==" }
+
 Alternatively, a password can be read from a file by specifying a table with a
 single ``file`` key and the filepath as the value:
 
