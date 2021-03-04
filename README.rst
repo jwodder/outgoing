@@ -394,6 +394,20 @@ The ``file`` path is resolved following the same rules as other paths.  If the
 ``file`` field is omitted, the given key will be looked up in a file named
 ``.env`` in the same directory as the configuration file.
 
+A password can also be retrieved using keyring_.  The basic format is:
+
+.. _keyring: https://github.com/jaraco/keyring
+
+.. code:: toml
+
+    password = { keyring = { service = "host_or_service_name", username = "your_username" } }
+
+If the ``service`` key is omitted, the value will default to the sending
+method's host value, if it has one; likewise, an omitted ``username`` will
+default to the username for the sending method, if there is one.  A specific
+keyring backend can be specified with the ``backend`` key, and the directory
+from which to load the backend can be specified with the ``keyring-path`` key.
+
 Extension packages can define additional password provider methods.
 
 

@@ -1,10 +1,16 @@
 from base64 import b64decode
 from collections.abc import Mapping
+from contextlib import ExitStack
 import os
+import sys
 from typing import Any, Optional
 from dotenv import dotenv_values
-from pydantic import BaseModel
-from .config import FilePath, Path
+from keyring import get_keyring
+from keyring.backend import KeyringBackend
+from keyring.core import load_keyring
+from morecontext import additem
+from pydantic import BaseModel, Field, ValidationError
+from .config import DirectoryPath, FilePath, Path
 from .errors import InvalidPasswordError
 from .util import AnyPath, resolve_path
 
@@ -64,3 +70,46 @@ def dotenv_provider(spec: Any, configpath: Optional[AnyPath] = None) -> str:
                 f"key {ds.key!r} in {ds.file} does not have a value"
             )
         return value
+
+
+class KeyringSpec(BaseModel):
+    configpath: Optional[Path]
+    service: str
+    username: str
+    backend: Optional[str]
+    keyring_path: Optional[DirectoryPath] = Field(alias="keyring-path")
+
+
+def keyring_provider(
+    spec: Any,
+    host: Optional[str],
+    username: Optional[str],
+    configpath: Optional[AnyPath] = None,
+) -> str:
+    if not isinstance(spec, Mapping):
+        raise InvalidPasswordError("'keyring' password specifier must be an object")
+    try:
+        ks = KeyringSpec(
+            **{"service": host, "username": username, **spec, "configpath": configpath}
+        )
+    except ValidationError as e:
+        raise InvalidPasswordError(f"Invalid 'keyring' password specifier: {e}")
+    with ExitStack() as stack:
+        keyring: KeyringBackend
+        if ks.backend is not None:
+            if ks.keyring_path is not None:
+                stack.enter_context(
+                    additem(sys.path, str(ks.keyring_path), prepend=True)
+                )
+            keyring = load_keyring(ks.backend)
+            keyring.set_properties_from_env()
+        else:
+            keyring = get_keyring()
+        password = keyring.get_password(ks.service, ks.username)
+    if password is None:
+        raise InvalidPasswordError(
+            f"Could not find password for service {ks.service!r}, username"
+            f" {ks.username!r} in keyring"
+        )
+    else:
+        return password

@@ -10,7 +10,8 @@ def tmp_home(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Path:
     monkeypatch.setenv("HOME", str(tmp_path))
     # At this point, why not always set the Windows var?
     monkeypatch.setenv("USERPROFILE", str(tmp_path))
-    # Used by appdirs:
+    # Used by appdirs and keyring:
+    monkeypatch.delenv("XDG_CONFIG_HOME", raising=False)
     monkeypatch.setenv("LOCALAPPDATA", str(tmp_path))
     return tmp_path
 
