@@ -7,7 +7,6 @@ from email2dict import email2dict
 import pytest
 from outgoing import from_dict
 from outgoing.senders.mailboxes import MaildirSender
-from testing_lib import msg_factory
 
 
 @pytest.mark.parametrize("folder", [None, "work"])
@@ -46,7 +45,7 @@ def test_maildir_send_no_folder_new_path(
     with sender as s:
         assert sender is s
         sender.send(test_email1)
-    inbox = Maildir("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox = Maildir("inbox")
     assert inbox.list_folders() == []
     msgs = list(inbox)
     assert len(msgs) == 1
@@ -67,7 +66,7 @@ def test_maildir_send_folder_new_path(
     )
     with sender:
         sender.send(test_email1)
-    inbox = Maildir("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox = Maildir("inbox")
     assert inbox.list_folders() == ["work"]
     work = inbox.get_folder("work")
     msgs = list(work)
@@ -82,7 +81,7 @@ def test_maildir_send_no_folder_extant_path(
     tmp_path: Path,
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    inbox = Maildir("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox = Maildir("inbox")
     inbox.add(test_email1)
     sender = from_dict(
         {
@@ -108,7 +107,7 @@ def test_maildir_send_new_folder_extant_path(
     tmp_path: Path,
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    inbox = Maildir("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox = Maildir("inbox")
     inbox.add(test_email1)
     sender = from_dict(
         {
@@ -134,7 +133,7 @@ def test_maildir_send_extant_folder_extant_path(
     tmp_path: Path,
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    inbox = Maildir("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox = Maildir("inbox")
     inbox.add_folder("work").add(test_email1)
     sender = from_dict(
         {
@@ -167,7 +166,7 @@ def test_maildir_send_no_context(
         configpath=str(tmp_path / "foo.txt"),
     )
     sender.send(test_email1)
-    inbox = Maildir("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox = Maildir("inbox")
     assert inbox.list_folders() == []
     msgs = list(inbox)
     assert len(msgs) == 1

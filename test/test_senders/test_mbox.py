@@ -5,7 +5,6 @@ from email2dict import email2dict
 import pytest
 from outgoing import from_dict
 from outgoing.senders.mailboxes import MboxSender
-from testing_lib import msg_factory
 
 
 def test_mbox_construct(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -39,7 +38,7 @@ def test_mbox_send_new_path(
     with sender as s:
         assert sender is s
         sender.send(test_email1)
-    inbox = mbox("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox = mbox("inbox")
     inbox.lock()
     msgs = list(inbox)
     inbox.close()
@@ -56,7 +55,7 @@ def test_mbox_send_extant_path(
     tmp_path: Path,
 ) -> None:
     monkeypatch.chdir(tmp_path)
-    inbox = mbox("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox = mbox("inbox")
     inbox.lock()
     inbox.add(test_email1)
     inbox.close()
@@ -69,7 +68,7 @@ def test_mbox_send_extant_path(
     )
     with sender:
         sender.send(test_email2)
-    inbox = mbox("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox = mbox("inbox")
     inbox.lock()
     msgs = list(inbox)
     inbox.close()
@@ -94,7 +93,7 @@ def test_mbox_send_no_context(
         configpath=str(tmp_path / "foo.txt"),
     )
     sender.send(test_email1)
-    inbox = mbox("inbox", factory=msg_factory)  # type: ignore[arg-type]
+    inbox = mbox("inbox")
     inbox.lock()
     msgs = list(inbox)
     inbox.close()
