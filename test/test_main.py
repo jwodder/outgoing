@@ -5,7 +5,6 @@ from click.testing import CliRunner, Result
 from email2dict import email2dict
 from pytest_mock import MockerFixture
 from outgoing.__main__ import main
-from testing_lib import test_email1, test_email2
 
 
 def show_result(r: Result) -> str:
@@ -16,7 +15,7 @@ def show_result(r: Result) -> str:
         return r.output
 
 
-def test_main_stdin(mocker: MockerFixture) -> None:
+def test_main_stdin(mocker: MockerFixture, test_email1: EmailMessage) -> None:
     m = mocker.patch("outgoing.senders.null.NullSender", autospec=True)
     runner = CliRunner()
     with runner.isolated_filesystem():
@@ -37,7 +36,9 @@ def test_main_stdin(mocker: MockerFixture) -> None:
     assert email2dict(sent) == email2dict(test_email1)
 
 
-def test_main_args(mocker: MockerFixture) -> None:
+def test_main_args(
+    mocker: MockerFixture, test_email1: EmailMessage, test_email2: EmailMessage
+) -> None:
     m = mocker.patch("outgoing.senders.null.NullSender", autospec=True)
     runner = CliRunner()
     with runner.isolated_filesystem():

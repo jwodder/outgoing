@@ -1,3 +1,4 @@
+from email.message import EmailMessage
 from pathlib import Path
 import subprocess
 from typing import List, Union
@@ -5,7 +6,6 @@ import pytest
 from pytest_mock import MockerFixture
 from outgoing import from_dict
 from outgoing.senders.command import CommandSender
-from testing_lib import test_email1
 
 
 def test_command_construct_default(tmp_path: Path) -> None:
@@ -39,7 +39,11 @@ def test_command_construct(command: Union[str, List[str]], tmp_path: Path) -> No
     ],
 )
 def test_command_send(
-    command: Union[str, List[str]], shell: bool, mocker: MockerFixture, tmp_path: Path
+    command: Union[str, List[str]],
+    shell: bool,
+    mocker: MockerFixture,
+    test_email1: EmailMessage,
+    tmp_path: Path,
 ) -> None:
     m = mocker.patch("subprocess.run")
     sender = from_dict(
@@ -66,7 +70,11 @@ def test_command_send(
     ],
 )
 def test_command_send_no_context(
-    command: Union[str, List[str]], shell: bool, mocker: MockerFixture, tmp_path: Path
+    command: Union[str, List[str]],
+    shell: bool,
+    mocker: MockerFixture,
+    test_email1: EmailMessage,
+    tmp_path: Path,
 ) -> None:
     m = mocker.patch("subprocess.run")
     sender = from_dict(

@@ -1,3 +1,4 @@
+from email.message import EmailMessage
 from mailbox import Maildir
 from operator import itemgetter
 from pathlib import Path
@@ -6,7 +7,7 @@ from email2dict import email2dict
 import pytest
 from outgoing import from_dict
 from outgoing.senders.mailboxes import MaildirSender
-from testing_lib import msg_factory, test_email1, test_email2
+from testing_lib import msg_factory
 
 
 @pytest.mark.parametrize("folder", [None, "work"])
@@ -32,7 +33,7 @@ def test_maildir_construct(
 
 
 def test_maildir_send_no_folder_new_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, test_email1: EmailMessage, tmp_path: Path
 ) -> None:
     monkeypatch.chdir(tmp_path)
     sender = from_dict(
@@ -53,7 +54,7 @@ def test_maildir_send_no_folder_new_path(
 
 
 def test_maildir_send_folder_new_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, test_email1: EmailMessage, tmp_path: Path
 ) -> None:
     monkeypatch.chdir(tmp_path)
     sender = from_dict(
@@ -75,7 +76,10 @@ def test_maildir_send_folder_new_path(
 
 
 def test_maildir_send_no_folder_extant_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch,
+    test_email1: EmailMessage,
+    test_email2: EmailMessage,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.chdir(tmp_path)
     inbox = Maildir("inbox", factory=msg_factory)  # type: ignore[arg-type]
@@ -98,7 +102,10 @@ def test_maildir_send_no_folder_extant_path(
 
 
 def test_maildir_send_new_folder_extant_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch,
+    test_email1: EmailMessage,
+    test_email2: EmailMessage,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.chdir(tmp_path)
     inbox = Maildir("inbox", factory=msg_factory)  # type: ignore[arg-type]
@@ -121,7 +128,10 @@ def test_maildir_send_new_folder_extant_path(
 
 
 def test_maildir_send_extant_folder_extant_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch,
+    test_email1: EmailMessage,
+    test_email2: EmailMessage,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.chdir(tmp_path)
     inbox = Maildir("inbox", factory=msg_factory)  # type: ignore[arg-type]
@@ -146,7 +156,7 @@ def test_maildir_send_extant_folder_extant_path(
 
 
 def test_maildir_send_no_context(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch, test_email1: EmailMessage, tmp_path: Path
 ) -> None:
     monkeypatch.chdir(tmp_path)
     sender = from_dict(

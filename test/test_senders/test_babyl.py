@@ -1,10 +1,11 @@
+from email.message import EmailMessage
 from mailbox import Babyl
 from pathlib import Path
 from email2dict import email2dict
 import pytest
 from outgoing import from_dict
 from outgoing.senders.mailboxes import BabylSender
-from testing_lib import msg_factory, test_email1, test_email2
+from testing_lib import msg_factory
 
 
 def test_babyl_construct(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -24,7 +25,9 @@ def test_babyl_construct(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Non
     assert sender._mbox is None
 
 
-def test_babyl_send_new_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_babyl_send_new_path(
+    monkeypatch: pytest.MonkeyPatch, test_email1: EmailMessage, tmp_path: Path
+) -> None:
     monkeypatch.chdir(tmp_path)
     sender = from_dict(
         {
@@ -45,7 +48,10 @@ def test_babyl_send_new_path(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) ->
 
 
 def test_babyl_send_extant_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    monkeypatch: pytest.MonkeyPatch,
+    test_email1: EmailMessage,
+    test_email2: EmailMessage,
+    tmp_path: Path,
 ) -> None:
     monkeypatch.chdir(tmp_path)
     inbox = Babyl("inbox", factory=msg_factory)  # type: ignore[arg-type]
@@ -70,7 +76,9 @@ def test_babyl_send_extant_path(
     assert email2dict(test_email2) == email2dict(msgs[1])
 
 
-def test_babyl_send_no_context(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_babyl_send_no_context(
+    monkeypatch: pytest.MonkeyPatch, test_email1: EmailMessage, tmp_path: Path
+) -> None:
     monkeypatch.chdir(tmp_path)
     sender = from_dict(
         {

@@ -1,3 +1,4 @@
+from email.message import EmailMessage
 from pathlib import Path
 import platform
 import smtplib
@@ -9,7 +10,6 @@ from pytest_mock import MockerFixture
 from smtpdfix import SMTPDFix
 from outgoing import from_dict
 from outgoing.senders.smtp import SMTPSender
-from testing_lib import test_email1
 
 smtpdfix_headers = ["x-mailfrom", "x-peer", "x-rcptto"]
 
@@ -158,7 +158,9 @@ def test_smtp_construct_explicit_port(
     }
 
 
-def test_smtp_send_no_ssl_no_auth(mocker: MockerFixture) -> None:
+def test_smtp_send_no_ssl_no_auth(
+    mocker: MockerFixture, test_email1: EmailMessage
+) -> None:
     m = mocker.patch("smtplib.SMTP", autospec=True)
     sender = from_dict({"method": "smtp", "host": "mx.example.com"})
     with sender:
@@ -170,7 +172,9 @@ def test_smtp_send_no_ssl_no_auth(mocker: MockerFixture) -> None:
     ]
 
 
-def test_smtp_send_no_ssl_auth(mocker: MockerFixture) -> None:
+def test_smtp_send_no_ssl_auth(
+    mocker: MockerFixture, test_email1: EmailMessage
+) -> None:
     m = mocker.patch("smtplib.SMTP", autospec=True)
     sender = from_dict(
         {
@@ -190,7 +194,9 @@ def test_smtp_send_no_ssl_auth(mocker: MockerFixture) -> None:
     ]
 
 
-def test_smtp_send_ssl_no_auth(mocker: MockerFixture) -> None:
+def test_smtp_send_ssl_no_auth(
+    mocker: MockerFixture, test_email1: EmailMessage
+) -> None:
     m = mocker.patch("smtplib.SMTP_SSL", autospec=True)
     sender = from_dict({"method": "smtp", "host": "mx.example.com", "ssl": True})
     with sender:
@@ -202,7 +208,7 @@ def test_smtp_send_ssl_no_auth(mocker: MockerFixture) -> None:
     ]
 
 
-def test_smtp_send_ssl_auth(mocker: MockerFixture) -> None:
+def test_smtp_send_ssl_auth(mocker: MockerFixture, test_email1: EmailMessage) -> None:
     m = mocker.patch("smtplib.SMTP_SSL", autospec=True)
     sender = from_dict(
         {
@@ -227,7 +233,9 @@ def test_smtp_send_ssl_auth(mocker: MockerFixture) -> None:
 # all?), so we need to split the tests apart.
 
 
-def test_smtp_fix_send_no_ssl_no_auth(smtpd: SMTPDFix) -> None:
+def test_smtp_fix_send_no_ssl_no_auth(
+    smtpd: SMTPDFix, test_email1: EmailMessage
+) -> None:
     sender = from_dict({"method": "smtp", "host": smtpd.hostname, "port": smtpd.port})
     with sender:
         sender.send(test_email1)
@@ -239,7 +247,7 @@ def test_smtp_fix_send_no_ssl_no_auth(smtpd: SMTPDFix) -> None:
 
 
 def test_smtp_fix_send_no_ssl_auth(
-    monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix
+    monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix, test_email1: EmailMessage
 ) -> None:
     monkeypatch.setenv("SMTPD_ENFORCE_AUTH", "True")
     monkeypatch.setenv("SMTPD_AUTH_REQUIRE_TLS", "False")
@@ -264,7 +272,9 @@ def test_smtp_fix_send_no_ssl_auth(
 
 
 @skip_pypy
-def test_smtp_fix_send_ssl_no_auth(smtpd_use_ssl: None, smtpd: SMTPDFix) -> None:
+def test_smtp_fix_send_ssl_no_auth(
+    smtpd_use_ssl: None, smtpd: SMTPDFix, test_email1: EmailMessage
+) -> None:
     sender = from_dict(
         {"method": "smtp", "host": smtpd.hostname, "port": smtpd.port, "ssl": True}
     )
@@ -283,7 +293,10 @@ def test_smtp_fix_send_ssl_no_auth(smtpd_use_ssl: None, smtpd: SMTPDFix) -> None
     reason="https://github.com/bebleo/smtpdfix/issues/10",
 )
 def test_smtp_fix_send_ssl_auth(
-    monkeypatch: pytest.MonkeyPatch, smtpd_use_ssl: None, smtpd: SMTPDFix
+    monkeypatch: pytest.MonkeyPatch,
+    smtpd_use_ssl: None,
+    smtpd: SMTPDFix,
+    test_email1: EmailMessage,
 ) -> None:
     monkeypatch.setenv("SMTPD_ENFORCE_AUTH", "True")
     monkeypatch.setenv("SMTPD_LOGIN_NAME", "luser")
@@ -309,7 +322,7 @@ def test_smtp_fix_send_ssl_auth(
 
 @skip_pypy
 def test_smtp_fix_send_starttls_no_auth(
-    monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix
+    monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix, test_email1: EmailMessage
 ) -> None:
     monkeypatch.setenv("SMTPD_USE_STARTTLS", "True")
     sender = from_dict(
@@ -331,7 +344,7 @@ def test_smtp_fix_send_starttls_no_auth(
 
 @skip_pypy
 def test_smtp_fix_send_starttls_auth(
-    monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix
+    monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix, test_email1: EmailMessage
 ) -> None:
     monkeypatch.setenv("SMTPD_USE_STARTTLS", "True")
     monkeypatch.setenv("SMTPD_ENFORCE_AUTH", "True")
@@ -356,7 +369,7 @@ def test_smtp_fix_send_starttls_auth(
     assert email2dict(test_email1) == msgdict
 
 
-def test_smtp_send_no_context(mocker: MockerFixture) -> None:
+def test_smtp_send_no_context(mocker: MockerFixture, test_email1: EmailMessage) -> None:
     m = mocker.patch("smtplib.SMTP", autospec=True)
     sender = from_dict({"method": "smtp", "host": "mx.example.com"})
     sender.send(test_email1)
