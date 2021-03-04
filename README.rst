@@ -359,6 +359,8 @@ table with a single ``base64`` key and the encoded password as the value:
 
     password = { base64 = "aHVudGVyMg==" }
 
+Base64 passwords must decode to UTF-8 text.
+
 Alternatively, a password can be read from a file by specifying a table with a
 single ``file`` key and the filepath as the value:
 
