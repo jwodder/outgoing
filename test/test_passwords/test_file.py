@@ -1,3 +1,5 @@
+import errno
+import os
 from pathlib import Path
 import pytest
 from outgoing import resolve_password
@@ -65,4 +67,14 @@ def test_file_password_not_string_configpath() -> None:
     assert str(excinfo.value) == (
         "bar.txt: Invalid password configuration: 'file' password specifier"
         " must be a string"
+    )
+
+
+def test_file_nonexistent_file(tmp_path: Path) -> None:
+    file_path = tmp_path / "nowhere"
+    with pytest.raises(InvalidPasswordError) as excinfo:
+        resolve_password({"file": str(file_path)})
+    e = FileNotFoundError(errno.ENOENT, os.strerror(errno.ENOENT), str(file_path))
+    assert str(excinfo.value) == (
+        f"Invalid password configuration: Invalid 'file' path: {e}"
     )

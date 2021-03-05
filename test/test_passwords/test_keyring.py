@@ -245,3 +245,25 @@ def test_keyring_nonexistent_keyring_path(tmp_path: Path) -> None:
         f'  file or directory at path "{keyring_path}" does not exist'
         f" (type=value_error.path.not_exists; path={keyring_path})"
     )
+
+
+def test_keyring_path_relative_to_configpath_ignore_spec_configpath(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "lib").mkdir()
+    copyfile(HUNTER2KEYRING, tmp_path / "lib" / HUNTER2KEYRING.name)
+    assert (
+        resolve_password(
+            {
+                "keyring": {
+                    "service": "api.example.com",
+                    "username": "luser",
+                    "backend": "Hunter2Keyring.Keyring",
+                    "keyring-path": "../lib",
+                    "configpath": tmp_path / "bar" / "baz.txt",
+                }
+            },
+            configpath=tmp_path / "foo" / "conf.toml",
+        )
+        == "hunter2"
+    )

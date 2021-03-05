@@ -108,3 +108,57 @@ def test_dotenv_password_no_value(tmp_path: Path) -> None:
         str(excinfo.value) == "Invalid password configuration: key 'SECRET' in"
         f" {tmp_path/'foo.txt'} does not have a value"
     )
+
+
+def test_dotenv_invalid_spec_type() -> None:
+    with pytest.raises(InvalidPasswordError) as excinfo:
+        resolve_password({"dotenv": "SECRET"})
+    assert (
+        str(excinfo.value)
+        == "Invalid password configuration: 'dotenv' password specifier must"
+        " be an object"
+    )
+
+
+def test_dotenv_no_key() -> None:
+    with pytest.raises(InvalidPasswordError) as excinfo:
+        resolve_password({"dotenv": {}})
+    assert str(excinfo.value) == (
+        "Invalid password configuration: Invalid 'dotenv' password specifier: "
+        "1 validation error for DotenvSpec\n"
+        "key\n"
+        "  field required (type=value_error.missing)"
+    )
+
+
+def test_dotenv_nonexistent_file(tmp_path: Path) -> None:
+    dotenv_path = tmp_path / "nowhere"
+    with pytest.raises(InvalidPasswordError) as excinfo:
+        resolve_password({"dotenv": {"key": "SECRET", "file": dotenv_path}})
+    assert str(excinfo.value) == (
+        "Invalid password configuration: Invalid 'dotenv' password specifier:"
+        " 1 validation error for DotenvSpec\n"
+        "file\n"
+        f'  file or directory at path "{dotenv_path}" does not exist'
+        f" (type=value_error.path.not_exists; path={dotenv_path})"
+    )
+
+
+def test_dotenv_password_configpath_relative_ignore_spec_configpath(
+    tmp_path: Path,
+) -> None:
+    (tmp_path / "bar").mkdir()
+    (tmp_path / "bar" / "foo.txt").write_text("SECRET=hunter2\n")
+    assert (
+        resolve_password(
+            {
+                "dotenv": {
+                    "key": "SECRET",
+                    "file": "foo.txt",
+                    "configpath": tmp_path / "gnusto" / "cleesh.txt",
+                }
+            },
+            configpath=tmp_path / "bar" / "quux.txt",
+        )
+        == "hunter2"
+    )

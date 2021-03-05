@@ -32,7 +32,10 @@ def file_provider(spec: Any, configpath: Optional[AnyPath] = None) -> str:
             "'file' password specifier must be a string", configpath=configpath
         )
     filepath = resolve_path(path, configpath)
-    return filepath.read_text().strip()
+    try:
+        return filepath.read_text().strip()
+    except OSError as e:
+        raise InvalidPasswordError(f"Invalid 'file' path: {e}")
 
 
 def base64_provider(spec: Any) -> str:
@@ -53,7 +56,10 @@ class DotenvSpec(BaseModel):
 def dotenv_provider(spec: Any, configpath: Optional[AnyPath] = None) -> str:
     if not isinstance(spec, Mapping):
         raise InvalidPasswordError("'dotenv' password specifier must be an object")
-    ds = DotenvSpec(**{**spec, "configpath": configpath})
+    try:
+        ds = DotenvSpec(**{**spec, "configpath": configpath})
+    except ValidationError as e:
+        raise InvalidPasswordError(f"Invalid 'dotenv' password specifier: {e}")
     if ds.file is None:
         if configpath is not None:
             ds.file = resolve_path(".env", basepath=configpath)

@@ -188,7 +188,7 @@ def lookup_netrc(
             f" but netrc says {auth[0]!r}"
         )
     password = auth[2]
-    if password is None:
+    if password is None:  # pragma: no cover
         # mypy says this can happen, but the actual implementation in CPython
         # says otherwise.
         raise errors.NetrcLookupError("No password given in netrc entry")
