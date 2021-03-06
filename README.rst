@@ -18,9 +18,6 @@
 | `Documentation <https://outgoing.readthedocs.io>`_
 | `Issues <https://github.com/jwodder/outgoing/issues>`_
 
-.. contents::
-    :backlinks: top
-
 ``outgoing`` provides a common interface to multiple different e-mail sending
 methods (SMTP, sendmail, mbox, etc.).  Just construct a sender from a
 configuration file or object, pass it an ``EmailMessage`` instance, and let the
