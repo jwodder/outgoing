@@ -51,3 +51,5 @@ Exceptions
     :show-inheritance:
 .. autoexception:: outgoing.errors.NetrcLookupError
     :show-inheritance:
+.. autoexception:: outgoing.errors.UnsupportedEmailError
+    :show-inheritance:

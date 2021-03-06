@@ -62,3 +62,12 @@ class NetrcLookupError(Error):
     """
 
     pass
+
+
+class UnsupportedEmailError(Error):
+    """
+    Raised by sender objects when asked to send an e-mail that uses features or
+    constructs that the sending method does not support
+    """
+
+    pass
