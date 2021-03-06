@@ -44,8 +44,8 @@ an `InvalidConfigError`.
 
 Callables can resolve password fields by passing them to `resolve_password()`
 or by using pydantic and the `Password` type.  Callables should resolve paths
-relative to ``configpath`` by using `resolve_path()` or by using pydantic and
-the `Path`, `FilePath`, and/or `DirectoryPath` types.
+relative to the directory containing ``configpath`` by using `resolve_path()`
+or by using pydantic and the `Path`, `FilePath`, and/or `DirectoryPath` types.
 
 The last step of writing a sending method is to package it in a Python project
 and declare the callable as an entry point in the ``outgoing.senders`` entry

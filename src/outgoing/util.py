@@ -53,9 +53,9 @@ def resolve_path(path: AnyPath, basepath: Optional[AnyPath] = None) -> Path:
     """
     Convert a path to a `pathlib.Path` instance and resolve it using the same
     rules for as paths in ``outgoing`` configuration files: expand tildes by
-    calling `Path.expanduser()`, prepend ``basepath`` (usually the value of
-    ``configpath``) to the path if given, and then resolve the resulting path
-    to make it absolute.
+    calling `Path.expanduser()`, prepend the parent directory of ``basepath``
+    (usually the value of ``configpath``) to the path if given, and then
+    resolve the resulting path to make it absolute.
 
     :param path path: the path to resolve
     :param path basepath: an optional path to resolve ``path`` relative to

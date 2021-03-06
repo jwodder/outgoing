@@ -18,8 +18,9 @@ else:
         Converts its input to `pathlib.Path` instances, including expanding
         tildes.  If there is a field named ``configpath`` declared before the
         `Path` field and its value is non-`None`, then the value of the `Path`
-        field will be resolved relative to the ``configpath`` field; otherwise,
-        it will be resolved relative to the current directory.
+        field will be resolved relative to the parent directory of the
+        ``configpath`` field; otherwise, it will be resolved relative to the
+        current directory.
         """
 
         @classmethod
