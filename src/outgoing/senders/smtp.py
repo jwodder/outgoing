@@ -41,9 +41,9 @@ class SMTPSender(NetrcConfig, OpenClosable):
             self._client = smtplib.SMTP(self.host, self.port)
         if self.ssl == STARTTLS:
             self._client.starttls()
-        auth = self.get_username_password()
-        if auth is not None:
-            self._client.login(auth[0], auth[1])
+        if self.username is not None:
+            assert self.password is not None
+            self._client.login(self.username, self.password.get_secret_value())
 
     def close(self) -> None:
         if self._client is None:

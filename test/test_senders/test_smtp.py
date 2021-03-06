@@ -75,7 +75,6 @@ def test_smtp_construct_no_ssl(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
         "netrc": False,
     }
     assert sender._client is None
-    assert sender.get_username_password() == ("me", "hunter2")
 
 
 def test_smtp_construct_ssl(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
@@ -101,7 +100,6 @@ def test_smtp_construct_ssl(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> 
         "netrc": False,
     }
     assert sender._client is None
-    assert sender.get_username_password() == ("me", "12345")
 
 
 def test_smtp_construct_starttls(
@@ -123,14 +121,13 @@ def test_smtp_construct_starttls(
     assert sender.dict() == {
         "configpath": tmp_path / "foo.txt",
         "host": "mx.example.com",
-        "username": None,
-        "password": None,
+        "username": "me",
+        "password": SecretStr("secret"),
         "port": 587,
         "ssl": "starttls",
         "netrc": tmp_path / "net.rc",
     }
     assert sender._client is None
-    assert sender.get_username_password() == ("me", "secret")
 
 
 @pytest.mark.parametrize("ssl", [False, True, "starttls"])

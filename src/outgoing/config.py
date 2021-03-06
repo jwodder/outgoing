@@ -1,5 +1,5 @@
 import pathlib
-from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Tuple, Union
+from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Union
 import pydantic
 from . import core
 from .util import AnyPath, resolve_path
@@ -180,15 +180,22 @@ class NetrcConfig(pydantic.BaseModel):
     """
     A pydantic model usable as a base class for any senders that wish to
     support both ``password`` fields and netrc files.  The model accepts the
-    fields ``configpath``, ``netrc`` (a boolean or file path; defaults to
+    fields ``configpath``, ``netrc`` (a boolean or a file path; defaults to
     `False`), ``host`` (required), ``username`` (optional), and ``password``
-    (optional).
+    (optional).  When the model is instantiated, if ``password`` is `None` but
+    ``netrc`` is true or a filepath, the entry for ``host`` is looked up in
+    :file:`~/.netrc` or the given file, and the ``username`` and ``password``
+    fields are set to the values found.
 
-    The model's validators will raise an error if ``password`` is set while
-    ``netrc`` is true, or if ``password`` is set but ``username`` is not set.
+    The model will raise a validation error if any of the following are true:
 
-    The username & password are retrieved from an instance of this class by
-    calling the `get_username_password()` method.
+    - ``password`` is set but ``netrc`` is true
+    - ``password`` is set but ``username`` is not set
+    - ``username`` is set but ``password`` is not set and ``netrc`` is false
+    - ``netrc`` is true or a filepath, ``username`` is non-`None`, and the
+      username in the netrc file differs from ``username``
+    - ``netrc`` is true or a filepath and no entry can be found in the netrc
+      file
     """
 
     configpath: Optional[Path]
@@ -198,55 +205,23 @@ class NetrcConfig(pydantic.BaseModel):
     password: Optional[StandardPassword]
 
     @pydantic.root_validator(skip_on_failure=True)
-    def _forbid_netrc_if_password(
-        cls,  # noqa: B902
-        values: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        if values["password"] is not None and values["netrc"]:
-            raise ValueError("netrc cannot be set when a password is present")
-        return values
-
-    @pydantic.root_validator(skip_on_failure=True)
-    def _require_username_if_password(
-        cls,  # noqa: B902
-        values: Dict[str, Any],
-    ) -> Dict[str, Any]:
-        if values["password"] is not None and values["username"] is None:
-            raise ValueError("Password cannot be given without username")
-        return values
-
-    def get_username_password(self) -> Optional[Tuple[str, str]]:
-        """
-        Retrieve the username & password according to the instance's field
-        values.
-
-        - If ``netrc`` is false and both ``username`` and ``password`` are
-          non-`None`, a ``(username, password)`` pair is returned.
-
-        - If ``netrc`` is false and ``password`` is `None`, return `None`.
-
-        - If ``netrc`` is true or a filepath, look up the entry for ``host`` in
-          :file:`~/.netrc` or the given file and return a ``(username,
-          password)`` pair.
-
-          - If ``username`` is also non-`None`, raise an error if the username
-            in the netrc file differs.
-
-        :raises NetrcLookupError:
-            if no entry for ``host`` or the default entry is present in the
-            netrc file; or if ``username`` differs from the username in the
-            netrc file
-        """
-
-        if self.password is not None:
-            assert self.username is not None, "Password is set but username is not"
-            return (self.username, self.password.get_secret_value())
-        elif self.netrc:
+    def _validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: B902
+        if values["password"] is not None:
+            if values["netrc"]:
+                raise ValueError("netrc cannot be set when a password is present")
+            elif values["username"] is None:
+                raise ValueError("Password cannot be given without username")
+        elif values["netrc"]:
             path: Optional[Path]
-            if isinstance(self.netrc, bool):
+            if isinstance(values["netrc"], bool):
                 path = None
             else:
-                path = self.netrc
-            return core.lookup_netrc(self.host, username=self.username, path=path)
-        else:
-            return None
+                path = values["netrc"]
+            username, password = core.lookup_netrc(
+                values["host"], username=values["username"], path=path
+            )
+            values["username"] = username
+            values["password"] = StandardPassword(password)
+        elif values["username"] is not None:
+            raise ValueError("Username cannot be given without netrc or password")
+        return values
