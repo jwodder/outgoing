@@ -23,7 +23,7 @@ DEFAULT_CONFIG_SECTION = "outgoing"
 
 SENDER_GROUP = "outgoing.senders"
 
-PASSWORD_PROVIDER_GROUP = "outgoing.password_providers"
+PASSWORD_SCHEME_GROUP = "outgoing.password_schemes"
 
 S = TypeVar("S", bound="Sender")
 
@@ -45,6 +45,10 @@ class Sender(Protocol):
 
 
 def get_default_configpath() -> Path:
+    """
+    Returns the location of the default config file (regardless of whether it
+    exists) as a `pathlib.Path` object
+    """
     return Path(appdirs.user_config_dir("outgoing", "jwodder"), "outgoing.toml")
 
 
@@ -53,6 +57,20 @@ def from_config_file(
     section: Optional[str] = DEFAULT_CONFIG_SECTION,
     fallback: bool = True,
 ) -> Sender:
+    """
+    Read configuration from the table/field ``section`` (default
+    "``outgoing``") in the file at ``path`` (default: the path returned by
+    `get_default_configpath()`) and construct a sender object from the
+    specification.  The file may be either TOML or JSON (type detected based on
+    file extension).  If ``section`` is `None`, the entire file, rather than
+    only a single field, is used as the configuration.  If ``fallback`` is
+    true, the file is not the default config file, and the file either does not
+    exist or does not contain the given section, fall back to reading from the
+    default section of the default config file.
+
+    :raises InvalidConfigError: if the configuration is invalid
+    :raises MissingConfigError: if no configuration file or section is present
+    """
     if path is None:
         configpath = get_default_configpath()
     else:
@@ -99,6 +117,17 @@ def from_dict(
     data: Mapping[str, Any],
     configpath: Optional[AnyPath] = None,
 ) -> Sender:
+    """
+    Construct a sender object using the given ``data`` as the configuration.
+    If ``configpath`` is given, any paths in the ``data`` will be resolved
+    relative to ``configpath``'s parent directory; otherwise, they will be
+    resolved relative to the current directory.
+
+    ``data`` should not contain a ``"configpath"`` key; such an entry will be
+    discarded.
+
+    :raises InvalidConfigError: if the configuration is invalid
+    """
     try:
         method = data["method"]
     except KeyError:
@@ -134,28 +163,43 @@ def resolve_password(
     username: Optional[str] = None,
     configpath: Union[str, Path, None] = None,
 ) -> str:
+    """
+    Resolve a configuration password value.  If ``password`` is a string, it is
+    returned unchanged.  Otherwise, it must be a mapping with exactly one
+    element; the key is used as the name of the password scheme, and the value
+    is passed to the corresponding function for retrieving the password.
+
+    When resolving a password field in an ``outgoing`` configuration structure,
+    the configpath and any host/service or username values from the
+    configuration (or host/service/username constants specific to the sending
+    method) should be passed into this function so that they can be made
+    available to any password scheme functions that need them.
+
+    :raises InvalidPasswordError:
+        if ``password`` is invalid or cannot be resolved
+    """
     if isinstance(password, str):
         return password
     elif len(password) != 1:
         raise errors.InvalidPasswordError(
             "Password must be either a string or an object with exactly one field"
         )
-    ((provider, spec),) = password.items()
+    ((scheme, spec),) = password.items()
     try:
-        ep = entrypoints.get_single(PASSWORD_PROVIDER_GROUP, provider)
+        ep = entrypoints.get_single(PASSWORD_SCHEME_GROUP, scheme)
     except entrypoints.NoSuchEntryPoint:
         raise errors.InvalidPasswordError(
-            f"Unsupported password provider {provider!r}",
+            f"Unsupported password scheme {scheme!r}",
             configpath=configpath,
         )
-    provider_func = ep.load()
+    scheme_func = ep.load()
     available_kwargs = {
         "host": host,
         "username": username,
         "configpath": configpath,
     }
     kwargs = {}
-    sig = inspect.signature(provider_func)
+    sig = inspect.signature(scheme_func)
     for param in sig.parameters.values():
         if (
             param.kind in (param.POSITIONAL_OR_KEYWORD, param.KEYWORD_ONLY)
@@ -165,14 +209,24 @@ def resolve_password(
         elif param.kind is param.VAR_KEYWORD:
             kwargs.update(available_kwargs)
     try:
-        return cast(str, provider_func(spec=spec, **kwargs))
+        return cast(str, scheme_func(spec=spec, **kwargs))
     except (TypeError, ValueError) as e:
-        raise errors.InvalidPasswordError(str(e))
+        raise errors.InvalidPasswordError(str(e), configpath=configpath)
 
 
 def lookup_netrc(
     host: str, username: Optional[str] = None, path: Optional[AnyPath] = None
 ) -> Tuple[str, str]:
+    """
+    Look up the entry for ``host`` in the netrc file at ``path`` (default:
+    :file:`~/.netrc`) and return a pair of the username & password.  If
+    ``username`` is specified and it does not equal the username in the file, a
+    `NetrcLookupError` is raised.
+
+    :raises NetrcLookupError:
+        if no entry for ``host`` or the default entry is present in the netrc
+        file; or if ``username`` differs from the username in the netrc file
+    """
     if path is None:
         rc = netrc()
     else:

@@ -1,36 +1,30 @@
-.. image:: http://www.repostatus.org/badges/latest/wip.svg
-    :target: http://www.repostatus.org/#wip
-    :alt: Project Status: WIP — Initial development is in progress, but there
-          has not yet been a stable, usable release suitable for the public.
+.. module:: outgoing
 
-.. image:: https://github.com/jwodder/outgoing/workflows/Test/badge.svg?branch=master
-    :target: https://github.com/jwodder/outgoing/actions?workflow=Test
-    :alt: CI Status
-
-.. image:: https://codecov.io/gh/jwodder/outgoing/branch/master/graph/badge.svg
-    :target: https://codecov.io/gh/jwodder/outgoing
-
-.. image:: https://img.shields.io/github/license/jwodder/outgoing.svg
-    :target: https://opensource.org/licenses/MIT
-    :alt: MIT License
+=======================================================
+outgoing — Common interface for multiple e-mail methods
+=======================================================
 
 `GitHub <https://github.com/jwodder/outgoing>`_
 | `Documentation <https://outgoing.readthedocs.io>`_
 | `Issues <https://github.com/jwodder/outgoing/issues>`_
 
-.. contents::
-    :backlinks: top
+.. toctree::
+    :hidden:
+
+    configuration
+    pyapi
+    command
+    extensions
+    writing-exts
+    ext-utilities
 
 ``outgoing`` provides a common interface to multiple different e-mail sending
 methods (SMTP, sendmail, mbox, etc.).  Just construct a sender from a
-configuration file or object, pass it an ``EmailMessage`` instance, and let the
-magical internet daemons take care of the rest.
+configuration file or object, pass it an `~email.message.EmailMessage`
+instance, and let the magical internet daemons take care of the rest.
 
 ``outgoing`` itself provides support for only basic sending methods; additional
-methods are provided by extension packages.
-
-See `the documentation <https://outgoing.readthedocs.io>`_ for more
-information.
+methods are provided by :ref:`extension packages <extensions>`.
 
 
 Installation
@@ -41,6 +35,8 @@ Installation
 
     python3 -m pip install git+https://github.com/jwodder/outgoing
 
+
+.. _examples:
 
 Examples
 ========
@@ -124,3 +120,9 @@ configuration by passing the configuration structure to the
     with outgoing.from_dict(SENDING_CONFIG) as sender:
         sender.send(msg1)
         sender.send(msg2)
+
+
+Indices and tables
+==================
+* :ref:`genindex`
+* :ref:`search`

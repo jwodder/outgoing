@@ -15,7 +15,7 @@ from .errors import InvalidPasswordError
 from .util import AnyPath, resolve_path
 
 
-def env_provider(spec: Any) -> str:
+def env_scheme(spec: Any) -> str:
     if not isinstance(spec, str):
         raise InvalidPasswordError("'env' password specifier must be a string")
     try:
@@ -24,7 +24,7 @@ def env_provider(spec: Any) -> str:
         raise InvalidPasswordError(f"Environment variable {spec!r} not set")
 
 
-def file_provider(spec: Any, configpath: Optional[AnyPath] = None) -> str:
+def file_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
     try:
         path = os.fsdecode(spec)
     except Exception:
@@ -38,7 +38,7 @@ def file_provider(spec: Any, configpath: Optional[AnyPath] = None) -> str:
         raise InvalidPasswordError(f"Invalid 'file' path: {e}")
 
 
-def base64_provider(spec: Any) -> str:
+def base64_scheme(spec: Any) -> str:
     if not isinstance(spec, str):
         raise InvalidPasswordError("'base64' password specifier must be a string")
     try:
@@ -53,7 +53,7 @@ class DotenvSpec(BaseModel):
     file: Optional[FilePath]
 
 
-def dotenv_provider(spec: Any, configpath: Optional[AnyPath] = None) -> str:
+def dotenv_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
     if not isinstance(spec, Mapping):
         raise InvalidPasswordError("'dotenv' password specifier must be an object")
     try:
@@ -86,7 +86,7 @@ class KeyringSpec(BaseModel):
     keyring_path: Optional[DirectoryPath] = Field(alias="keyring-path")
 
 
-def keyring_provider(
+def keyring_scheme(
     spec: Any,
     host: Optional[str],
     username: Optional[str],

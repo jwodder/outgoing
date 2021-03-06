@@ -11,6 +11,17 @@ OC = TypeVar("OC", bound="OpenClosable")
 
 
 class OpenClosable(ABC, BaseModel):
+    """
+    An abstract base class for creating reentrant_ context managers.  A
+    concrete subclass must define ``open()`` and ``close()`` methods;
+    `OpenClosable` will then define ``__enter__`` and ``__exit__`` methods that
+    keep track of the depth of nested ``with`` statements, calling ``open()``
+    and ``close()`` only when entering & exiting the outermost ``with``.
+
+    .. _reentrant: https://docs.python.org/3/library/contextlib.html
+                   #reentrant-cms
+    """
+
     _context_depth: int = PrivateAttr(0)
 
     @abstractmethod
@@ -39,6 +50,17 @@ class OpenClosable(ABC, BaseModel):
 
 
 def resolve_path(path: AnyPath, basepath: Optional[AnyPath] = None) -> Path:
+    """
+    Convert a path to a `pathlib.Path` instance and resolve it using the same
+    rules for as paths in ``outgoing`` configuration files: expand tildes by
+    calling `Path.expanduser()`, prepend ``basepath`` (usually the value of
+    ``configpath``) to the path if given, and then resolve the resulting path
+    to make it absolute.
+
+    :param path path: the path to resolve
+    :param path basepath: an optional path to resolve ``path`` relative to
+    :rtype: pathlib.Path
+    """
     p = Path(os.fsdecode(path)).expanduser()
     if basepath is not None:
         p = Path(os.fsdecode(basepath)).parent / p
