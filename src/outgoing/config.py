@@ -1,5 +1,5 @@
 import pathlib
-from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Tuple, Union, cast
+from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Tuple, Union
 import pydantic
 from . import core
 from .util import AnyPath, resolve_path
@@ -47,56 +47,35 @@ else:
             yield from super().__get_validators__()
 
 
-class PasswordMeta(type):
-    def __new__(
-        metacls,
-        name: str,
-        bases: Tuple[type, ...],
-        namespace: Dict[str, Any],
-    ) -> "PasswordMeta":
-        if (
-            namespace.get("host") is not None
-            and namespace.get("host_field") is not None
-        ):
-            raise RuntimeError("host and host_field are mutually exclusive")
-        if (
-            namespace.get("username") is not None
-            and namespace.get("username_field") is not None
-        ):
-            raise RuntimeError("username and username_field are mutually exclusive")
-        return cast(PasswordMeta, super().__new__(metacls, name, bases, namespace))
-
-
 # We have to implement Password configuration via explicit subclassing as using
 # a function instead à la pydantic's conlist() leads to mypy errors; cf.
 # <https://github.com/samuelcolvin/pydantic/issues/975>
-class Password(pydantic.SecretStr, metaclass=PasswordMeta):
+class Password(pydantic.SecretStr):
     """
     A subclass of `pydantic.SecretStr` that accepts ``outgoing`` password
     specifiers as input and automatically resolves them using
     `resolve_password()`.  Host, username, and ``configpath`` values are passed
     to `resolve_password()` as follows:
 
-    - If `Password` is subclassed and given a ``host_field`` class variable
-      naming a field, and if the subclass is then used in a model where a field
-      with that name is declared before the `Password` subclass field, then
-      when the model is instantiated, the value of the named field will be
-      passed as the ``host`` argument to `resolve_password()`.
+    - If `Password` is subclassed and given a ``host`` class variable naming a
+      field, and if the subclass is then used in a model where a field with
+      that name is declared before the `Password` subclass field, then when the
+      model is instantiated, the value of the named field will be passed as the
+      ``host`` argument to `resolve_password()`.
 
-    - As an alternative to defining ``host_field``, a ``host`` class callable
-      (a classmethod or staticmethod) can be defined on a subclass of
-      `Password`, and when that subclass is used in a model being instantiated,
-      the callable will be passed a `dict` of all validated fields declared
-      before the password field; the return value from the callable will then
-      be passed as the ``host`` argument to `resolve_password()`.
+    - Alternatively, `Password` can be subclassed with ``host`` set to a class
+      callable (a classmethod or staticmethod), and when that subclass is used
+      in a model being instantiated, the callable will be passed a `dict` of
+      all validated fields declared before the password field; the return value
+      from the callable will then be passed as the ``host`` argument to
+      `resolve_password()`.
 
-    - If `Password` is used in a model without being subclassed, or if neither
-      ``host_field`` nor ``host`` is defined in a subclass, then `None` will be
-      passed as the ``host`` argument to `resolve_password()`.
+    - If `Password` is used in a model without being subclassed, or if ``host``
+      is not defined in a subclass, then `None` will be passed as the ``host``
+      argument to `resolve_password()`.
 
     - The ``username`` argument to `resolve_password()` can likewise be defined
-      by subclassing `Password` and defining ``username_field`` or ``username``
-      appropriately.
+      by subclassing `Password` and defining ``username`` appropriately.
 
     - If there is a field named ``configpath`` declared before the `Password`
       field, then the value of ``configpath`` is passed to
@@ -110,10 +89,10 @@ class Password(pydantic.SecretStr, metaclass=PasswordMeta):
     .. code:: python
 
         class MyPassword(outgoing.Password):
-            host_field = "service"
+            host = "service"
 
             @staticmethod
-            def username(values):
+            def username(values: Dict[str, Any]) -> str:
                 return "__token__"
 
 
@@ -149,9 +128,7 @@ class Password(pydantic.SecretStr, metaclass=PasswordMeta):
     """
 
     host: ClassVar[Any] = None
-    host_field: ClassVar[Optional[str]] = None
     username: ClassVar[Any] = None
-    username_field: ClassVar[Optional[str]] = None
 
     @classmethod
     def __get_validators__(cls) -> "CallableGenerator":
@@ -160,18 +137,22 @@ class Password(pydantic.SecretStr, metaclass=PasswordMeta):
 
     @classmethod
     def _resolve(cls, v: Any, values: Dict[str, Any]) -> str:
-        if cls.host_field is not None:
-            host = values.get(cls.host_field)
+        if isinstance(cls.host, str):
+            host = values.get(cls.host)
         elif callable(cls.host):
             host = cls.host(values)
+        elif cls.host is None:
+            host = None
         else:
-            host = cls.host
-        if cls.username_field is not None:
-            username = values.get(cls.username_field)
+            raise RuntimeError("Password.host must be a str, callable, or None")
+        if isinstance(cls.username, str):
+            username = values.get(cls.username)
         elif callable(cls.username):
             username = cls.username(values)
+        elif cls.username is None:
+            username = None
         else:
-            username = cls.username
+            raise RuntimeError("Password.username must be a str, callable, or None")
         return core.resolve_password(
             v,
             host=host,
@@ -186,12 +167,12 @@ def path_resolve(v: AnyPath, values: Dict[str, Any]) -> pathlib.Path:
 
 class StandardPassword(Password):
     """
-    A subclass of `Password` in which ``host_field`` is set to ``"host"`` and
-    ``username_field`` is set to ``"username"``.
+    A subclass of `Password` in which ``host`` is set to ``"host"`` and
+    ``username`` is set to ``"username"``
     """
 
-    host_field = "host"
-    username_field = "username"
+    host = "host"
+    username = "username"
 
 
 class NetrcConfig(pydantic.BaseModel):

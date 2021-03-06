@@ -4,7 +4,14 @@ from unittest.mock import sentinel
 from pydantic import BaseModel, SecretStr, ValidationError
 import pytest
 from pytest_mock import MockerFixture
-from outgoing.config import DirectoryPath, FilePath, NetrcConfig, Password, Path
+from outgoing.config import (
+    DirectoryPath,
+    FilePath,
+    NetrcConfig,
+    Password,
+    Path,
+    StandardPassword,
+)
 
 
 class Paths(BaseModel):
@@ -125,19 +132,14 @@ def test_path_resolve_absolute_configpath(
     assert obj.dirpath == tmp_path / "foo"
 
 
-class Password01(Password):
-    host_field = "host"
-    username_field = "username"
-
-
 class Config01(BaseModel):
     configpath: pathlib.Path
     host: str
     username: str
-    password: Password01
+    password: StandardPassword
 
 
-def test_password_fetch_fields(mocker: MockerFixture) -> None:
+def test_standard_password(mocker: MockerFixture) -> None:
     m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
     cfg = Config01(
         configpath="foo/bar",
@@ -158,8 +160,13 @@ def test_password_fetch_fields(mocker: MockerFixture) -> None:
 
 
 class Password02(Password):
-    host = "api.example.com"
-    username = "mylogin"
+    @classmethod
+    def host(cls, values: Dict[str, Any]) -> str:
+        return "api.example.com"
+
+    @classmethod
+    def username(cls, values: Dict[str, Any]) -> str:
+        return "mylogin"
 
 
 class Config02(BaseModel):
@@ -224,26 +231,6 @@ def test_password_callable_fields(mocker: MockerFixture) -> None:
         username="me@example.com",
         configpath=pathlib.Path("foo/bar"),
     )
-
-
-def test_password_host_and_host_field() -> None:
-    with pytest.raises(RuntimeError) as excinfo:
-        type(
-            "PasswordTest",
-            (Password,),
-            {"host": "api.example.com", "host_field": "host"},
-        )
-    assert str(excinfo.value) == "host and host_field are mutually exclusive"
-
-
-def test_password_username_and_username_field() -> None:
-    with pytest.raises(RuntimeError) as excinfo:
-        type(
-            "PasswordTest",
-            (Password,),
-            {"username": "me", "username_field": "username"},
-        )
-    assert str(excinfo.value) == "username and username_field are mutually exclusive"
 
 
 def test_netrc_config(mocker: MockerFixture) -> None:
