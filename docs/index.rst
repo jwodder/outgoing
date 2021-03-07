@@ -5,6 +5,7 @@ outgoing — Common interface for multiple e-mail methods
 =======================================================
 
 `GitHub <https://github.com/jwodder/outgoing>`_
+| `PyPI <https://pypi.org/project/outgoing/>`_
 | `Documentation <https://outgoing.readthedocs.io>`_
 | `Issues <https://github.com/jwodder/outgoing/issues>`_
 
@@ -33,7 +34,7 @@ Installation
 <https://pip.pypa.io>`_ for Python 3 (You have pip, right?) to install
 ``outgoing`` and its dependencies::
 
-    python3 -m pip install git+https://github.com/jwodder/outgoing
+    python3 -m pip install outgoing
 
 
 .. _examples:
