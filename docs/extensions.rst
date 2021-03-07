@@ -1,5 +1,3 @@
-.. _extensions:
-
 Available Extensions
 ====================
 

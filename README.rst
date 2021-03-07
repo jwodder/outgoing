@@ -21,6 +21,7 @@
 | `PyPI <https://pypi.org/project/outgoing/>`_
 | `Documentation <https://outgoing.readthedocs.io>`_
 | `Issues <https://github.com/jwodder/outgoing/issues>`_
+| `Changelog <https://github.com/jwodder/outgoing/blob/master/CHANGELOG.md>`_
 
 ``outgoing`` provides a common interface to multiple different e-mail sending
 methods (SMTP, sendmail, mbox, etc.).  Just construct a sender from a

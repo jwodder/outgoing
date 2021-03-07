@@ -8,6 +8,7 @@ outgoing — Common interface for multiple e-mail methods
 | `PyPI <https://pypi.org/project/outgoing/>`_
 | `Documentation <https://outgoing.readthedocs.io>`_
 | `Issues <https://github.com/jwodder/outgoing/issues>`_
+| :doc:`Changelog <changelog>`
 
 .. toctree::
     :hidden:
@@ -18,6 +19,7 @@ outgoing — Common interface for multiple e-mail methods
     extensions
     writing-exts
     ext-utilities
+    changelog
 
 ``outgoing`` provides a common interface to multiple different e-mail sending
 methods (SMTP, sendmail, mbox, etc.).  Just construct a sender from a
@@ -25,7 +27,7 @@ configuration file or object, pass it an `~email.message.EmailMessage`
 instance, and let the magical internet daemons take care of the rest.
 
 ``outgoing`` itself provides support for only basic sending methods; additional
-methods are provided by :ref:`extension packages <extensions>`.
+methods are provided by :doc:`extension packages <extensions>`.
 
 
 Installation
