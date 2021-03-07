@@ -1,5 +1,5 @@
 from pathlib import Path
-from typing import Any, Dict
+from typing import Any, Dict, Optional
 from unittest.mock import sentinel
 from pydantic import BaseModel, SecretStr, ValidationError
 import pytest
@@ -220,4 +220,28 @@ def test_username_error_password(mocker: MockerFixture) -> None:
     with pytest.raises(ValidationError) as excinfo:
         UsernameErrorConfig(configpath="foo/bar", password=sentinel.PASSWORD)
     assert "Insufficient data to determine password" in str(excinfo.value)
+    m.assert_not_called()
+
+
+class OptionalPasswordConfig(BaseModel):
+    configpath: Path
+    host: str
+    username: str
+    password: Optional[StandardPassword]
+
+
+def test_none_optional_password(mocker: MockerFixture) -> None:
+    m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    cfg = OptionalPasswordConfig(
+        configpath="foo/bar",
+        host="example.com",
+        username="me",
+        password=None,
+    )
+    assert cfg.dict() == {
+        "configpath": Path("foo/bar"),
+        "host": "example.com",
+        "username": "me",
+        "password": None,
+    }
     m.assert_not_called()
