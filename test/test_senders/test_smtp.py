@@ -364,3 +364,11 @@ def test_smtp_send_no_context(mocker: MockerFixture, test_email1: EmailMessage) 
         mocker.call.send_message(test_email1),
         mocker.call.quit(),
     ]
+
+
+def test_smtp_close_unopened() -> None:
+    sender = from_dict({"method": "smtp", "host": "mx.example.com"})
+    assert isinstance(sender, SMTPSender)
+    with pytest.raises(ValueError) as excinfo:
+        sender.close()
+    assert str(excinfo.value) == "SMTPSender is not open"
