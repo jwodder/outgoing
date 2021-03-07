@@ -1,6 +1,5 @@
 from pathlib import Path
 from typing import Any, Dict, Optional
-from unittest.mock import sentinel
 from pydantic import BaseModel, SecretStr, ValidationError
 import pytest
 from pytest_mock import MockerFixture
@@ -20,18 +19,35 @@ def test_standard_password(mocker: MockerFixture) -> None:
         configpath="foo/bar",
         host="example.com",
         username="me",
-        password=sentinel.PASSWORD,
+        password="sentinel",
     )
     assert cfg.configpath == Path("foo/bar")
     assert cfg.host == "example.com"
     assert cfg.username == "me"
     assert cfg.password == SecretStr("12345")
     m.assert_called_once_with(
-        sentinel.PASSWORD,
+        "sentinel",
         host="example.com",
         username="me",
         configpath=Path("foo/bar"),
     )
+
+
+@pytest.mark.parametrize("badpass", [42, ["SECRET"], True])
+def test_standard_password_invalid_type(badpass: Any, mocker: MockerFixture) -> None:
+    m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    with pytest.raises(ValidationError) as excinfo:
+        Config01(
+            configpath="foo/bar",
+            host="example.com",
+            username="me",
+            password=badpass,
+        )
+    assert (
+        "Password must be either a string or an object with exactly one field"
+        in str(excinfo.value)
+    )
+    m.assert_not_called()
 
 
 def test_standard_password_invalid_env() -> None:
@@ -53,7 +69,7 @@ def test_standard_password_invalid_host(mocker: MockerFixture) -> None:
             configpath="foo/bar",
             host=[42],
             username="me",
-            password=sentinel.PASSWORD,
+            password="sentinel",
         )
     assert "Insufficient data to determine password" in str(excinfo.value)
     m.assert_not_called()
@@ -66,7 +82,7 @@ def test_standard_password_invalid_username(mocker: MockerFixture) -> None:
             configpath="foo/bar",
             host="example.com",
             username=[42],
-            password=sentinel.PASSWORD,
+            password="sentinel",
         )
     assert "Insufficient data to determine password" in str(excinfo.value)
     m.assert_not_called()
@@ -95,14 +111,14 @@ def test_password_constant_fields(mocker: MockerFixture) -> None:
         configpath="foo/bar",
         host="example.com",
         username="me",
-        password=sentinel.PASSWORD,
+        password="sentinel",
     )
     assert cfg.configpath == Path("foo/bar")
     assert cfg.host == "example.com"
     assert cfg.username == "me"
     assert cfg.password == SecretStr("12345")
     m.assert_called_once_with(
-        sentinel.PASSWORD,
+        "sentinel",
         host="api.example.com",
         username="mylogin",
         configpath=Path("foo/bar"),
@@ -132,14 +148,14 @@ def test_password_callable_fields(mocker: MockerFixture) -> None:
         configpath="foo/bar",
         host="example.com",
         username="me",
-        password=sentinel.PASSWORD,
+        password="sentinel",
     )
     assert cfg.configpath == Path("foo/bar")
     assert cfg.host == "example.com"
     assert cfg.username == "me"
     assert cfg.password == SecretStr("12345")
     m.assert_called_once_with(
-        sentinel.PASSWORD,
+        "sentinel",
         host="http:example.com",
         username="me@example.com",
         configpath=Path("foo/bar"),
@@ -159,14 +175,14 @@ def test_password_unset_fields(mocker: MockerFixture) -> None:
         configpath="foo/bar",
         host="example.com",
         username="me",
-        password=sentinel.PASSWORD,
+        password="sentinel",
     )
     assert cfg.configpath == Path("foo/bar")
     assert cfg.host == "example.com"
     assert cfg.username == "me"
     assert cfg.password == SecretStr("12345")
     m.assert_called_once_with(
-        sentinel.PASSWORD,
+        "sentinel",
         host=None,
         username=None,
         configpath=Path("foo/bar"),
@@ -199,7 +215,7 @@ class HostErrorConfig(BaseModel):
 def test_host_error_password(mocker: MockerFixture) -> None:
     m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
     with pytest.raises(ValidationError) as excinfo:
-        HostErrorConfig(configpath="foo/bar", password=sentinel.PASSWORD)
+        HostErrorConfig(configpath="foo/bar", password="sentinel")
     assert "Insufficient data to determine password" in str(excinfo.value)
     m.assert_not_called()
 
@@ -218,7 +234,7 @@ class UsernameErrorConfig(BaseModel):
 def test_username_error_password(mocker: MockerFixture) -> None:
     m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
     with pytest.raises(ValidationError) as excinfo:
-        UsernameErrorConfig(configpath="foo/bar", password=sentinel.PASSWORD)
+        UsernameErrorConfig(configpath="foo/bar", password="sentinel")
     assert "Insufficient data to determine password" in str(excinfo.value)
     m.assert_not_called()
 

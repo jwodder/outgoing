@@ -1,3 +1,4 @@
+from collections.abc import Mapping
 import pathlib
 from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Union
 import pydantic
@@ -151,6 +152,10 @@ class Password(pydantic.SecretStr):
 
     @classmethod
     def _resolve(cls, v: Any, values: Dict[str, Any]) -> str:
+        if not isinstance(v, (str, Mapping)):
+            raise ValueError(
+                "Password must be either a string or an object with exactly one field"
+            )
         if isinstance(cls.host, str):
             try:
                 host = values[cls.host]

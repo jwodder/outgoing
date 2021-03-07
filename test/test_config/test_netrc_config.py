@@ -191,12 +191,12 @@ def test_netrc_config_no_netrc(mocker: MockerFixture) -> None:
         netrc=False,
         host="api.example.com",
         username="myname",
-        password=sentinel.PASSWORD,
+        password="sentinel",
     )
     assert cfg.username == "myname"
     assert cfg.password == SecretStr("12345")
     m1.assert_called_once_with(
-        sentinel.PASSWORD,
+        "sentinel",
         host="api.example.com",
         username="myname",
         configpath=Path("foo/bar").resolve(),
@@ -214,12 +214,12 @@ def test_netrc_config_no_netrc_key(mocker: MockerFixture) -> None:
         configpath="foo/bar",
         host="api.example.com",
         username="myname",
-        password=sentinel.PASSWORD,
+        password="sentinel",
     )
     assert cfg.username == "myname"
     assert cfg.password == SecretStr("12345")
     m1.assert_called_once_with(
-        sentinel.PASSWORD,
+        "sentinel",
         host="api.example.com",
         username="myname",
         configpath=Path("foo/bar").resolve(),
