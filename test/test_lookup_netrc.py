@@ -17,7 +17,7 @@ def test_lookup_netrc(
     assert lookup_netrc("api.example.com", username=username) == ("myname", "hunter2")
 
 
-def test_netrc_username_mismatch(
+def test_lookup_netrc_username_mismatch(
     monkeypatch: pytest.MonkeyPatch,
     tmp_home: Path,
 ) -> None:
