@@ -4,8 +4,8 @@ Utilities for Extension Authors
 ===============================
 
 .. autofunction:: lookup_netrc
-.. autofunction:: resolve_path
 .. autofunction:: resolve_password
+.. autofunction:: resolve_path
 .. autoclass:: OpenClosable
     :show-inheritance:
 
