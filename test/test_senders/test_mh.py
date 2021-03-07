@@ -255,3 +255,18 @@ def test_mh_send_no_context(
     msgs = list(inbox)
     assert len(msgs) == 1
     assert email2dict(test_email1) == email2dict(msgs[0])
+
+
+def test_mh_close_unopened(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+    monkeypatch.chdir(tmp_path)
+    sender = from_dict(
+        {
+            "method": "mh",
+            "path": "inbox",
+        },
+        configpath=str(tmp_path / "foo.txt"),
+    )
+    assert isinstance(sender, MHSender)
+    with pytest.raises(ValueError) as excinfo:
+        sender.close()
+    assert str(excinfo.value) == "Mailbox is not open"
