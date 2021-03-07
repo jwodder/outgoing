@@ -8,10 +8,10 @@ class NullSender(OpenClosable):
     configpath: Optional[Path] = None
 
     def open(self) -> None:
-        pass
+        ...
 
     def close(self) -> None:
-        pass
+        ...
 
     def send(self, msg: EmailMessage) -> None:
-        pass
+        ...
