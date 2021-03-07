@@ -2,6 +2,7 @@ import pathlib
 from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Union
 import pydantic
 from . import core
+from .errors import InvalidPasswordError
 from .util import AnyPath, resolve_path
 
 if TYPE_CHECKING:
@@ -58,14 +59,17 @@ class Password(pydantic.SecretStr):
       field, and if the subclass is then used in a model where a field with
       that name is declared before the `Password` subclass field, then when the
       model is instantiated, the value of the named field will be passed as the
-      ``host`` argument to `resolve_password()`.
+      ``host`` argument to `resolve_password()`.  (If the named field is not
+      present on the model that uses the subclass, the `Password` field will
+      fail validation.)
 
     - Alternatively, `Password` can be subclassed with ``host`` set to a class
       callable (a classmethod or staticmethod), and when that subclass is used
       in a model being instantiated, the callable will be passed a `dict` of
       all validated fields declared before the password field; the return value
       from the callable will then be passed as the ``host`` argument to
-      `resolve_password()`.
+      `resolve_password()`.  (If the callable raises an exception, the
+      `Password` field will fail validation.)
 
     - If `Password` is used in a model without being subclassed, or if ``host``
       is not defined in a subclass, then `None` will be passed as the ``host``
@@ -91,7 +95,6 @@ class Password(pydantic.SecretStr):
             @staticmethod
             def username(values: Dict[str, Any]) -> str:
                 return "__token__"
-
 
     and then use it in your model like so:
 
@@ -149,25 +152,40 @@ class Password(pydantic.SecretStr):
     @classmethod
     def _resolve(cls, v: Any, values: Dict[str, Any]) -> str:
         if isinstance(cls.host, str):
-            host = values.get(cls.host)
+            try:
+                host = values[cls.host]
+            except KeyError:
+                raise ValueError("Insufficient data to determine password")
         elif callable(cls.host):
-            host = cls.host(values)
+            try:
+                host = cls.host(values)
+            except Exception:
+                raise ValueError("Insufficient data to determine password")
         else:
             assert cls.host is None
             host = None
         if isinstance(cls.username, str):
-            username = values.get(cls.username)
+            try:
+                username = values[cls.username]
+            except KeyError:
+                raise ValueError("Insufficient data to determine password")
         elif callable(cls.username):
-            username = cls.username(values)
+            try:
+                username = cls.username(values)
+            except Exception:
+                raise ValueError("Insufficient data to determine password")
         else:
             assert cls.username is None
             username = None
-        return core.resolve_password(
-            v,
-            host=host,
-            username=username,
-            configpath=values.get("configpath"),
-        )
+        try:
+            return core.resolve_password(
+                v,
+                host=host,
+                username=username,
+                configpath=values.get("configpath"),
+            )
+        except InvalidPasswordError as e:
+            raise ValueError(e.details)
 
 
 def path_resolve(v: AnyPath, values: Dict[str, Any]) -> pathlib.Path:

@@ -1,7 +1,7 @@
 from pathlib import Path
 from typing import Any, Dict
 from unittest.mock import sentinel
-from pydantic import BaseModel, SecretStr
+from pydantic import BaseModel, SecretStr, ValidationError
 import pytest
 from pytest_mock import MockerFixture
 from outgoing.config import Password, StandardPassword
@@ -32,6 +32,44 @@ def test_standard_password(mocker: MockerFixture) -> None:
         username="me",
         configpath=Path("foo/bar"),
     )
+
+
+def test_standard_password_invalid_env() -> None:
+    with pytest.raises(ValidationError) as excinfo:
+        Config01(
+            configpath="foo/bar",
+            host="example.com",
+            username="me",
+            password={"env": {"key": "SECRET"}},
+        )
+    assert "'env' password specifier must be a string" in str(excinfo.value)
+    assert "foo/bar" not in str(excinfo.value)
+
+
+def test_standard_password_invalid_host(mocker: MockerFixture) -> None:
+    m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    with pytest.raises(ValidationError) as excinfo:
+        Config01(
+            configpath="foo/bar",
+            host=[42],
+            username="me",
+            password=sentinel.PASSWORD,
+        )
+    assert "Insufficient data to determine password" in str(excinfo.value)
+    m.assert_not_called()
+
+
+def test_standard_password_invalid_username(mocker: MockerFixture) -> None:
+    m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    with pytest.raises(ValidationError) as excinfo:
+        Config01(
+            configpath="foo/bar",
+            host="example.com",
+            username=[42],
+            password=sentinel.PASSWORD,
+        )
+    assert "Insufficient data to determine password" in str(excinfo.value)
+    m.assert_not_called()
 
 
 class Password02(Password):
@@ -145,3 +183,41 @@ def test_password_bad_username(mocker: MockerFixture) -> None:
     with pytest.raises(RuntimeError) as excinfo:
         type("PasswordTest", (Password,), {"username": 42})
     assert str(excinfo.value) == "Password.username must be a str, callable, or None"
+
+
+class HostErrorPassword(Password):
+    @classmethod
+    def host(cls, values: Dict[str, Any]) -> None:
+        raise RuntimeError("Invalid host method")
+
+
+class HostErrorConfig(BaseModel):
+    configpath: Path
+    password: HostErrorPassword
+
+
+def test_host_error_password(mocker: MockerFixture) -> None:
+    m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    with pytest.raises(ValidationError) as excinfo:
+        HostErrorConfig(configpath="foo/bar", password=sentinel.PASSWORD)
+    assert "Insufficient data to determine password" in str(excinfo.value)
+    m.assert_not_called()
+
+
+class UsernameErrorPassword(Password):
+    @classmethod
+    def username(cls, values: Dict[str, Any]) -> None:
+        raise RuntimeError("Invalid username method")
+
+
+class UsernameErrorConfig(BaseModel):
+    configpath: Path
+    password: UsernameErrorPassword
+
+
+def test_username_error_password(mocker: MockerFixture) -> None:
+    m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    with pytest.raises(ValidationError) as excinfo:
+        UsernameErrorConfig(configpath="foo/bar", password=sentinel.PASSWORD)
+    assert "Insufficient data to determine password" in str(excinfo.value)
+    m.assert_not_called()
