@@ -230,6 +230,7 @@ def lookup_netrc(
     :raises NetrcLookupError:
         if no entry for ``host`` or the default entry is present in the netrc
         file; or if ``username`` differs from the username in the netrc file
+    :raises netrc.NetrcParseError: if the `netrc` module encounters an error
     """
     if path is None:
         rc = netrc()
