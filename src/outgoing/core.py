@@ -212,6 +212,10 @@ def resolve_password(
         return cast(str, scheme_func(spec=spec, **kwargs))
     except (TypeError, ValueError) as e:
         raise errors.InvalidPasswordError(str(e), configpath=configpath)
+    except errors.InvalidPasswordError as e:
+        if e.configpath is None:
+            e.configpath = configpath
+        raise e
 
 
 def lookup_netrc(

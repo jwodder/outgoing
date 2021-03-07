@@ -35,7 +35,7 @@ def file_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
     try:
         return filepath.read_text().strip()
     except OSError as e:
-        raise InvalidPasswordError(f"Invalid 'file' path: {e}")
+        raise InvalidPasswordError(f"Invalid 'file' path: {e}", configpath=configpath)
 
 
 def base64_scheme(spec: Any) -> str:
@@ -55,11 +55,15 @@ class DotenvSpec(BaseModel):
 
 def dotenv_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
     if not isinstance(spec, Mapping):
-        raise InvalidPasswordError("'dotenv' password specifier must be an object")
+        raise InvalidPasswordError(
+            "'dotenv' password specifier must be an object", configpath=configpath
+        )
     try:
         ds = DotenvSpec(**{**spec, "configpath": configpath})
     except ValidationError as e:
-        raise InvalidPasswordError(f"Invalid 'dotenv' password specifier: {e}")
+        raise InvalidPasswordError(
+            f"Invalid 'dotenv' password specifier: {e}", configpath=configpath
+        )
     if ds.file is None:
         if configpath is not None:
             ds.file = resolve_path(".env", basepath=configpath)
@@ -69,11 +73,14 @@ def dotenv_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
     try:
         value = env[ds.key]
     except KeyError:
-        raise InvalidPasswordError(f"key {ds.key!r} not in {ds.file}")
+        raise InvalidPasswordError(
+            f"key {ds.key!r} not in {ds.file}", configpath=configpath
+        )
     else:
         if value is None:
             raise InvalidPasswordError(
-                f"key {ds.key!r} in {ds.file} does not have a value"
+                f"key {ds.key!r} in {ds.file} does not have a value",
+                configpath=configpath,
             )
         return value
 
@@ -93,13 +100,17 @@ def keyring_scheme(
     configpath: Optional[AnyPath] = None,
 ) -> str:
     if not isinstance(spec, Mapping):
-        raise InvalidPasswordError("'keyring' password specifier must be an object")
+        raise InvalidPasswordError(
+            "'keyring' password specifier must be an object", configpath=configpath
+        )
     try:
         ks = KeyringSpec(
             **{"service": host, "username": username, **spec, "configpath": configpath}
         )
     except ValidationError as e:
-        raise InvalidPasswordError(f"Invalid 'keyring' password specifier: {e}")
+        raise InvalidPasswordError(
+            f"Invalid 'keyring' password specifier: {e}", configpath=configpath
+        )
     with ExitStack() as stack:
         keyring: KeyringBackend
         if ks.backend is not None:
@@ -115,7 +126,8 @@ def keyring_scheme(
     if password is None:
         raise InvalidPasswordError(
             f"Could not find password for service {ks.service!r}, username"
-            f" {ks.username!r} in keyring"
+            f" {ks.username!r} in keyring",
+            configpath=configpath,
         )
     else:
         return password

@@ -68,6 +68,13 @@ def test_dirpath_not_directory(tmp_path: pathlib.Path) -> None:
         Paths(dirpath=tmp_path / "foo")
 
 
+def test_paths_schema_format() -> None:
+    schema = Paths.schema()
+    assert schema["properties"]["path"]["format"] == "path"
+    assert schema["properties"]["filepath"]["format"] == "file-path"
+    assert schema["properties"]["dirpath"]["format"] == "directory-path"
+
+
 class ResolvingPaths(BaseModel):
     configpath: Optional[Path]
     path: Path
@@ -233,6 +240,45 @@ def test_password_callable_fields(mocker: MockerFixture) -> None:
     )
 
 
+class Config04(BaseModel):
+    configpath: pathlib.Path
+    host: str
+    username: str
+    password: Password
+
+
+def test_password_unset_fields(mocker: MockerFixture) -> None:
+    m = mocker.patch("outgoing.core.resolve_password", return_value="12345")
+    cfg = Config04(
+        configpath="foo/bar",
+        host="example.com",
+        username="me",
+        password=sentinel.PASSWORD,
+    )
+    assert cfg.configpath == pathlib.Path("foo/bar")
+    assert cfg.host == "example.com"
+    assert cfg.username == "me"
+    assert cfg.password == SecretStr("12345")
+    m.assert_called_once_with(
+        sentinel.PASSWORD,
+        host=None,
+        username=None,
+        configpath=pathlib.Path("foo/bar"),
+    )
+
+
+def test_password_bad_host(mocker: MockerFixture) -> None:
+    with pytest.raises(RuntimeError) as excinfo:
+        type("PasswordTest", (Password,), {"host": 42})
+    assert str(excinfo.value) == "Password.host must be a str, callable, or None"
+
+
+def test_password_bad_username(mocker: MockerFixture) -> None:
+    with pytest.raises(RuntimeError) as excinfo:
+        type("PasswordTest", (Password,), {"username": 42})
+    assert str(excinfo.value) == "Password.username must be a str, callable, or None"
+
+
 def test_netrc_config(mocker: MockerFixture) -> None:
     m = mocker.patch(
         "outgoing.core.lookup_netrc",
@@ -393,6 +439,19 @@ def test_netrc_config_password_netrc(
     m.assert_not_called()
 
 
+def test_netrc_config_username_no_password_no_netrc(
+    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    m = mocker.patch(
+        "outgoing.core.lookup_netrc",
+        return_value=(sentinel.USERNAME, "hunter2"),
+    )
+    with pytest.raises(ValidationError) as excinfo:
+        NetrcConfig(host="api.example.com", username="myname")
+    assert "Username cannot be given without netrc or password" in str(excinfo.value)
+    m.assert_not_called()
+
+
 def test_netrc_config_no_netrc(mocker: MockerFixture) -> None:
     m1 = mocker.patch("outgoing.core.resolve_password", return_value="12345")
     m2 = mocker.patch(
@@ -469,3 +528,13 @@ def test_netrc_config_nothing_no_keys(mocker: MockerFixture) -> None:
     assert cfg.username is None
     assert cfg.password is None
     m.assert_not_called()
+
+
+def test_netrc_config_no_entry(tmp_home: Path) -> None:
+    (tmp_home / ".netrc").touch()
+    with pytest.raises(ValidationError) as excinfo:
+        NetrcConfig(host="api.example.com", netrc=True)
+    assert (
+        "Error retrieving password from netrc file: No entry for"
+        " 'api.example.com' or default found in netrc file" in str(excinfo.value)
+    )

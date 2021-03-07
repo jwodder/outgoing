@@ -24,10 +24,6 @@ else:
         """
 
         @classmethod
-        def __modify_schema__(cls, field_schema: Dict[str, Any]) -> None:
-            field_schema.update(format="file-path")
-
-        @classmethod
         def __get_validators__(cls) -> "CallableGenerator":
             yield path_resolve
 
@@ -131,6 +127,20 @@ class Password(pydantic.SecretStr):
     host: ClassVar[Any] = None
     username: ClassVar[Any] = None
 
+    def __init_subclass__(cls) -> None:
+        if (
+            cls.host is not None
+            and not isinstance(cls.host, str)
+            and not callable(cls.host)
+        ):
+            raise RuntimeError("Password.host must be a str, callable, or None")
+        if (
+            cls.username is not None
+            and not isinstance(cls.username, str)
+            and not callable(cls.username)
+        ):
+            raise RuntimeError("Password.username must be a str, callable, or None")
+
     @classmethod
     def __get_validators__(cls) -> "CallableGenerator":
         yield cls._resolve
@@ -142,18 +152,16 @@ class Password(pydantic.SecretStr):
             host = values.get(cls.host)
         elif callable(cls.host):
             host = cls.host(values)
-        elif cls.host is None:
-            host = None
         else:
-            raise RuntimeError("Password.host must be a str, callable, or None")
+            assert cls.host is None
+            host = None
         if isinstance(cls.username, str):
             username = values.get(cls.username)
         elif callable(cls.username):
             username = cls.username(values)
-        elif cls.username is None:
-            username = None
         else:
-            raise RuntimeError("Password.username must be a str, callable, or None")
+            assert cls.username is None
+            username = None
         return core.resolve_password(
             v,
             host=host,
@@ -217,9 +225,12 @@ class NetrcConfig(pydantic.BaseModel):
                 path = None
             else:
                 path = values["netrc"]
-            username, password = core.lookup_netrc(
-                values["host"], username=values["username"], path=path
-            )
+            try:
+                username, password = core.lookup_netrc(
+                    values["host"], username=values["username"], path=path
+                )
+            except Exception as e:
+                raise ValueError(f"Error retrieving password from netrc file: {e}")
             values["username"] = username
             values["password"] = StandardPassword(password)
         elif values["username"] is not None:
