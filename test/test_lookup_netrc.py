@@ -7,9 +7,7 @@ from outgoing.errors import NetrcLookupError
 
 
 @pytest.mark.parametrize("username", [None, "myname"])
-def test_lookup_netrc(
-    monkeypatch: pytest.MonkeyPatch, tmp_home: Path, username: Optional[str]
-) -> None:
+def test_lookup_netrc(tmp_home: Path, username: Optional[str]) -> None:
     (tmp_home / ".netrc").write_text(
         "machine api.example.com\nlogin myname\npassword hunter2\n"
     )
@@ -18,7 +16,6 @@ def test_lookup_netrc(
 
 
 def test_lookup_netrc_username_mismatch(
-    monkeypatch: pytest.MonkeyPatch,
     tmp_home: Path,
 ) -> None:
     (tmp_home / ".netrc").write_text(
@@ -33,9 +30,7 @@ def test_lookup_netrc_username_mismatch(
 
 
 @pytest.mark.parametrize("username", [None, "yourname"])
-def test_lookup_netrc_path(
-    monkeypatch: pytest.MonkeyPatch, tmp_home: Path, username: Optional[str]
-) -> None:
+def test_lookup_netrc_path(tmp_home: Path, username: Optional[str]) -> None:
     (tmp_home / ".netrc").write_text(
         "machine api.example.com\nlogin myname\npassword hunter2\n"
     )
@@ -49,9 +44,7 @@ def test_lookup_netrc_path(
 
 
 @pytest.mark.parametrize("username", [None, "myname"])
-def test_lookup_netrc_no_match(
-    monkeypatch: pytest.MonkeyPatch, tmp_home: Path, username: Optional[str]
-) -> None:
+def test_lookup_netrc_no_match(tmp_home: Path, username: Optional[str]) -> None:
     (tmp_home / ".netrc").write_text(
         "machine api.example.com\nlogin myname\npassword hunter2\n"
     )
@@ -69,9 +62,7 @@ def test_lookup_netrc_no_match(
     raises=NetrcParseError,
 )
 @pytest.mark.parametrize("username", [None, "myname"])
-def test_lookup_netrc_no_password(
-    monkeypatch: pytest.MonkeyPatch, tmp_home: Path, username: Optional[str]
-) -> None:
+def test_lookup_netrc_no_password(tmp_home: Path, username: Optional[str]) -> None:
     (tmp_home / ".netrc").write_text("machine api.example.com\nlogin myname\n")
     (tmp_home / ".netrc").chmod(0o600)
     with pytest.raises(NetrcLookupError) as excinfo:

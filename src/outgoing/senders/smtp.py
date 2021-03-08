@@ -20,7 +20,9 @@ class SMTPSender(NetrcConfig, OpenClosable):
     _client: Optional[smtplib.SMTP] = PrivateAttr(None)
 
     @validator("port", always=True)
-    def _set_default_port(cls, v: Any, values: Dict[str, Any]) -> Any:  # noqa: B902
+    def _set_default_port(
+        cls, v: Any, values: Dict[str, Any]  # noqa: B902, U100
+    ) -> Any:
         if v == 0:
             ssl = values.get("ssl")
             if ssl is True:

@@ -96,9 +96,7 @@ def test_smtp_construct_ssl(tmp_path: Path) -> None:
     assert sender._client is None
 
 
-def test_smtp_construct_starttls(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_smtp_construct_starttls(tmp_path: Path) -> None:
     (tmp_path / "net.rc").write_text(
         "machine mx.example.com\nlogin me\npassword secret\n"
     )
@@ -272,9 +270,8 @@ def test_smtp_fix_send_no_ssl_auth(
     assert email2dict(test_email1) == msgdict
 
 
-def test_smtp_fix_send_ssl_no_auth(
-    smtpd_use_ssl: None, smtpd: SMTPDFix, test_email1: EmailMessage
-) -> None:
+@pytest.mark.usefixtures("smtpd_use_ssl")
+def test_smtp_fix_send_ssl_no_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -> None:
     sender = from_dict(
         {"method": "smtp", "host": smtpd.hostname, "port": smtpd.port, "ssl": True}
     )
@@ -291,9 +288,9 @@ def test_smtp_fix_send_ssl_no_auth(
     raises=smtplib.SMTPNotSupportedError,
     reason="https://github.com/bebleo/smtpdfix/issues/10",
 )
+@pytest.mark.usefixtures("smtpd_use_ssl")
 def test_smtp_fix_send_ssl_auth(
     monkeypatch: pytest.MonkeyPatch,
-    smtpd_use_ssl: None,
     smtpd: SMTPDFix,
     test_email1: EmailMessage,
 ) -> None:

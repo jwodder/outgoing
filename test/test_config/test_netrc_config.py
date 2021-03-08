@@ -167,9 +167,7 @@ def test_netrc_config_password_netrc(
     m.assert_not_called()
 
 
-def test_netrc_config_username_no_password_no_netrc(
-    mocker: MockerFixture, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_netrc_config_username_no_password_no_netrc(mocker: MockerFixture) -> None:
     m = mocker.patch(
         "outgoing.core.lookup_netrc",
         return_value=(sentinel.USERNAME, "hunter2"),

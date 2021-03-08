@@ -236,7 +236,7 @@ class NetrcConfig(pydantic.BaseModel):
     password: Optional[StandardPassword]
 
     @pydantic.root_validator(skip_on_failure=True)
-    def _validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: B902
+    def _validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: B902, U100
         if values["password"] is not None:
             if values["netrc"]:
                 raise ValueError("netrc cannot be set when a password is present")

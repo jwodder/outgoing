@@ -30,7 +30,6 @@ def test_file_password_configpath_relative(tmp_path: Path) -> None:
 
 
 def test_file_password_expanduser(
-    monkeypatch: pytest.MonkeyPatch,
     tmp_home: Path,
 ) -> None:
     (tmp_home / "foo.txt").write_text(" hunter2\n")
@@ -38,7 +37,6 @@ def test_file_password_expanduser(
 
 
 def test_file_password_expanduser_configpath(
-    monkeypatch: pytest.MonkeyPatch,
     tmp_home: Path,
 ) -> None:
     (tmp_home / "foo.txt").write_text(" hunter2\n")

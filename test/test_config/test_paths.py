@@ -16,7 +16,6 @@ class Paths(BaseModel):
 
 
 def test_path_expanduser(
-    monkeypatch: pytest.MonkeyPatch,
     tmp_home: pathlib.Path,
 ) -> None:
     (tmp_home / "foo").mkdir()

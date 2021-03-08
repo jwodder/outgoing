@@ -90,11 +90,11 @@ def test_standard_password_invalid_username(mocker: MockerFixture) -> None:
 
 class Password02(Password):
     @classmethod
-    def host(cls, values: Dict[str, Any]) -> str:
+    def host(cls, _values: Dict[str, Any]) -> str:
         return "api.example.com"
 
     @classmethod
-    def username(cls, values: Dict[str, Any]) -> str:
+    def username(cls, _values: Dict[str, Any]) -> str:
         return "mylogin"
 
 
@@ -189,13 +189,13 @@ def test_password_unset_fields(mocker: MockerFixture) -> None:
     )
 
 
-def test_password_bad_host(mocker: MockerFixture) -> None:
+def test_password_bad_host() -> None:
     with pytest.raises(RuntimeError) as excinfo:
         type("PasswordTest", (Password,), {"host": 42})
     assert str(excinfo.value) == "Password.host must be a str, callable, or None"
 
 
-def test_password_bad_username(mocker: MockerFixture) -> None:
+def test_password_bad_username() -> None:
     with pytest.raises(RuntimeError) as excinfo:
         type("PasswordTest", (Password,), {"username": 42})
     assert str(excinfo.value) == "Password.username must be a str, callable, or None"
@@ -203,7 +203,7 @@ def test_password_bad_username(mocker: MockerFixture) -> None:
 
 class HostErrorPassword(Password):
     @classmethod
-    def host(cls, values: Dict[str, Any]) -> None:
+    def host(cls, _values: Dict[str, Any]) -> None:
         raise RuntimeError("Invalid host method")
 
 
@@ -222,7 +222,7 @@ def test_host_error_password(mocker: MockerFixture) -> None:
 
 class UsernameErrorPassword(Password):
     @classmethod
-    def username(cls, values: Dict[str, Any]) -> None:
+    def username(cls, _values: Dict[str, Any]) -> None:
         raise RuntimeError("Invalid username method")
 
 

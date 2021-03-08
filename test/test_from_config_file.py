@@ -68,8 +68,9 @@ def test_from_nonexistent_custom_config_file_no_default(tmp_home: Path) -> None:
     )
 
 
+@pytest.mark.usefixtures("tmp_home")
 @pytest.mark.parametrize("fallback", [False, True])
-def test_from_nonexistent_default_config_file(fallback: bool, tmp_home: Path) -> None:
+def test_from_nonexistent_default_config_file(fallback: bool) -> None:
     defconf = get_default_configpath()
     with pytest.raises(MissingConfigError) as excinfo:
         from_config_file(fallback=fallback)
@@ -188,8 +189,9 @@ def test_from_no_section_in_custom_config_file_or_default(tmp_home: Path) -> Non
     )
 
 
+@pytest.mark.usefixtures("tmp_home")
 @pytest.mark.parametrize("fallback", [False, True])
-def test_from_no_section_default_config_file(fallback: bool, tmp_home: Path) -> None:
+def test_from_no_section_default_config_file(fallback: bool) -> None:
     defconf = get_default_configpath()
     defconf.parent.mkdir(parents=True, exist_ok=True)
     defconf.write_text('[sender]\nmethod = "mbox"\npath = "inbox"\n')
