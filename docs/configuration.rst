@@ -142,7 +142,8 @@ The ``mbox`` method appends e-mails to an mbox file on the local machine.
 Configuration fields:
 
 ``path`` : filepath (required)
-    The location of the mbox file
+    The location of the mbox file.  If the file does not exist, it will be
+    created when the sender object is entered.
 
 Example ``mbox`` configuration:
 
@@ -161,8 +162,9 @@ machine.
 
 Configuration fields:
 
-``path`` : filepath (required)
-    The location of the Maildir mailbox
+``path`` : directory path (required)
+    The location of the Maildir mailbox.  If the directory does not exist, it
+    will be created when the sender object is entered.
 
 ``folder`` : string (optional)
     A folder within the Maildir mailbox in which to place e-mails
@@ -175,8 +177,9 @@ The ``mh`` method adds e-mails to an MH mailbox directory on the local machine.
 
 Configuration fields:
 
-``path`` : filepath (required)
-    The location of the MH mailbox
+``path`` : directory path (required)
+    The location of the MH mailbox.  If the directory does not exist, it will
+    be created when the sender object is entered.
 
 ``folder`` : string or list of strings (optional)
     A folder within the Maildir mailbox in which to place e-mails; can be
@@ -202,7 +205,8 @@ The ``mmdf`` method adds e-mails to an MMDF mailbox file on the local machine.
 Configuration fields:
 
 ``path`` : filepath (required)
-    The location of the MMDF mailbox
+    The location of the MMDF mailbox.  If the file does not exist, it will be
+    created when the sender object is entered.
 
 
 ``babyl``
@@ -213,7 +217,8 @@ The ``babyl`` method adds e-mails to a Babyl mailbox file on the local machine.
 Configuration fields:
 
 ``path`` : filepath (required)
-    The location of the Babyl mailbox
+    The location of the Babyl mailbox.  If the file does not exist, it will be
+    created when the sender object is entered.
 
 
 ``null``
