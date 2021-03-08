@@ -8,6 +8,7 @@ import pytest
 from pytest_mock import MockerFixture
 from smtpdfix import SMTPDFix
 from outgoing import from_dict
+from outgoing.errors import InvalidConfigError
 from outgoing.senders.smtp import SMTPSender
 
 smtpdfix_headers = ["x-mailfrom", "x-peer", "x-rcptto"]
@@ -70,7 +71,7 @@ def test_smtp_construct_no_ssl(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
     assert sender._client is None
 
 
-def test_smtp_construct_ssl(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None:
+def test_smtp_construct_ssl(tmp_path: Path) -> None:
     (tmp_path / "secret").write_text("12345\n")
     sender = from_dict(
         {
@@ -124,9 +125,7 @@ def test_smtp_construct_starttls(
 
 
 @pytest.mark.parametrize("ssl", [False, True, "starttls"])
-def test_smtp_construct_explicit_port(
-    monkeypatch: pytest.MonkeyPatch, ssl: Union[bool, str], tmp_path: Path
-) -> None:
+def test_smtp_construct_explicit_port(ssl: Union[bool, str], tmp_path: Path) -> None:
     sender = from_dict(
         {
             "method": "smtp",
@@ -146,6 +145,18 @@ def test_smtp_construct_explicit_port(
         "ssl": ssl,
         "netrc": False,
     }
+
+
+def test_smtp_construct_negative_port(tmp_path: Path) -> None:
+    with pytest.raises(InvalidConfigError):
+        from_dict(
+            {
+                "method": "smtp",
+                "host": "mx.example.com",
+                "port": -1,
+            },
+            configpath=str(tmp_path / "foo.txt"),
+        )
 
 
 def test_smtp_send_no_ssl_no_auth(

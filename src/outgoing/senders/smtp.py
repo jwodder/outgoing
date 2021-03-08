@@ -2,7 +2,7 @@ from email.message import EmailMessage
 import smtplib
 import sys
 from typing import Any, Dict, Optional
-from pydantic import PrivateAttr, validator
+from pydantic import Field, PrivateAttr, validator
 from ..config import NetrcConfig
 from ..util import OpenClosable
 
@@ -16,7 +16,7 @@ STARTTLS = "starttls"
 
 class SMTPSender(NetrcConfig, OpenClosable):
     ssl: Literal[False, True, "starttls"] = False
-    port: int = 0
+    port: int = Field(0, ge=0)
     _client: Optional[smtplib.SMTP] = PrivateAttr(None)
 
     @validator("port", always=True)
