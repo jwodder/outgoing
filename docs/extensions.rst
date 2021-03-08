@@ -11,7 +11,10 @@ this page!
 Sending Methods
 ---------------
 
-None yet.  Be the first!
+- outgoing-mailgun__ — Supports sending e-mail via Mailgun__
+
+  __ https://github.com/jwodder/outgoing-mailgun
+  __ https://www.mailgun.com
 
 
 Password Schemes
