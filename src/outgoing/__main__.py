@@ -1,4 +1,4 @@
-from email import message_from_bytes, policy
+from email import message_from_binary_file, policy
 from email.message import EmailMessage
 from typing import IO, List, Optional
 import click
@@ -36,7 +36,7 @@ def main(ctx: click.Context, message: List[IO[bytes]], config: Optional[str]) ->
         with from_config_file(config, fallback=False) as sender:
             for fp in message:
                 with fp:
-                    msg = message_from_bytes(fp.read(), policy=policy.default)
+                    msg = message_from_binary_file(fp, policy=policy.default)
                 assert isinstance(msg, EmailMessage)
                 sender.send(msg)
     except Error as e:
