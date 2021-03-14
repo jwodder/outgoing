@@ -56,7 +56,7 @@ A sample configuration file:
     host = "mx.example.com"
     ssl = "starttls"
     username = "myname"
-    password = { "file" = "~/secrets/smtp-password" }
+    password = { file = "~/secrets/smtp-password" }
 
 
 Sending an e-mail based on a configuration file:
@@ -97,22 +97,26 @@ configuration by passing the configuration structure to the
     from email.message import EmailMessage
     import outgoing
 
-    msg1 = EmailMessage()
-    msg1["Subject"] = "No."
-    msg1["To"] = "me@here.qq"
-    msg1["From"] = "my.beloved@love.love"
-    msg1.set_content(
-        "Hot pockets?  Thou disgusteth me.\n"
-        "\n"
-        "Pineapple pizza or RIOT.\n"
+    # Construct an EmailMessage object using the eletter library
+    # <https://github.com/jwodder/eletter>:
+    from eletter import compose
+
+    msg1 = compose(
+        subject="No.",
+        to=["me@here.qq"],
+        from_="my.beloved@love.love",
+        text=(
+            "Hot pockets?  Thou disgusteth me.\n"
+            "\n"
+            "Pineapple pizza or RIOT.\n"
+        ),
     )
 
-    msg2 = EmailMessage()
-    msg2["Subject"] = "I'd like to place an order."
-    msg2["To"] = "pete@za.aa"
-    msg2["From"] = "my.beloved@love.love"
-    msg2.set_content(
-        "I need the usual.  Twelve Hawaiian Abominations to go, please.\n"
+    msg2 = compose(
+        subject="I'd like to place an order.",
+        to=["pete@za.aa"],
+        from_="my.beloved@love.love",
+        text="I need the usual.  Twelve Hawaiian Abominations to go, please.\n",
     )
 
     SENDING_CONFIG = {
