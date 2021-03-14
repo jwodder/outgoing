@@ -2,7 +2,7 @@ from email.message import EmailMessage
 from pathlib import Path
 import smtplib
 from typing import Union
-from email2dict import email2dict
+from mailbits import email2dict
 from pydantic import SecretStr
 import pytest
 from pytest_mock import MockerFixture

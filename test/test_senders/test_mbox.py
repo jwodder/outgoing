@@ -1,7 +1,7 @@
 from email.message import EmailMessage
 from mailbox import mbox
 from pathlib import Path
-from email2dict import email2dict
+from mailbits import email2dict
 import pytest
 from outgoing import from_dict
 from outgoing.senders.mailboxes import MboxSender

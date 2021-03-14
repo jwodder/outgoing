@@ -3,7 +3,7 @@ from mailbox import Maildir
 from operator import itemgetter
 from pathlib import Path
 from typing import Optional
-from email2dict import email2dict
+from mailbits import email2dict
 import pytest
 from outgoing import from_dict
 from outgoing.senders.mailboxes import MaildirSender

@@ -3,7 +3,7 @@ from mailbox import MH
 from operator import itemgetter
 from pathlib import Path
 from typing import List, Union
-from email2dict import email2dict
+from mailbits import email2dict
 import pytest
 from outgoing import from_dict
 from outgoing.senders.mailboxes import MHSender

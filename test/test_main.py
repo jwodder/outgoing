@@ -2,7 +2,7 @@ from email.message import EmailMessage
 from pathlib import Path
 from traceback import format_exception
 from click.testing import CliRunner, Result
-from email2dict import email2dict
+from mailbits import email2dict
 from pytest_mock import MockerFixture
 from outgoing.__main__ import main
 
