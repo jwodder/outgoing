@@ -61,3 +61,51 @@ def test_main_args(
     sent2 = instance.send.call_args_list[1][0][0]
     assert isinstance(sent2, EmailMessage)
     assert email2dict(sent2) == email2dict(test_email2)
+
+
+def test_main_custom_section(mocker: MockerFixture, test_email1: EmailMessage) -> None:
+    m = mocker.patch("outgoing.senders.null.NullSender", autospec=True)
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        Path("cfg.toml").write_text(
+            "[outgoing]\n" 'method = "command"\n' "\n" "[test]\n" 'method = "null"\n'
+        )
+        r = runner.invoke(
+            main,
+            ["--config", "cfg.toml", "--section", "test"],
+            input=bytes(test_email1),
+            standalone_mode=False,
+        )
+    assert r.exit_code == 0, show_result(r)
+    assert r.output == ""
+    m.assert_called_once_with(method="null", configpath=Path("cfg.toml"))
+    instance = m.return_value.__enter__.return_value
+    assert instance.send.call_count == 1
+    sent = instance.send.call_args[0][0]
+    assert isinstance(sent, EmailMessage)
+    assert email2dict(sent) == email2dict(test_email1)
+
+
+def test_main_no_section(mocker: MockerFixture, test_email1: EmailMessage) -> None:
+    m = mocker.patch("outgoing.senders.null.NullSender", autospec=True)
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        Path("cfg.toml").write_text(
+            'method = "null"\n\n[outgoing]\nmethod = "command"\n'
+        )
+        r = runner.invoke(
+            main,
+            ["--config", "cfg.toml", "--no-section"],
+            input=bytes(test_email1),
+            standalone_mode=False,
+        )
+    assert r.exit_code == 0, show_result(r)
+    assert r.output == ""
+    m.assert_called_once_with(
+        method="null", configpath=Path("cfg.toml"), outgoing={"method": "command"}
+    )
+    instance = m.return_value.__enter__.return_value
+    assert instance.send.call_count == 1
+    sent = instance.send.call_args[0][0]
+    assert isinstance(sent, EmailMessage)
+    assert email2dict(sent) == email2dict(test_email1)

@@ -1,9 +1,16 @@
 from email import message_from_binary_file, policy
 from email.message import EmailMessage
-from typing import IO, List, Optional
+from typing import Any, IO, List, Optional
 import click
-from . import __version__, from_config_file, get_default_configpath
+from . import (
+    DEFAULT_CONFIG_SECTION,
+    __version__,
+    from_config_file,
+    get_default_configpath,
+)
 from .errors import Error
+
+NO_SECTION = object()
 
 
 @click.command()
@@ -21,19 +28,43 @@ from .errors import Error
     help="Specify the outgoing configuration file to use",
     show_default=True,
 )
+@click.option(
+    "-s",
+    "--section",
+    help=(
+        "Read configuration from the given key/section of the config file"
+        f"  [default: {DEFAULT_CONFIG_SECTION}]"
+    ),
+    metavar="KEY",
+)
+@click.option(
+    "--no-section",
+    "section",
+    flag_value=NO_SECTION,
+    help="Read configuration from the root of the config file",
+)
 @click.argument("message", type=click.File("rb"), nargs=-1)
 @click.pass_context
-def main(ctx: click.Context, message: List[IO[bytes]], config: Optional[str]) -> None:
+def main(
+    ctx: click.Context, message: List[IO[bytes]], config: Optional[str], section: Any
+) -> None:
     """
     Common interface for different e-mail methods.
 
     Visit <https://github.com/jwodder/outgoing> for more information.
     """
-
+    sectname: Optional[str]
+    if section is NO_SECTION:
+        sectname = None
+    elif section is None:
+        sectname = DEFAULT_CONFIG_SECTION
+    else:
+        assert isinstance(section, str)
+        sectname = section
     if not message:
         message = [click.get_binary_stream("stdin")]
     try:
-        with from_config_file(config, fallback=False) as sender:
+        with from_config_file(config, section=sectname, fallback=False) as sender:
             for fp in message:
                 with fp:
                     msg = message_from_binary_file(fp, policy=policy.default)
