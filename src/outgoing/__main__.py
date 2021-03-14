@@ -1,7 +1,9 @@
 from email import message_from_binary_file, policy
 from email.message import EmailMessage
+import logging
 from typing import Any, IO, List, Optional
 import click
+from click_loglevel import LogLevel
 from . import (
     DEFAULT_CONFIG_SECTION,
     __version__,
@@ -29,6 +31,13 @@ NO_SECTION = object()
     show_default=True,
 )
 @click.option(
+    "-l",
+    "--log-level",
+    type=LogLevel(),
+    default=logging.INFO,
+    help="Set logging level  [default: INFO]",
+)
+@click.option(
     "-s",
     "--section",
     help=(
@@ -46,13 +55,22 @@ NO_SECTION = object()
 @click.argument("message", type=click.File("rb"), nargs=-1)
 @click.pass_context
 def main(
-    ctx: click.Context, message: List[IO[bytes]], config: Optional[str], section: Any
+    ctx: click.Context,
+    message: List[IO[bytes]],
+    config: Optional[str],
+    section: Any,
+    log_level: int,
 ) -> None:
     """
     Common interface for different e-mail methods.
 
     Visit <https://github.com/jwodder/outgoing> for more information.
     """
+    logging.basicConfig(
+        format="%(asctime)s [%(levelname)-8s] %(name)s %(message)s",
+        datefmt="%H:%M:%S",
+        level=log_level,
+    )
     sectname: Optional[str]
     if section is NO_SECTION:
         sectname = None

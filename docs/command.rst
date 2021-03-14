@@ -26,6 +26,16 @@ Options
     Specify a :ref:`configuration file <configfile>` to use instead of the
     default configuration file
 
+.. option:: -l <level>, --log-level <level>
+
+    .. versionadded:: 0.2.0
+
+    Set the `logging level`_ to the given value; default: ``INFO``.  The level
+    can be given as a case-insensitive level name or as a numeric value.
+
+    .. _logging level: https://docs.python.org/3/library/logging.html
+                       #logging-levels
+
 .. option:: -s <key>, --section <key>
 
     .. versionadded:: 0.2.0
