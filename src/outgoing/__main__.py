@@ -4,6 +4,7 @@ import logging
 from typing import Any, IO, List, Optional
 import click
 from click_loglevel import LogLevel
+from dotenv import find_dotenv, load_dotenv
 from . import (
     DEFAULT_CONFIG_SECTION,
     __version__,
@@ -29,6 +30,12 @@ NO_SECTION = object()
     default=get_default_configpath(),
     help="Specify the outgoing configuration file to use",
     show_default=True,
+)
+@click.option(
+    "-E",
+    "--env",
+    type=click.Path(exists=True, dir_okay=False),
+    help="Load environment files from given .env file",
 )
 @click.option(
     "-l",
@@ -60,12 +67,19 @@ def main(
     config: Optional[str],
     section: Any,
     log_level: int,
+    env: Optional[str],
 ) -> None:
     """
     Common interface for different e-mail methods.
 
     Visit <https://github.com/jwodder/outgoing> for more information.
     """
+    if env is None:
+        # dotenv's default behavior doesn't play well with
+        # click.testing.CliRunner, so we have to force the library to start
+        # searching at the current directory.
+        env = find_dotenv(usecwd=True)
+    load_dotenv(env)
     logging.basicConfig(
         format="%(asctime)s [%(levelname)-8s] %(name)s %(message)s",
         datefmt="%H:%M:%S",

@@ -5,6 +5,8 @@ v0.2.0 (in development)
 - Gave the `outgoing` command `--section`, `--no-section`, and `--log-level`
   options
 - Added logging to built-in sender classes
+- The `outgoing` command now loads settings from `.env` files and has an
+  `--env` option
 
 v0.1.0 (2021-03-06)
 -------------------

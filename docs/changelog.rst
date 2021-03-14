@@ -10,6 +10,8 @@ v0.2.0 (in development)
 - Gave the :command:`outgoing` command ``--section``, ``--no-section``, and
   ``--log-level`` options
 - Added logging to built-in sender classes
+- The :command:`outgoing` command now loads settings from :file:`.env` files
+  and has an ``--env`` option
 
 v0.1.0 (2021-03-06)
 -------------------

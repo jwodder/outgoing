@@ -109,3 +109,60 @@ def test_main_no_section(mocker: MockerFixture, test_email1: EmailMessage) -> No
     sent = instance.send.call_args[0][0]
     assert isinstance(sent, EmailMessage)
     assert email2dict(sent) == email2dict(test_email1)
+
+
+def test_main_default_dotenv(mocker: MockerFixture, test_email1: EmailMessage) -> None:
+    m = mocker.patch("smtplib.SMTP", autospec=True)
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        Path(".env").write_text("DOTENV_PASSWORD=hunter2\n")
+        Path("cfg.toml").write_text(
+            "[outgoing]\n"
+            'method = "smtp"\n'
+            'host = "mx.example.com"\n'
+            'username = "luser"\n'
+            'password = { env = "DOTENV_PASSWORD" }\n'
+        )
+        r = runner.invoke(
+            main,
+            ["--config", "cfg.toml"],
+            input=bytes(test_email1),
+            standalone_mode=False,
+        )
+    assert r.exit_code == 0, show_result(r)
+    assert r.output == ""
+    assert m.call_args_list == [mocker.call("mx.example.com", 25)]
+    assert m.return_value.method_calls == [
+        mocker.call.login("luser", "hunter2"),
+        mocker.call.send_message(mocker.ANY),
+        mocker.call.quit(),
+    ]
+
+
+def test_main_custom_dotenv(mocker: MockerFixture, test_email1: EmailMessage) -> None:
+    m = mocker.patch("smtplib.SMTP", autospec=True)
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        Path(".env").write_text("CUSTOM_DOTENV_PASSWORD=12345\n")
+        Path("custom.env").write_text("CUSTOM_DOTENV_PASSWORD=hunter2\n")
+        Path("cfg.toml").write_text(
+            "[outgoing]\n"
+            'method = "smtp"\n'
+            'host = "mx.example.com"\n'
+            'username = "luser"\n'
+            'password = { env = "CUSTOM_DOTENV_PASSWORD" }\n'
+        )
+        r = runner.invoke(
+            main,
+            ["--config", "cfg.toml", "--env", "custom.env"],
+            input=bytes(test_email1),
+            standalone_mode=False,
+        )
+    assert r.exit_code == 0, show_result(r)
+    assert r.output == ""
+    assert m.call_args_list == [mocker.call("mx.example.com", 25)]
+    assert m.return_value.method_calls == [
+        mocker.call.login("luser", "hunter2"),
+        mocker.call.send_message(mocker.ANY),
+        mocker.call.quit(),
+    ]

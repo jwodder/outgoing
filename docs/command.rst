@@ -26,6 +26,15 @@ Options
     Specify a :ref:`configuration file <configfile>` to use instead of the
     default configuration file
 
+.. option:: -E <file>, --env <file>
+
+    .. versionadded:: 0.2.0
+
+    Load environment variables from the given :file:`.env` file before reading
+    the configuration file.  By default, environment variables are loaded from
+    the first file named ":file:`.env`" found by searching from the current
+    directory upwards.
+
 .. option:: -l <level>, --log-level <level>
 
     .. versionadded:: 0.2.0
