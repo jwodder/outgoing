@@ -14,12 +14,6 @@ from outgoing.senders.smtp import SMTPSender
 smtpdfix_headers = ["x-mailfrom", "x-peer", "x-rcptto"]
 
 
-# See <https://github.com/bebleo/smtpdfix/issues/50> for why this is necessary.
-@pytest.fixture
-def smtpd_use_ssl(monkeypatch: pytest.MonkeyPatch) -> None:
-    monkeypatch.setenv("SMTPD_USE_SSL", "True")
-
-
 def test_smtp_construct_default_ssl(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
@@ -246,13 +240,11 @@ def test_smtp_fix_send_no_ssl_no_auth(
     assert email2dict(test_email1) == msgdict
 
 
-def test_smtp_fix_send_no_ssl_auth(
-    monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix, test_email1: EmailMessage
-) -> None:
-    monkeypatch.setenv("SMTPD_ENFORCE_AUTH", "True")
-    monkeypatch.setenv("SMTPD_AUTH_REQUIRE_TLS", "False")
-    monkeypatch.setenv("SMTPD_LOGIN_NAME", "luser")
-    monkeypatch.setenv("SMTPD_LOGIN_PASSWORD", "hunter2")
+def test_smtp_fix_send_no_ssl_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -> None:
+    smtpd.config.enforce_auth = True
+    smtpd.config.auth_require_tls = False
+    smtpd.config.login_username = "luser"
+    smtpd.config.login_password = "hunter2"
     sender = from_dict(
         {
             "method": "smtp",
@@ -271,8 +263,8 @@ def test_smtp_fix_send_no_ssl_auth(
     assert email2dict(test_email1) == msgdict
 
 
-@pytest.mark.usefixtures("smtpd_use_ssl")
 def test_smtp_fix_send_ssl_no_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -> None:
+    smtpd.config.use_ssl = True
     sender = from_dict(
         {"method": "smtp", "host": smtpd.hostname, "port": smtpd.port, "ssl": True}
     )
@@ -289,15 +281,14 @@ def test_smtp_fix_send_ssl_no_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -
     raises=smtplib.SMTPNotSupportedError,
     reason="https://github.com/bebleo/smtpdfix/issues/10",
 )
-@pytest.mark.usefixtures("smtpd_use_ssl")
 def test_smtp_fix_send_ssl_auth(
-    monkeypatch: pytest.MonkeyPatch,
     smtpd: SMTPDFix,
     test_email1: EmailMessage,
 ) -> None:
-    monkeypatch.setenv("SMTPD_ENFORCE_AUTH", "True")
-    monkeypatch.setenv("SMTPD_LOGIN_NAME", "luser")
-    monkeypatch.setenv("SMTPD_LOGIN_PASSWORD", "hunter2")
+    smtpd.config.enforce_auth = True
+    smtpd.config.login_username = "luser"
+    smtpd.config.login_password = "hunter2"
+    smtpd.config.use_ssl = True
     sender = from_dict(
         {
             "method": "smtp",
@@ -318,9 +309,9 @@ def test_smtp_fix_send_ssl_auth(
 
 
 def test_smtp_fix_send_starttls_no_auth(
-    monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix, test_email1: EmailMessage
+    smtpd: SMTPDFix, test_email1: EmailMessage
 ) -> None:
-    monkeypatch.setenv("SMTPD_USE_STARTTLS", "True")
+    smtpd.config.use_starttls = True
     sender = from_dict(
         {
             "method": "smtp",
@@ -339,12 +330,12 @@ def test_smtp_fix_send_starttls_no_auth(
 
 
 def test_smtp_fix_send_starttls_auth(
-    monkeypatch: pytest.MonkeyPatch, smtpd: SMTPDFix, test_email1: EmailMessage
+    smtpd: SMTPDFix, test_email1: EmailMessage
 ) -> None:
-    monkeypatch.setenv("SMTPD_USE_STARTTLS", "True")
-    monkeypatch.setenv("SMTPD_ENFORCE_AUTH", "True")
-    monkeypatch.setenv("SMTPD_LOGIN_NAME", "luser")
-    monkeypatch.setenv("SMTPD_LOGIN_PASSWORD", "hunter2")
+    smtpd.config.use_starttls = True
+    smtpd.config.enforce_auth = True
+    smtpd.config.login_username = "luser"
+    smtpd.config.login_password = "hunter2"
     sender = from_dict(
         {
             "method": "smtp",
