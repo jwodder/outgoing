@@ -22,17 +22,12 @@ examples.
 Sender Objects
 --------------
 
-Sender objects support, at minimum, the following protocol:
+.. autoclass:: Sender()
+    :special-members: __enter__, __exit__
 
-- They can be used as context managers, and their ``__enter__`` methods return
-  ``self``.
-
-- Within its own context, calling a sender's ``send(msg:
-  email.message.EmailMessage)`` method sends the given e-mail.
-
-In addition, ``outgoing``'s built-in senders are reentrant__ and reusable__ as
-context managers, and their ``send()`` methods can be called outside of a
-context.
+In addition to the base protocol, ``outgoing``'s built-in senders are
+reentrant__ and reusable__ as context managers, and their ``send()`` methods
+can be called outside of a context.
 
 __ https://docs.python.org/3/library/contextlib.html#reentrant-context-managers
 __ https://docs.python.org/3/library/contextlib.html#reusable-context-managers

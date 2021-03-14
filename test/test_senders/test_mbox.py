@@ -3,7 +3,7 @@ from mailbox import mbox
 from pathlib import Path
 from mailbits import email2dict
 import pytest
-from outgoing import from_dict
+from outgoing import Sender, from_dict
 from outgoing.senders.mailboxes import MboxSender
 
 
@@ -16,6 +16,7 @@ def test_mbox_construct(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None
         },
         configpath=str(tmp_path / "foo.txt"),
     )
+    assert isinstance(sender, Sender)
     assert isinstance(sender, MboxSender)
     assert sender.dict() == {
         "configpath": tmp_path / "foo.txt",

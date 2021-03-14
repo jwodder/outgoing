@@ -7,7 +7,7 @@ from pydantic import SecretStr
 import pytest
 from pytest_mock import MockerFixture
 from smtpdfix import SMTPDFix
-from outgoing import from_dict
+from outgoing import Sender, from_dict
 from outgoing.errors import InvalidConfigError
 from outgoing.senders.smtp import SMTPSender
 
@@ -33,6 +33,7 @@ def test_smtp_construct_default_ssl(
         },
         configpath=str(tmp_path / "foo.txt"),
     )
+    assert isinstance(sender, Sender)
     assert isinstance(sender, SMTPSender)
     assert sender.dict() == {
         "configpath": tmp_path / "foo.txt",

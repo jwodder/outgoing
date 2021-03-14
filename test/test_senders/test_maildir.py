@@ -5,7 +5,7 @@ from pathlib import Path
 from typing import Optional
 from mailbits import email2dict
 import pytest
-from outgoing import from_dict
+from outgoing import Sender, from_dict
 from outgoing.senders.mailboxes import MaildirSender
 
 
@@ -22,6 +22,7 @@ def test_maildir_construct(
         },
         configpath=str(tmp_path / "foo.txt"),
     )
+    assert isinstance(sender, Sender)
     assert isinstance(sender, MaildirSender)
     assert sender.dict() == {
         "configpath": tmp_path / "foo.txt",

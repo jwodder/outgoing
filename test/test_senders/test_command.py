@@ -4,12 +4,13 @@ import subprocess
 from typing import List, Union
 import pytest
 from pytest_mock import MockerFixture
-from outgoing import from_dict
+from outgoing import Sender, from_dict
 from outgoing.senders.command import CommandSender
 
 
 def test_command_construct_default(tmp_path: Path) -> None:
     sender = from_dict({"method": "command"}, configpath=tmp_path / "foo.toml")
+    assert isinstance(sender, Sender)
     assert isinstance(sender, CommandSender)
     assert sender.dict() == {
         "configpath": tmp_path / "foo.toml",

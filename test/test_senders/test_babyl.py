@@ -3,7 +3,7 @@ from mailbox import Babyl
 from pathlib import Path
 from mailbits import email2dict
 import pytest
-from outgoing import from_dict
+from outgoing import Sender, from_dict
 from outgoing.senders.mailboxes import BabylSender
 
 
@@ -16,6 +16,7 @@ def test_babyl_construct(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Non
         },
         configpath=str(tmp_path / "foo.txt"),
     )
+    assert isinstance(sender, Sender)
     assert isinstance(sender, BabylSender)
     assert sender.dict() == {
         "configpath": tmp_path / "foo.txt",

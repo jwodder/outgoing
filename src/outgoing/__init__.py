@@ -29,6 +29,7 @@ from .config import (
 )
 from .core import (
     DEFAULT_CONFIG_SECTION,
+    Sender,
     from_config_file,
     from_dict,
     get_default_configpath,
@@ -57,6 +58,7 @@ __all__ = [
     "OpenClosable",
     "Password",
     "Path",
+    "Sender",
     "StandardPassword",
     "from_config_file",
     "from_dict",

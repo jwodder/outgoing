@@ -15,9 +15,9 @@ from . import errors
 from .util import AnyPath
 
 if sys.version_info[:2] >= (3, 8):
-    from typing import Protocol
+    from typing import Protocol, runtime_checkable
 else:
-    from typing_extensions import Protocol
+    from typing_extensions import Protocol, runtime_checkable
 
 DEFAULT_CONFIG_SECTION = "outgoing"
 
@@ -28,7 +28,19 @@ PASSWORD_SCHEME_GROUP = "outgoing.password_schemes"
 S = TypeVar("S", bound="Sender")
 
 
+@runtime_checkable
 class Sender(Protocol):
+    """
+    `Sender` is a `~typing.Protocol` implemented by sender objects.  The
+    protocol requires the following behavior:
+
+    - Sender objects can be used as context managers, and their ``__enter__``
+      methods return ``self``.
+
+    - Within its own context, calling a sender's ``send(msg:
+      email.message.EmailMessage)`` method sends the given e-mail.
+    """
+
     def __enter__(self: S) -> S:
         ...
 
@@ -41,6 +53,7 @@ class Sender(Protocol):
         ...
 
     def send(self, msg: EmailMessage) -> Any:
+        """ Send ``msg`` or raise an exception if that's not possible """
         ...
 
 
