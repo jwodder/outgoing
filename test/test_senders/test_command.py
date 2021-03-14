@@ -1,4 +1,5 @@
 from email.message import EmailMessage
+import logging
 from pathlib import Path
 import subprocess
 from typing import List, Union
@@ -40,12 +41,14 @@ def test_command_construct(command: Union[str, List[str]], tmp_path: Path) -> No
     ],
 )
 def test_command_send(
+    caplog: pytest.LogCaptureFixture,
     command: Union[str, List[str]],
     shell: bool,
     mocker: MockerFixture,
     test_email1: EmailMessage,
     tmp_path: Path,
 ) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
     m = mocker.patch("subprocess.run")
     sender = from_dict(
         {"method": "command", "command": command}, configpath=tmp_path / "foo.toml"
@@ -61,6 +64,13 @@ def test_command_send(
         stdout=subprocess.PIPE,
         stderr=subprocess.PIPE,
     )
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.command",
+            logging.INFO,
+            f"Sending e-mail {test_email1['Subject']!r} via command {command!r}",
+        )
+    ]
 
 
 @pytest.mark.parametrize(

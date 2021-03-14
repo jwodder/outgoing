@@ -1,4 +1,5 @@
 from email.message import EmailMessage
+import logging
 from mailbox import Babyl
 from pathlib import Path
 from mailbits import email2dict
@@ -26,8 +27,12 @@ def test_babyl_construct(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> Non
 
 
 def test_babyl_send_new_path(
-    monkeypatch: pytest.MonkeyPatch, test_email1: EmailMessage, tmp_path: Path
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    test_email1: EmailMessage,
+    tmp_path: Path,
 ) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
     monkeypatch.chdir(tmp_path)
     sender = from_dict(
         {
@@ -45,6 +50,24 @@ def test_babyl_send_new_path(
     inbox.close()
     assert len(msgs) == 1
     assert email2dict(test_email1) == email2dict(msgs[0])
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.mailboxes",
+            logging.DEBUG,
+            f"Opening Babyl mailbox at {tmp_path/'inbox'}",
+        ),
+        (
+            "outgoing.senders.mailboxes",
+            logging.INFO,
+            f"Adding e-mail {test_email1['Subject']!r} to Babyl mailbox at"
+            f" {tmp_path/'inbox'}",
+        ),
+        (
+            "outgoing.senders.mailboxes",
+            logging.DEBUG,
+            f"Closing Babyl mailbox at {tmp_path/'inbox'}",
+        ),
+    ]
 
 
 def test_babyl_send_extant_path(

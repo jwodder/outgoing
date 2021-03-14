@@ -9,6 +9,7 @@ v0.2.0 (in development)
 - Mark `Sender` as ``runtime_checkable`` and export it
 - Gave the :command:`outgoing` command ``--section`` and ``--no-section``
   options
+- Added logging to built-in sender classes
 
 v0.1.0 (2021-03-06)
 -------------------

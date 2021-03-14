@@ -1,4 +1,5 @@
 from email.message import EmailMessage
+import logging
 from mailbox import Maildir
 from operator import itemgetter
 from pathlib import Path
@@ -33,8 +34,12 @@ def test_maildir_construct(
 
 
 def test_maildir_send_no_folder_new_path(
-    monkeypatch: pytest.MonkeyPatch, test_email1: EmailMessage, tmp_path: Path
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    test_email1: EmailMessage,
+    tmp_path: Path,
 ) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
     monkeypatch.chdir(tmp_path)
     sender = from_dict(
         {
@@ -51,11 +56,33 @@ def test_maildir_send_no_folder_new_path(
     msgs = list(inbox)
     assert len(msgs) == 1
     assert email2dict(test_email1) == email2dict(msgs[0])
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.mailboxes",
+            logging.DEBUG,
+            f"Opening Maildir at {tmp_path/'inbox'}, root folder",
+        ),
+        (
+            "outgoing.senders.mailboxes",
+            logging.INFO,
+            f"Adding e-mail {test_email1['Subject']!r} to Maildir at"
+            f" {tmp_path/'inbox'}, root folder",
+        ),
+        (
+            "outgoing.senders.mailboxes",
+            logging.DEBUG,
+            f"Closing Maildir at {tmp_path/'inbox'}, root folder",
+        ),
+    ]
 
 
 def test_maildir_send_folder_new_path(
-    monkeypatch: pytest.MonkeyPatch, test_email1: EmailMessage, tmp_path: Path
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    test_email1: EmailMessage,
+    tmp_path: Path,
 ) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
     monkeypatch.chdir(tmp_path)
     sender = from_dict(
         {
@@ -73,6 +100,24 @@ def test_maildir_send_folder_new_path(
     msgs = list(work)
     assert len(msgs) == 1
     assert email2dict(test_email1) == email2dict(msgs[0])
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.mailboxes",
+            logging.DEBUG,
+            f"Opening Maildir at {tmp_path/'inbox'}, folder 'work'",
+        ),
+        (
+            "outgoing.senders.mailboxes",
+            logging.INFO,
+            f"Adding e-mail {test_email1['Subject']!r} to Maildir at"
+            f" {tmp_path/'inbox'}, folder 'work'",
+        ),
+        (
+            "outgoing.senders.mailboxes",
+            logging.DEBUG,
+            f"Closing Maildir at {tmp_path/'inbox'}, folder 'work'",
+        ),
+    ]
 
 
 def test_maildir_send_no_folder_extant_path(

@@ -1,9 +1,12 @@
 from email.message import EmailMessage
+import logging
 import subprocess
 from typing import List, Optional, Union
 from pydantic import Field
 from ..config import Path
 from ..util import OpenClosable
+
+log = logging.getLogger(__name__)
 
 
 class CommandSender(OpenClosable):
@@ -19,6 +22,11 @@ class CommandSender(OpenClosable):
         pass
 
     def send(self, msg: EmailMessage) -> None:
+        log.info(
+            "Sending e-mail %r via command %r",
+            msg.get("Subject", "<NO SUBJECT>"),
+            self.command,
+        )
         subprocess.run(
             self.command,
             shell=isinstance(self.command, str),

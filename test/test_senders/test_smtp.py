@@ -1,4 +1,5 @@
 from email.message import EmailMessage
+import logging
 from pathlib import Path
 import smtplib
 from typing import Union
@@ -153,8 +154,9 @@ def test_smtp_construct_negative_port(tmp_path: Path) -> None:
 
 
 def test_smtp_send_no_ssl_no_auth(
-    mocker: MockerFixture, test_email1: EmailMessage
+    caplog: pytest.LogCaptureFixture, mocker: MockerFixture, test_email1: EmailMessage
 ) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
     m = mocker.patch("smtplib.SMTP", autospec=True)
     sender = from_dict({"method": "smtp", "host": "mx.example.com"})
     with sender:
@@ -164,11 +166,29 @@ def test_smtp_send_no_ssl_no_auth(
         mocker.call.send_message(test_email1),
         mocker.call.quit(),
     ]
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Connecting to SMTP server at mx.example.com, port 25",
+        ),
+        (
+            "outgoing.senders.smtp",
+            logging.INFO,
+            f"Sending e-mail {test_email1['Subject']!r} via SMTP",
+        ),
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Closing connection to mx.example.com",
+        ),
+    ]
 
 
 def test_smtp_send_no_ssl_auth(
-    mocker: MockerFixture, test_email1: EmailMessage
+    caplog: pytest.LogCaptureFixture, mocker: MockerFixture, test_email1: EmailMessage
 ) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
     m = mocker.patch("smtplib.SMTP", autospec=True)
     sender = from_dict(
         {
@@ -186,11 +206,30 @@ def test_smtp_send_no_ssl_auth(
         mocker.call.send_message(test_email1),
         mocker.call.quit(),
     ]
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Connecting to SMTP server at mx.example.com, port 25",
+        ),
+        ("outgoing.senders.smtp", logging.DEBUG, "Logging in as 'luser'"),
+        (
+            "outgoing.senders.smtp",
+            logging.INFO,
+            f"Sending e-mail {test_email1['Subject']!r} via SMTP",
+        ),
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Closing connection to mx.example.com",
+        ),
+    ]
 
 
 def test_smtp_send_ssl_no_auth(
-    mocker: MockerFixture, test_email1: EmailMessage
+    caplog: pytest.LogCaptureFixture, mocker: MockerFixture, test_email1: EmailMessage
 ) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
     m = mocker.patch("smtplib.SMTP_SSL", autospec=True)
     sender = from_dict({"method": "smtp", "host": "mx.example.com", "ssl": True})
     with sender:
@@ -200,9 +239,31 @@ def test_smtp_send_ssl_no_auth(
         mocker.call.send_message(test_email1),
         mocker.call.quit(),
     ]
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Connecting to SMTP server at mx.example.com, port 465, using TLS",
+        ),
+        (
+            "outgoing.senders.smtp",
+            logging.INFO,
+            f"Sending e-mail {test_email1['Subject']!r} via SMTP",
+        ),
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Closing connection to mx.example.com",
+        ),
+    ]
 
 
-def test_smtp_send_ssl_auth(mocker: MockerFixture, test_email1: EmailMessage) -> None:
+def test_smtp_send_ssl_auth(
+    caplog: pytest.LogCaptureFixture,
+    mocker: MockerFixture,
+    test_email1: EmailMessage,
+) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
     m = mocker.patch("smtplib.SMTP_SSL", autospec=True)
     sender = from_dict(
         {
@@ -220,6 +281,102 @@ def test_smtp_send_ssl_auth(mocker: MockerFixture, test_email1: EmailMessage) ->
         mocker.call.login("luser", "54321"),
         mocker.call.send_message(test_email1),
         mocker.call.quit(),
+    ]
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Connecting to SMTP server at mx.example.com, port 465, using TLS",
+        ),
+        ("outgoing.senders.smtp", logging.DEBUG, "Logging in as 'luser'"),
+        (
+            "outgoing.senders.smtp",
+            logging.INFO,
+            f"Sending e-mail {test_email1['Subject']!r} via SMTP",
+        ),
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Closing connection to mx.example.com",
+        ),
+    ]
+
+
+def test_smtp_send_starttls_no_auth(
+    caplog: pytest.LogCaptureFixture, mocker: MockerFixture, test_email1: EmailMessage
+) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
+    m = mocker.patch("smtplib.SMTP", autospec=True)
+    sender = from_dict({"method": "smtp", "host": "mx.example.com", "ssl": "starttls"})
+    with sender:
+        sender.send(test_email1)
+    assert m.call_args_list == [mocker.call("mx.example.com", 587)]
+    assert m.return_value.method_calls == [
+        mocker.call.starttls(),
+        mocker.call.send_message(test_email1),
+        mocker.call.quit(),
+    ]
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Connecting to SMTP server at mx.example.com, port 587",
+        ),
+        ("outgoing.senders.smtp", logging.DEBUG, "Enabling STARTTLS"),
+        (
+            "outgoing.senders.smtp",
+            logging.INFO,
+            f"Sending e-mail {test_email1['Subject']!r} via SMTP",
+        ),
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Closing connection to mx.example.com",
+        ),
+    ]
+
+
+def test_smtp_send_starttls_auth(
+    caplog: pytest.LogCaptureFixture, mocker: MockerFixture, test_email1: EmailMessage
+) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
+    m = mocker.patch("smtplib.SMTP", autospec=True)
+    sender = from_dict(
+        {
+            "method": "smtp",
+            "host": "mx.example.com",
+            "username": "luser",
+            "password": "54321",
+            "ssl": "starttls",
+        }
+    )
+    with sender:
+        sender.send(test_email1)
+    assert m.call_args_list == [mocker.call("mx.example.com", 587)]
+    assert m.return_value.method_calls == [
+        mocker.call.starttls(),
+        mocker.call.login("luser", "54321"),
+        mocker.call.send_message(test_email1),
+        mocker.call.quit(),
+    ]
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Connecting to SMTP server at mx.example.com, port 587",
+        ),
+        ("outgoing.senders.smtp", logging.DEBUG, "Enabling STARTTLS"),
+        ("outgoing.senders.smtp", logging.DEBUG, "Logging in as 'luser'"),
+        (
+            "outgoing.senders.smtp",
+            logging.INFO,
+            f"Sending e-mail {test_email1['Subject']!r} via SMTP",
+        ),
+        (
+            "outgoing.senders.smtp",
+            logging.DEBUG,
+            "Closing connection to mx.example.com",
+        ),
     ]
 
 

@@ -1,4 +1,5 @@
 from email.message import EmailMessage
+import logging
 from mailbox import mbox
 from pathlib import Path
 from mailbits import email2dict
@@ -26,8 +27,12 @@ def test_mbox_construct(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None
 
 
 def test_mbox_send_new_path(
-    monkeypatch: pytest.MonkeyPatch, test_email1: EmailMessage, tmp_path: Path
+    caplog: pytest.LogCaptureFixture,
+    monkeypatch: pytest.MonkeyPatch,
+    test_email1: EmailMessage,
+    tmp_path: Path,
 ) -> None:
+    caplog.set_level(logging.DEBUG, logger="outgoing")
     monkeypatch.chdir(tmp_path)
     sender = from_dict(
         {
@@ -47,6 +52,24 @@ def test_mbox_send_new_path(
     msgdict = email2dict(msgs[0])
     msgdict["unixfrom"] = None
     assert email2dict(test_email1) == msgdict
+    assert caplog.record_tuples == [
+        (
+            "outgoing.senders.mailboxes",
+            logging.DEBUG,
+            f"Opening mbox at {tmp_path/'inbox'}",
+        ),
+        (
+            "outgoing.senders.mailboxes",
+            logging.INFO,
+            f"Adding e-mail {test_email1['Subject']!r} to mbox at"
+            f" {tmp_path/'inbox'}",
+        ),
+        (
+            "outgoing.senders.mailboxes",
+            logging.DEBUG,
+            f"Closing mbox at {tmp_path/'inbox'}",
+        ),
+    ]
 
 
 def test_mbox_send_extant_path(
