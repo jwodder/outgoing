@@ -434,6 +434,7 @@ def test_smtp_fix_send_ssl_no_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -
     assert email2dict(test_email1) == msgdict
 
 
+@pytest.mark.skip(reason="Produces PytestUnraisableExceptionWarning on pytest 6.2.3+")
 @pytest.mark.xfail(
     raises=smtplib.SMTPNotSupportedError,
     reason="https://github.com/bebleo/smtpdfix/issues/10",
