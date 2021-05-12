@@ -52,11 +52,13 @@ NO_SECTION = object()
         f"  [default: {DEFAULT_CONFIG_SECTION}]"
     ),
     metavar="KEY",
+    type=click.UNPROCESSED,
 )
 @click.option(
     "--no-section",
     "section",
     flag_value=NO_SECTION,
+    type=click.UNPROCESSED,
     help="Read configuration from the root of the config file",
 )
 @click.argument("message", type=click.File("rb"), nargs=-1)

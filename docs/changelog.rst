@@ -3,6 +3,10 @@
 Changelog
 =========
 
+v0.2.1 (in development)
+-----------------------
+- Support Click 8
+
 v0.2.0 (2021-03-14)
 -------------------
 - Require the ``port`` field of ``SMTPSender`` to be non-negative
