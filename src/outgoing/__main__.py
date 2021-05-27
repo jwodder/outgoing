@@ -35,7 +35,7 @@ NO_SECTION = object()
     "-E",
     "--env",
     type=click.Path(exists=True, dir_okay=False),
-    help="Load environment files from given .env file",
+    help="Load environment variables from given .env file",
 )
 @click.option(
     "-l",
