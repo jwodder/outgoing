@@ -1,6 +1,6 @@
 from collections.abc import Mapping
 import pathlib
-from typing import Any, ClassVar, Dict, Optional, TYPE_CHECKING, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Union
 import pydantic
 from . import core
 from .errors import InvalidPasswordError

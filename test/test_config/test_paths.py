@@ -2,11 +2,7 @@ import pathlib
 from typing import Optional
 from pydantic import BaseModel, ValidationError
 import pytest
-from outgoing.config import (
-    DirectoryPath,
-    FilePath,
-    Path,
-)
+from outgoing.config import DirectoryPath, FilePath, Path
 
 
 class Paths(BaseModel):
