@@ -3,6 +3,10 @@
 Changelog
 =========
 
+v0.2.2 (in development)
+-----------------------
+- Switch from toml to tomli
+
 v0.2.1 (2021-05-12)
 -------------------
 - Support Click 8

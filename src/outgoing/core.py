@@ -10,7 +10,7 @@ from types import TracebackType
 from typing import Any, Mapping, Optional, Tuple, Type, TypeVar, Union, cast
 import appdirs
 import entrypoints
-import toml
+import tomli
 from . import errors
 from .util import AnyPath
 
@@ -91,7 +91,8 @@ def from_config_file(
     data: Any
     try:
         if configpath.suffix == ".toml":
-            data = toml.load(configpath)
+            with configpath.open("r") as fp:
+                data = tomli.load(fp)
         elif configpath.suffix == ".json":
             with configpath.open("r") as fp:
                 data = json.load(fp)
