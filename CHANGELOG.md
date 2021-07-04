@@ -1,3 +1,7 @@
+v0.2.3 (in development)
+-----------------------
+- Read TOML files in UTF-8
+
 v0.2.2 (2021-07-02)
 -------------------
 - Switch from toml to tomli
