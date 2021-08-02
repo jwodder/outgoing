@@ -91,8 +91,8 @@ def from_config_file(
     data: Any
     try:
         if configpath.suffix == ".toml":
-            with configpath.open("r", encoding="utf-8") as fp:
-                data = tomli.load(fp)
+            with configpath.open("rb") as fb:
+                data = tomli.load(fb)
         elif configpath.suffix == ".json":
             with configpath.open("r") as fp:
                 data = json.load(fp)

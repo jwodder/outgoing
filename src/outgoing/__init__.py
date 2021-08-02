@@ -13,7 +13,7 @@ Visit <https://github.com/jwodder/outgoing> or <https://outgoing.rtfd.io> for
 more information.
 """
 
-__version__ = "0.2.3"
+__version__ = "0.2.4.dev1"
 __author__ = "John Thorvald Wodder II"
 __author_email__ = "outgoing@varonathe.org"
 __license__ = "MIT"
