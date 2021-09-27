@@ -3,8 +3,8 @@
 Changelog
 =========
 
-v0.2.5 (in development)
------------------------
+v0.2.5 (2021-09-27)
+-------------------
 - `outgoing.errors.UnsupportedEmailError` is now re-exported as
   `outgoing.UnsupportedEmailError` like all the other exception classes
 
