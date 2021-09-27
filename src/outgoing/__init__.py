@@ -42,6 +42,7 @@ from .errors import (
     InvalidPasswordError,
     MissingConfigError,
     NetrcLookupError,
+    UnsupportedEmailError,
 )
 from .util import OpenClosable, resolve_path
 
@@ -60,6 +61,7 @@ __all__ = [
     "Path",
     "Sender",
     "StandardPassword",
+    "UnsupportedEmailError",
     "from_config_file",
     "from_dict",
     "get_default_configpath",

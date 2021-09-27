@@ -36,15 +36,15 @@ __ https://docs.python.org/3/library/contextlib.html#reusable-context-managers
 Exceptions
 ----------
 
-.. autoexception:: outgoing.errors.Error
+.. autoexception:: Error
     :show-inheritance:
-.. autoexception:: outgoing.errors.InvalidConfigError
+.. autoexception:: InvalidConfigError
     :show-inheritance:
-.. autoexception:: outgoing.errors.InvalidPasswordError
+.. autoexception:: InvalidPasswordError
     :show-inheritance:
-.. autoexception:: outgoing.errors.MissingConfigError
+.. autoexception:: MissingConfigError
     :show-inheritance:
-.. autoexception:: outgoing.errors.NetrcLookupError
+.. autoexception:: NetrcLookupError
     :show-inheritance:
-.. autoexception:: outgoing.errors.UnsupportedEmailError
+.. autoexception:: UnsupportedEmailError
     :show-inheritance:
