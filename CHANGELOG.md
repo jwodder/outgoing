@@ -1,3 +1,8 @@
+v0.2.5 (in development)
+-----------------------
+- `outgoing.errors.UnsupportedEmailError` is now re-exported as
+  `outgoing.UnsupportedEmailError` like all the other exception classes
+
 v0.2.4 (2021-08-02)
 -------------------
 - Update for tomli 1.2.0
