@@ -3,6 +3,10 @@
 Changelog
 =========
 
+In Development
+--------------
+- Support Python 3.10
+
 v0.2.5 (2021-09-27)
 -------------------
 - `outgoing.errors.UnsupportedEmailError` is now re-exported as
