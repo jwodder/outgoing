@@ -9,10 +9,14 @@ import sys
 from types import TracebackType
 from typing import Any, Mapping, Optional, Tuple, Type, TypeVar, Union, cast
 import appdirs
-import entrypoints
 import tomli
 from . import errors
 from .util import AnyPath
+
+if sys.version_info[:2] >= (3, 10):
+    from importlib.metadata import entry_points
+else:
+    from importlib_metadata import entry_points
 
 if sys.version_info[:2] >= (3, 8):
     from typing import Protocol, runtime_checkable
@@ -154,8 +158,8 @@ def from_dict(
         data = dict(data)
         data.pop("configpath", None)
     try:
-        ep = entrypoints.get_single(SENDER_GROUP, method)
-    except entrypoints.NoSuchEntryPoint:
+        ep, *_ = entry_points(group=SENDER_GROUP, name=method)
+    except ValueError:
         raise errors.InvalidConfigError(
             f"Unsupported method {method!r}",
             configpath=configpath,
@@ -200,8 +204,8 @@ def resolve_password(
         )
     ((scheme, spec),) = password.items()
     try:
-        ep = entrypoints.get_single(PASSWORD_SCHEME_GROUP, scheme)
-    except entrypoints.NoSuchEntryPoint:
+        ep, *_ = entry_points(group=PASSWORD_SCHEME_GROUP, name=scheme)
+    except ValueError:
         raise errors.InvalidPasswordError(
             f"Unsupported password scheme {scheme!r}",
             configpath=configpath,

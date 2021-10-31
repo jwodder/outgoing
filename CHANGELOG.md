@@ -1,6 +1,7 @@
 In Development
 --------------
 - Support Python 3.10
+- Replaced `entrypoints` dependency with `importlib-metadata`
 
 v0.2.5 (2021-09-27)
 -------------------
