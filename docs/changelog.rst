@@ -3,8 +3,8 @@
 Changelog
 =========
 
-In Development
---------------
+v0.3.0 (2021-10-31)
+-------------------
 - Support Python 3.10
 - Replaced ``entrypoints`` dependency with ``importlib-metadata``
 - Replaced ``appdirs`` dependency with ``platformdirs``.  This is a
