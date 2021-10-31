@@ -2,6 +2,10 @@ In Development
 --------------
 - Support Python 3.10
 - Replaced `entrypoints` dependency with `importlib-metadata`
+- Replaced `appdirs` dependency with `platformdirs`.  This is a **breaking**
+  change on macOS, where the default configuration path changes from
+  `~/Library/Application Support/outgoing/outgoing.toml` to
+  `~/Library/Preferences/outgoing/outgoing.toml`.
 
 v0.2.5 (2021-09-27)
 -------------------

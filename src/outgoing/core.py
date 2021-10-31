@@ -8,7 +8,7 @@ from pathlib import Path
 import sys
 from types import TracebackType
 from typing import Any, Mapping, Optional, Tuple, Type, TypeVar, Union, cast
-import appdirs
+from platformdirs import user_config_path
 import tomli
 from . import errors
 from .util import AnyPath
@@ -66,7 +66,7 @@ def get_default_configpath() -> Path:
     Returns the location of the default config file (regardless of whether it
     exists) as a `pathlib.Path` object
     """
-    return Path(appdirs.user_config_dir("outgoing", "jwodder"), "outgoing.toml")
+    return user_config_path("outgoing", "jwodder") / "outgoing.toml"
 
 
 def from_config_file(
