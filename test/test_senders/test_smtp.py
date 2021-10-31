@@ -2,8 +2,6 @@ from email.message import EmailMessage
 import logging
 from pathlib import Path
 import smtplib
-import ssl
-import sys
 from typing import Union
 from mailbits import email2dict
 from pydantic import SecretStr
@@ -422,11 +420,6 @@ def test_smtp_fix_send_no_ssl_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -
     assert email2dict(test_email1) == msgdict
 
 
-@pytest.mark.xfail(
-    sys.version_info[:2] >= (3, 10),
-    raises=ssl.SSLError,
-    reason="https://github.com/aio-libs/aiosmtpd/issues/277",
-)
 def test_smtp_fix_send_ssl_no_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -> None:
     smtpd.config.use_ssl = True
     sender = from_dict(
