@@ -33,7 +33,10 @@ def file_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
         )
     filepath = resolve_path(path, configpath)
     try:
-        return filepath.read_text().strip()
+        with open(filepath) as fp:
+            # Open with open() instead of using filepath.read_text() in order
+            # for the error message in PyPy-3.[78] to not include "PosixPath"
+            return fp.read().strip()
     except OSError as e:
         raise InvalidPasswordError(f"Invalid 'file' path: {e}", configpath=configpath)
 
