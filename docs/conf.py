@@ -2,7 +2,7 @@ from outgoing import __version__
 
 project = "outgoing"
 author = "John Thorvald Wodder II"
-copyright = "2021 John Thorvald Wodder II"
+copyright = "2021-2022 John Thorvald Wodder II"
 
 extensions = [
     "sphinx.ext.autodoc",
