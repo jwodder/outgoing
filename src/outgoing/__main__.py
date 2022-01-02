@@ -83,7 +83,7 @@ def main(
         env = find_dotenv(usecwd=True)
     load_dotenv(env)
     logging.basicConfig(
-        format="%(asctime)s [%(levelname)-8s] %(name)s %(message)s",
+        format="%(asctime)s [%(levelname)-8s] %(name)s: %(message)s",
         datefmt="%H:%M:%S",
         level=log_level,
     )
