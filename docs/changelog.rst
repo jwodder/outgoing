@@ -3,8 +3,8 @@
 Changelog
 =========
 
-v0.3.2 (in development)
------------------------
+v0.3.2 (2022-09-03)
+-------------------
 - Overload ``Password.__eq__`` so that instances continue to compare equal to
   ``pydantic.SecretStr`` instances even under pydantic 1.10
 
