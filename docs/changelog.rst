@@ -3,6 +3,11 @@
 Changelog
 =========
 
+v0.3.2 (in development)
+-----------------------
+- Overload ``Password.__eq__`` so that instances continue to compare equal to
+  ``pydantic.SecretStr`` instances even under pydantic 1.10
+
 v0.3.1 (2022-01-02)
 -------------------
 - Support tomli 2.0

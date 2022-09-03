@@ -30,7 +30,7 @@ else:
             yield path_resolve
 
     class FilePath(pydantic.FilePath):
-        """ Like `Path`, but the path must exist and be a file """
+        """Like `Path`, but the path must exist and be a file"""
 
         @classmethod
         def __get_validators__(cls) -> "CallableGenerator":
@@ -38,7 +38,7 @@ else:
             yield from super().__get_validators__()
 
     class DirectoryPath(pydantic.DirectoryPath):
-        """ Like `Path`, but the path must exist and be a directory """
+        """Like `Path`, but the path must exist and be a directory"""
 
         @classmethod
         def __get_validators__(cls) -> "CallableGenerator":
@@ -130,6 +130,12 @@ class Password(pydantic.SecretStr):
 
     host: ClassVar[Any] = None
     username: ClassVar[Any] = None
+
+    def __eq__(self, other: Any) -> bool:
+        if isinstance(other, pydantic.SecretStr):
+            return self.get_secret_value() == other.get_secret_value()
+        else:
+            return NotImplemented
 
     def __init_subclass__(cls) -> None:
         if (
