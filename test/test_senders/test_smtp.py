@@ -7,7 +7,7 @@ from mailbits import email2dict
 from pydantic import SecretStr
 import pytest
 from pytest_mock import MockerFixture
-from smtpdfix import SMTPDFix
+from smtpdfix import AuthController
 from outgoing import Sender, from_dict
 from outgoing.errors import InvalidConfigError
 from outgoing.senders.smtp import SMTPSender
@@ -385,7 +385,7 @@ def test_smtp_send_starttls_auth(
 
 
 def test_smtp_fix_send_no_ssl_no_auth(
-    smtpd: SMTPDFix, test_email1: EmailMessage
+    smtpd: AuthController, test_email1: EmailMessage
 ) -> None:
     sender = from_dict({"method": "smtp", "host": smtpd.hostname, "port": smtpd.port})
     with sender:
@@ -397,7 +397,9 @@ def test_smtp_fix_send_no_ssl_no_auth(
     assert email2dict(test_email1) == msgdict
 
 
-def test_smtp_fix_send_no_ssl_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -> None:
+def test_smtp_fix_send_no_ssl_auth(
+    smtpd: AuthController, test_email1: EmailMessage
+) -> None:
     smtpd.config.enforce_auth = True
     smtpd.config.auth_require_tls = False
     smtpd.config.login_username = "luser"
@@ -420,7 +422,9 @@ def test_smtp_fix_send_no_ssl_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -
     assert email2dict(test_email1) == msgdict
 
 
-def test_smtp_fix_send_ssl_no_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -> None:
+def test_smtp_fix_send_ssl_no_auth(
+    smtpd: AuthController, test_email1: EmailMessage
+) -> None:
     smtpd.config.use_ssl = True
     sender = from_dict(
         {"method": "smtp", "host": smtpd.hostname, "port": smtpd.port, "ssl": True}
@@ -440,7 +444,7 @@ def test_smtp_fix_send_ssl_no_auth(smtpd: SMTPDFix, test_email1: EmailMessage) -
     reason="https://github.com/bebleo/smtpdfix/issues/10",
 )
 def test_smtp_fix_send_ssl_auth(
-    smtpd: SMTPDFix,
+    smtpd: AuthController,
     test_email1: EmailMessage,
 ) -> None:
     smtpd.config.enforce_auth = True
@@ -467,7 +471,7 @@ def test_smtp_fix_send_ssl_auth(
 
 
 def test_smtp_fix_send_starttls_no_auth(
-    smtpd: SMTPDFix, test_email1: EmailMessage
+    smtpd: AuthController, test_email1: EmailMessage
 ) -> None:
     smtpd.config.use_starttls = True
     sender = from_dict(
@@ -488,7 +492,7 @@ def test_smtp_fix_send_starttls_no_auth(
 
 
 def test_smtp_fix_send_starttls_auth(
-    smtpd: SMTPDFix, test_email1: EmailMessage
+    smtpd: AuthController, test_email1: EmailMessage
 ) -> None:
     smtpd.config.use_starttls = True
     smtpd.config.enforce_auth = True
