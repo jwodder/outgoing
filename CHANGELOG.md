@@ -1,3 +1,7 @@
+v0.4.0 (in development)
+-----------------------
+- Drop support for Python 3.6
+
 v0.3.2 (2022-09-03)
 -------------------
 - Overload `Password.__eq__` so that instances continue to compare equal to
