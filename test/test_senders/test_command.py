@@ -1,8 +1,8 @@
+from __future__ import annotations
 from email.message import EmailMessage
 import logging
 from pathlib import Path
 import subprocess
-from typing import List, Union
 import pytest
 from pytest_mock import MockerFixture
 from outgoing import Sender, from_dict
@@ -22,7 +22,7 @@ def test_command_construct_default(tmp_path: Path) -> None:
 @pytest.mark.parametrize(
     "command", ["~/my/command --option", ["~/my/command", "--option"]]
 )
-def test_command_construct(command: Union[str, List[str]], tmp_path: Path) -> None:
+def test_command_construct(command: str | list[str], tmp_path: Path) -> None:
     sender = from_dict(
         {"method": "command", "command": command}, configpath=tmp_path / "foo.toml"
     )
@@ -42,7 +42,7 @@ def test_command_construct(command: Union[str, List[str]], tmp_path: Path) -> No
 )
 def test_command_send(
     caplog: pytest.LogCaptureFixture,
-    command: Union[str, List[str]],
+    command: str | list[str],
     shell: bool,
     mocker: MockerFixture,
     test_email1: EmailMessage,
@@ -81,7 +81,7 @@ def test_command_send(
     ],
 )
 def test_command_send_no_context(
-    command: Union[str, List[str]],
+    command: str | list[str],
     shell: bool,
     mocker: MockerFixture,
     test_email1: EmailMessage,

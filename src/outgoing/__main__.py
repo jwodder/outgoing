@@ -1,7 +1,8 @@
+from __future__ import annotations
 from email import message_from_binary_file, policy
 from email.message import EmailMessage
 import logging
-from typing import Any, IO, List, Optional
+from typing import Any, IO, Optional
 import click
 from click_loglevel import LogLevel
 from dotenv import find_dotenv, load_dotenv
@@ -65,7 +66,7 @@ NO_SECTION = object()
 @click.pass_context
 def main(
     ctx: click.Context,
-    message: List[IO[bytes]],
+    message: list[IO[bytes]],
     config: Optional[str],
     section: Any,
     log_level: int,

@@ -1,8 +1,9 @@
+from __future__ import annotations
 from email.message import EmailMessage
 import logging
 import smtplib
 import sys
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from pydantic import Field, PrivateAttr, validator
 from ..config import NetrcConfig
 from ..util import OpenClosable
@@ -24,7 +25,7 @@ class SMTPSender(NetrcConfig, OpenClosable):
 
     @validator("port", always=True)
     def _set_default_port(
-        cls, v: Any, values: Dict[str, Any]  # noqa: B902, U100
+        cls, v: Any, values: dict[str, Any]  # noqa: B902, U100
     ) -> Any:
         if v == 0:
             ssl = values.get("ssl")

@@ -1,9 +1,9 @@
+from __future__ import annotations
 from email.message import EmailMessage
 import logging
 from mailbox import MH
 from operator import itemgetter
 from pathlib import Path
-from typing import List, Union
 from mailbits import email2dict
 import pytest
 from outgoing import Sender, from_dict
@@ -12,7 +12,7 @@ from outgoing.senders.mailboxes import MHSender
 
 @pytest.mark.parametrize("folder", [None, "work", ["important", "work"]])
 def test_mh_construct(
-    folder: Union[str, List[str], None], monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    folder: str | list[str] | None, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.chdir(tmp_path)
     sender = from_dict(

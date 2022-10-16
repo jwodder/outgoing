@@ -1,8 +1,9 @@
+from __future__ import annotations
 from abc import ABC, abstractmethod
 import os
 from pathlib import Path
 from types import TracebackType
-from typing import Optional, Type, TypeVar, Union
+from typing import Optional, TypeVar, Union
 from pydantic import BaseModel, PrivateAttr
 
 AnyPath = Union[str, bytes, "os.PathLike[str]", "os.PathLike[bytes]"]
@@ -40,7 +41,7 @@ class OpenClosable(ABC, BaseModel):
 
     def __exit__(
         self,
-        _exc_type: Optional[Type[BaseException]],
+        _exc_type: Optional[type[BaseException]],
         _exc_val: Optional[BaseException],
         _exc_tb: Optional[TracebackType],
     ) -> None:

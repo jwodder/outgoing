@@ -1,6 +1,7 @@
+from __future__ import annotations
 from collections.abc import Mapping
 import pathlib
-from typing import TYPE_CHECKING, Any, ClassVar, Dict, Optional, Union
+from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union
 import pydantic
 from . import core
 from .errors import InvalidPasswordError
@@ -26,14 +27,14 @@ else:
         """
 
         @classmethod
-        def __get_validators__(cls) -> "CallableGenerator":
+        def __get_validators__(cls) -> CallableGenerator:
             yield path_resolve
 
     class FilePath(pydantic.FilePath):
         """Like `Path`, but the path must exist and be a file"""
 
         @classmethod
-        def __get_validators__(cls) -> "CallableGenerator":
+        def __get_validators__(cls) -> CallableGenerator:
             yield path_resolve
             yield from super().__get_validators__()
 
@@ -41,7 +42,7 @@ else:
         """Like `Path`, but the path must exist and be a directory"""
 
         @classmethod
-        def __get_validators__(cls) -> "CallableGenerator":
+        def __get_validators__(cls) -> CallableGenerator:
             yield path_resolve
             yield from super().__get_validators__()
 
@@ -94,7 +95,7 @@ class Password(pydantic.SecretStr):
             host = "service"
 
             @staticmethod
-            def username(values: Dict[str, Any]) -> str:
+            def username(values: dict[str, Any]) -> str:
                 return "__token__"
 
     and then use it in your model like so:
@@ -152,12 +153,12 @@ class Password(pydantic.SecretStr):
             raise RuntimeError("Password.username must be a str, callable, or None")
 
     @classmethod
-    def __get_validators__(cls) -> "CallableGenerator":
+    def __get_validators__(cls) -> CallableGenerator:
         yield cls._resolve
         yield from super().__get_validators__()
 
     @classmethod
-    def _resolve(cls, v: Any, values: Dict[str, Any]) -> str:
+    def _resolve(cls, v: Any, values: dict[str, Any]) -> str:
         if not isinstance(v, (str, Mapping)):
             raise ValueError(
                 "Password must be either a string or an object with exactly one field"
@@ -199,7 +200,7 @@ class Password(pydantic.SecretStr):
             raise ValueError(e.details)
 
 
-def path_resolve(v: AnyPath, values: Dict[str, Any]) -> pathlib.Path:
+def path_resolve(v: AnyPath, values: dict[str, Any]) -> pathlib.Path:
     return resolve_path(v, values.get("configpath"))
 
 
@@ -242,7 +243,7 @@ class NetrcConfig(pydantic.BaseModel):
     password: Optional[StandardPassword]
 
     @pydantic.root_validator(skip_on_failure=True)
-    def _validate(cls, values: Dict[str, Any]) -> Dict[str, Any]:  # noqa: B902, U100
+    def _validate(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: B902, U100
         if values["password"] is not None:
             if values["netrc"]:
                 raise ValueError("netrc cannot be set when a password is present")

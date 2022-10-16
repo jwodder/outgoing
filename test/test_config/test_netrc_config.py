@@ -1,5 +1,6 @@
+from __future__ import annotations
 from pathlib import Path
-from typing import Optional, Union
+from typing import Optional
 from unittest.mock import sentinel
 from pydantic import SecretStr, ValidationError
 import pytest
@@ -147,7 +148,7 @@ def test_netrc_config_password_no_username(mocker: MockerFixture) -> None:
 def test_netrc_config_password_netrc(
     mocker: MockerFixture,
     monkeypatch: pytest.MonkeyPatch,
-    netrc: Union[bool, str],
+    netrc: bool | str,
     tmp_path: Path,
 ) -> None:
     m = mocker.patch(

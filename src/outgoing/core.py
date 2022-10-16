@@ -1,4 +1,5 @@
-from collections.abc import Mapping as MappingABC
+from __future__ import annotations
+from collections.abc import Mapping
 from email.message import EmailMessage
 import inspect
 import json
@@ -7,7 +8,7 @@ import os
 from pathlib import Path
 import sys
 from types import TracebackType
-from typing import Any, Mapping, Optional, Tuple, Type, TypeVar, Union, cast
+from typing import Any, Optional, TypeVar, cast
 from platformdirs import user_config_path
 import tomli
 from . import errors
@@ -50,14 +51,14 @@ class Sender(Protocol):
 
     def __exit__(
         self,
-        exc_type: Optional[Type[BaseException]],
+        exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
     ) -> Optional[bool]:
         ...
 
     def send(self, msg: EmailMessage) -> Any:
-        """ Send ``msg`` or raise an exception if that's not possible """
+        """Send ``msg`` or raise an exception if that's not possible"""
         ...
 
 
@@ -108,7 +109,7 @@ def from_config_file(
     except FileNotFoundError:
         data = None
     if data is not None and section is not None:
-        if not isinstance(data, MappingABC):
+        if not isinstance(data, Mapping):
             raise errors.InvalidConfigError(
                 "Top-level structure must be a dict/object",
                 configpath=configpath,
@@ -123,7 +124,7 @@ def from_config_file(
                 raise e
         else:
             raise errors.MissingConfigError([configpath])
-    if not isinstance(data, MappingABC):
+    if not isinstance(data, Mapping):
         raise errors.InvalidConfigError(
             "Section must be a dict/object",
             configpath=configpath,
@@ -176,10 +177,10 @@ def from_dict(
 
 
 def resolve_password(
-    password: Union[str, Mapping[str, Any]],
+    password: str | Mapping[str, Any],
     host: Optional[str] = None,
     username: Optional[str] = None,
-    configpath: Union[str, Path, None] = None,
+    configpath: str | Path | None = None,
 ) -> str:
     """
     Resolve a configuration password value.  If ``password`` is a string, it is
@@ -238,7 +239,7 @@ def resolve_password(
 
 def lookup_netrc(
     host: str, username: Optional[str] = None, path: Optional[AnyPath] = None
-) -> Tuple[str, str]:
+) -> tuple[str, str]:
     """
     Look up the entry for ``host`` in the netrc file at ``path`` (default:
     :file:`~/.netrc`) and return a pair of the username & password.  If

@@ -1,16 +1,18 @@
+from __future__ import annotations
+from collections.abc import Sequence
 import os
-from typing import List, Optional, Sequence
+from typing import Optional
 from .util import AnyPath
 
 
 class Error(Exception):
-    """ The superclass for all exceptions raised by ``outgoing`` """
+    """The superclass for all exceptions raised by ``outgoing``"""
 
     pass
 
 
 class InvalidConfigError(Error):
-    """ Raised on encountering an invalid configuration structure """
+    """Raised on encountering an invalid configuration structure"""
 
     def __init__(self, details: str, configpath: Optional[AnyPath] = None):
         #: A message about the error
@@ -47,7 +49,7 @@ class MissingConfigError(Error):
 
     def __init__(self, configpaths: Sequence[AnyPath]):
         #: Paths to the configfiles searched for configuration
-        self.configpaths: List[AnyPath] = list(configpaths)
+        self.configpaths: list[AnyPath] = list(configpaths)
 
     def __str__(self) -> str:
         return "outgoing configuration not found in files: " + ", ".join(

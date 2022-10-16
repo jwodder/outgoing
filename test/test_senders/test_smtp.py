@@ -1,8 +1,8 @@
+from __future__ import annotations
 from email.message import EmailMessage
 import logging
 from pathlib import Path
 import smtplib
-from typing import Union
 from mailbits import email2dict
 from pydantic import SecretStr
 import pytest
@@ -119,7 +119,7 @@ def test_smtp_construct_starttls(tmp_path: Path) -> None:
 
 
 @pytest.mark.parametrize("ssl", [False, True, "starttls"])
-def test_smtp_construct_explicit_port(ssl: Union[bool, str], tmp_path: Path) -> None:
+def test_smtp_construct_explicit_port(ssl: bool | str, tmp_path: Path) -> None:
     sender = from_dict(
         {
             "method": "smtp",

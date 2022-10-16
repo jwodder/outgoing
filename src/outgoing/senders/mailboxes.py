@@ -1,3 +1,4 @@
+from __future__ import annotations
 from abc import abstractmethod
 from email.message import EmailMessage
 import logging
@@ -88,7 +89,7 @@ class MHSender(MailboxSender):
     def _makebox(self) -> mailbox.MH:
         box = mailbox.MH(self.path)
         if self.folder is not None:
-            folders: List[str]
+            folders: list[str]
             if isinstance(self.folder, str):
                 folders = [self.folder]
             else:

@@ -1,5 +1,6 @@
+from __future__ import annotations
 from pathlib import Path
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from pydantic import BaseModel, SecretStr, ValidationError
 import pytest
 from pytest_mock import MockerFixture
@@ -90,11 +91,11 @@ def test_standard_password_invalid_username(mocker: MockerFixture) -> None:
 
 class Password02(Password):
     @classmethod
-    def host(cls, _values: Dict[str, Any]) -> str:
+    def host(cls, _values: dict[str, Any]) -> str:
         return "api.example.com"
 
     @classmethod
-    def username(cls, _values: Dict[str, Any]) -> str:
+    def username(cls, _values: dict[str, Any]) -> str:
         return "mylogin"
 
 
@@ -127,11 +128,11 @@ def test_password_constant_fields(mocker: MockerFixture) -> None:
 
 class Password03(Password):
     @classmethod
-    def host(cls, values: Dict[str, Any]) -> str:
+    def host(cls, values: dict[str, Any]) -> str:
         return f"http:{values['host']}"
 
     @classmethod
-    def username(cls, values: Dict[str, Any]) -> str:
+    def username(cls, values: dict[str, Any]) -> str:
         return f"{values['username']}@{values['host']}"
 
 
@@ -203,7 +204,7 @@ def test_password_bad_username() -> None:
 
 class HostErrorPassword(Password):
     @classmethod
-    def host(cls, _values: Dict[str, Any]) -> None:
+    def host(cls, _values: dict[str, Any]) -> None:
         raise RuntimeError("Invalid host method")
 
 
@@ -222,7 +223,7 @@ def test_host_error_password(mocker: MockerFixture) -> None:
 
 class UsernameErrorPassword(Password):
     @classmethod
-    def username(cls, _values: Dict[str, Any]) -> None:
+    def username(cls, _values: dict[str, Any]) -> None:
         raise RuntimeError("Invalid username method")
 
 
