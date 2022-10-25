@@ -6,6 +6,7 @@ Changelog
 v0.4.0 (in development)
 -----------------------
 - Drop support for Python 3.6
+- Support Python 3.11
 
 v0.3.2 (2022-09-03)
 -------------------
