@@ -3,6 +3,8 @@ from email.message import EmailMessage
 import logging
 from pathlib import Path
 import smtplib
+import ssl
+import sys
 from mailbits import email2dict
 from pydantic import SecretStr
 import pytest
@@ -470,6 +472,11 @@ def test_smtp_fix_send_ssl_auth(
     assert email2dict(test_email1) == msgdict
 
 
+@pytest.mark.xfail(
+    sys.version_info[:2] >= (3, 11),
+    raises=ssl.SSLEOFError,
+    reason="https://github.com/bebleo/smtpdfix/issues/227",
+)
 def test_smtp_fix_send_starttls_no_auth(
     smtpd: AuthController, test_email1: EmailMessage
 ) -> None:
@@ -491,6 +498,11 @@ def test_smtp_fix_send_starttls_no_auth(
     assert email2dict(test_email1) == msgdict
 
 
+@pytest.mark.xfail(
+    sys.version_info[:2] >= (3, 11),
+    raises=ssl.SSLEOFError,
+    reason="https://github.com/bebleo/smtpdfix/issues/227",
+)
 def test_smtp_fix_send_starttls_auth(
     smtpd: AuthController, test_email1: EmailMessage
 ) -> None:
