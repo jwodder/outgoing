@@ -10,9 +10,13 @@ import sys
 from types import TracebackType
 from typing import Any, Optional, TypeVar, cast
 from platformdirs import user_config_path
-import tomli
 from . import errors
 from .util import AnyPath
+
+if sys.version_info[:2] >= (3, 11):
+    from tomllib import load as toml_load
+else:
+    from tomli import load as toml_load
 
 if sys.version_info[:2] >= (3, 10):
     from importlib.metadata import entry_points
@@ -97,7 +101,7 @@ def from_config_file(
     try:
         if configpath.suffix == ".toml":
             with configpath.open("rb") as fb:
-                data = tomli.load(fb)
+                data = toml_load(fb)
         elif configpath.suffix == ".json":
             with configpath.open("r") as fp:
                 data = json.load(fp)
