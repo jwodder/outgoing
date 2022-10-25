@@ -260,14 +260,13 @@ def lookup_netrc(
         raise errors.NetrcLookupError(
             f"No entry for {host!r} or default found in netrc file"
         )
-    elif username is not None and auth[0] != username:
+    elif username not in (None, "") and auth[0] != username:
         raise errors.NetrcLookupError(
             f"Username mismatch in netrc: expected {username!r},"
             f" but netrc says {auth[0]!r}"
         )
     password = auth[2]
-    if password is None:  # pragma: no cover
-        # mypy says this can happen, but the actual implementation in CPython
-        # says otherwise.
+    if password in (None, ""):
         raise errors.NetrcLookupError("No password given in netrc entry")
+    assert password is not None
     return (auth[0], password)
