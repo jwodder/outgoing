@@ -1,5 +1,6 @@
 from netrc import NetrcParseError
 from pathlib import Path
+import sys
 from typing import Optional
 import pytest
 from outgoing import lookup_netrc
@@ -58,7 +59,8 @@ def test_lookup_netrc_no_match(tmp_home: Path, username: Optional[str]) -> None:
 
 
 @pytest.mark.xfail(
-    reason="Tests something that mypy says can happen but doesn't happen in CPython",
+    sys.version_info[:2] < (3, 11),
+    reason="Only happens on Python 3.11+",
     raises=NetrcParseError,
 )
 @pytest.mark.parametrize("username", [None, "myname"])
