@@ -1,5 +1,5 @@
-v0.5.0 (in development)
------------------------
+v0.5.0 (2023-02-09)
+-------------------
 - Update `platformdirs` dependency to v3.  This is a **breaking** change on
   macOS, where the default configuration path changes from
   `~/Library/Preferences/outgoing/outgoing.toml` back to `~/Library/Application
