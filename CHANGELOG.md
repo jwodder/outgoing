@@ -1,3 +1,10 @@
+v0.5.0 (in development)
+-----------------------
+- Update `platformdirs` dependency to v3.  This is a **breaking** change on
+  macOS, where the default configuration path changes from
+  `~/Library/Preferences/outgoing/outgoing.toml` back to `~/Library/Application
+  Support/outgoing/outgoing.toml`.
+
 v0.4.0 (2022-10-25)
 -------------------
 - Drop support for Python 3.6
