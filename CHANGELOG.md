@@ -1,3 +1,7 @@
+v0.6.0 (in development)
+-----------------------
+- Support python-dotenv v1.0
+
 v0.5.0 (2023-02-09)
 -------------------
 - Update `platformdirs` dependency to v3.  This is a **breaking** change on
