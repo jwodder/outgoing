@@ -103,7 +103,7 @@ def from_config_file(
             with configpath.open("rb") as fb:
                 data = toml_load(fb)
         elif configpath.suffix == ".json":
-            with configpath.open("r") as fp:
+            with configpath.open("r", encoding="utf-8") as fp:
                 data = json.load(fp)
         else:
             raise errors.InvalidConfigError(

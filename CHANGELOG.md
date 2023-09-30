@@ -1,6 +1,8 @@
 v0.6.0 (in development)
 -----------------------
 - Support python-dotenv v1.0
+- Always read JSON configuration files using UTF-8 encoding
+- Always read files for the "file" password method using UTF-8 encoding
 
 v0.5.0 (2023-02-09)
 -------------------
