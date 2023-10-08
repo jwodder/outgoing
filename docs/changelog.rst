@@ -9,6 +9,7 @@ v0.6.0 (in development)
 - Always read JSON configuration files using UTF-8 encoding
 - Always read files for the "file" password method using UTF-8 encoding
 - Support Python 3.12
+- Correct the default Linux config file location listed in the README
 
 v0.5.0 (2023-02-09)
 -------------------

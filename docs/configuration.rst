@@ -12,25 +12,18 @@ TOML, and its location depends on your OS:
 
 .. _TOML: https://toml.io
 
-=======  ====================================================================
-Linux    :file:`~/.local/share/outgoing/outgoing.toml`
-         or :file:`$XDG_DATA_HOME/outgoing/outgoing.toml`
+=======  =======================================================================
+Linux    :file:`~/.config/outgoing/outgoing.toml`
+         or :file:`$XDG_CONFIG_HOME/outgoing/outgoing.toml`
 macOS    :file:`~/Library/Application Support/outgoing/outgoing.toml`
-Windows  :file:`C:\\Users\\<username>\\AppData\\Local\\jwodder\\outgoing\\outgoing.toml`
-=======  ====================================================================
-
-.. versionchanged:: 0.3.0
-
-    Due to a switch from ``appdirs`` to ``platformdirs``, the default
-    configuration path on macOS changed from :file:`~/Library/Application
-    Support/outgoing/outgoing.toml` to
-    :file:`~/Library/Preferences/outgoing/outgoing.toml`.
+Windows  :file:`%USERPROFILE%\\AppData\\Local\\jwodder\\outgoing\\outgoing.toml`
+=======  =======================================================================
 
 .. versionchanged:: 0.5.0
 
     Due to an upgrade to v3 of ``platformdirs``, the default configuration path
     on macOS changed from :file:`~/Library/Preferences/outgoing/outgoing.toml`
-    back to :file:`~/Library/Application Support/outgoing/outgoing.toml`.
+    to :file:`~/Library/Application Support/outgoing/outgoing.toml`.
 
 To find the exact path on your system, after installing ``outgoing``, run::
 
