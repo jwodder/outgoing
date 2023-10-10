@@ -68,7 +68,7 @@ def test_main_custom_section(mocker: MockerFixture, test_email1: EmailMessage) -
     runner = CliRunner()
     with runner.isolated_filesystem():
         Path("cfg.toml").write_text(
-            "[outgoing]\n" 'method = "command"\n' "\n" "[test]\n" 'method = "null"\n'
+            '[outgoing]\nmethod = "command"\n\n[test]\nmethod = "null"\n'
         )
         r = runner.invoke(
             main,
