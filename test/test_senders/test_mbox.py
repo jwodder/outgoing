@@ -19,7 +19,7 @@ def test_mbox_construct(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) -> None
     )
     assert isinstance(sender, Sender)
     assert isinstance(sender, MboxSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.txt",
         "path": tmp_path / "inbox",
     }

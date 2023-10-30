@@ -207,23 +207,23 @@ def test_keyring_path_relative_to_configpath(tmp_path: Path) -> None:
 def test_keyring_no_service() -> None:
     with pytest.raises(InvalidPasswordError) as excinfo:
         resolve_password({"keyring": {"username": "luser"}})
-    assert str(excinfo.value) == (
+    assert (
         "Invalid password configuration: Invalid 'keyring' password specifier: "
         "1 validation error for KeyringSpec\n"
         "service\n"
-        "  none is not an allowed value (type=type_error.none.not_allowed)"
-    )
+        "  Input should be a valid string"
+    ) in str(excinfo.value)
 
 
 def test_keyring_no_username() -> None:
     with pytest.raises(InvalidPasswordError) as excinfo:
         resolve_password({"keyring": {"service": "api.example.com"}})
-    assert str(excinfo.value) == (
+    assert (
         "Invalid password configuration: Invalid 'keyring' password specifier:"
         " 1 validation error for KeyringSpec\n"
         "username\n"
-        "  none is not an allowed value (type=type_error.none.not_allowed)"
-    )
+        "  Input should be a valid string"
+    ) in str(excinfo.value)
 
 
 def test_keyring_nonexistent_keyring_path(tmp_path: Path) -> None:
@@ -238,13 +238,12 @@ def test_keyring_nonexistent_keyring_path(tmp_path: Path) -> None:
                 }
             }
         )
-    assert str(excinfo.value) == (
+    assert (
         "Invalid password configuration: Invalid 'keyring' password specifier:"
         " 1 validation error for KeyringSpec\n"
         "keyring-path\n"
-        f'  file or directory at path "{keyring_path}" does not exist'
-        f" (type=value_error.path.not_exists; path={keyring_path})"
-    )
+        "  Path does not point to a directory"
+    ) in str(excinfo.value)
 
 
 def test_keyring_path_relative_to_configpath_ignore_spec_configpath(

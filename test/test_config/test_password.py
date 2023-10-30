@@ -244,7 +244,7 @@ class OptionalPasswordConfig(BaseModel):
     configpath: Path
     host: str
     username: str
-    password: Optional[StandardPassword]
+    password: Optional[StandardPassword] = None
 
 
 def test_none_optional_password(mocker: MockerFixture) -> None:
@@ -255,7 +255,7 @@ def test_none_optional_password(mocker: MockerFixture) -> None:
         username="me",
         password=None,
     )
-    assert cfg.dict() == {
+    assert cfg.model_dump() == {
         "configpath": Path("foo/bar"),
         "host": "example.com",
         "username": "me",

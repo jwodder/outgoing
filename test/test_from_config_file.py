@@ -13,7 +13,7 @@ def test_from_default_config_file(tmp_home: Path) -> None:
     defconf.write_text('[outgoing]\nmethod = "mbox"\npath = "inbox"\n')
     sender = from_config_file()
     assert isinstance(sender, MboxSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": defconf,
         "path": defconf.with_name("inbox"),
     }
@@ -27,7 +27,7 @@ def test_from_custom_config_file(tmp_home: Path) -> None:
     myconf.write_text('[outgoing]\nmethod = "maildir"\npath = "dirmail"\n')
     sender = from_config_file(myconf)
     assert isinstance(sender, MaildirSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": myconf,
         "path": tmp_home / "dirmail",
         "folder": None,
@@ -40,7 +40,7 @@ def test_from_nonexistent_custom_config_file(tmp_home: Path) -> None:
     defconf.write_text('[outgoing]\nmethod = "mbox"\npath = "inbox"\n')
     sender = from_config_file(tmp_home / "foo.toml")
     assert isinstance(sender, MboxSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": defconf,
         "path": defconf.with_name("inbox"),
     }
@@ -91,7 +91,7 @@ def test_from_custom_json_config_file(tmp_path: Path) -> None:
         )
     sender = from_config_file(myconf)
     assert isinstance(sender, MaildirSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": myconf,
         "path": tmp_path / "dirmail",
         "folder": None,
@@ -119,7 +119,7 @@ def test_from_custom_section(tmp_path: Path) -> None:
     )
     sender = from_config_file(tmp_path / "foo.toml", section="sender")
     assert isinstance(sender, MaildirSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.toml",
         "path": tmp_path / "dirmail",
         "folder": None,
@@ -137,7 +137,7 @@ def test_from_none_section(tmp_path: Path) -> None:
     )
     sender = from_config_file(tmp_path / "foo.toml", section=None)
     assert isinstance(sender, MaildirSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.toml",
         "path": tmp_path / "dirmail",
         "folder": None,
@@ -153,7 +153,7 @@ def test_from_no_section_custom_config_file(tmp_home: Path) -> None:
     )
     sender = from_config_file(tmp_home / "foo.toml")
     assert isinstance(sender, MboxSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": defconf,
         "path": defconf.with_name("inbox"),
     }

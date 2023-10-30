@@ -30,7 +30,7 @@ def test_smtp_construct_default_ssl(
     )
     assert isinstance(sender, Sender)
     assert isinstance(sender, SMTPSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.txt",
         "host": "mx.example.com",
         "username": "me",
@@ -55,7 +55,7 @@ def test_smtp_construct_no_ssl(monkeypatch: pytest.MonkeyPatch, tmp_path: Path) 
         configpath=str(tmp_path / "foo.txt"),
     )
     assert isinstance(sender, SMTPSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.txt",
         "host": "mx.example.com",
         "username": "me",
@@ -80,7 +80,7 @@ def test_smtp_construct_ssl(tmp_path: Path) -> None:
         configpath=str(tmp_path / "foo.txt"),
     )
     assert isinstance(sender, SMTPSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.txt",
         "host": "mx.example.com",
         "username": "me",
@@ -106,7 +106,7 @@ def test_smtp_construct_starttls(tmp_path: Path) -> None:
         configpath=str(tmp_path / "foo.txt"),
     )
     assert isinstance(sender, SMTPSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.txt",
         "host": "mx.example.com",
         "username": "me",
@@ -130,7 +130,7 @@ def test_smtp_construct_explicit_port(ssl: bool | str, tmp_path: Path) -> None:
         configpath=str(tmp_path / "foo.txt"),
     )
     assert isinstance(sender, SMTPSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.txt",
         "host": "mx.example.com",
         "username": None,

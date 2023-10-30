@@ -3,12 +3,13 @@ from abc import ABC, abstractmethod
 import os
 from pathlib import Path
 from types import TracebackType
-from typing import Optional, TypeVar, Union
+from typing import TYPE_CHECKING, Optional, Union
 from pydantic import BaseModel, PrivateAttr
 
-AnyPath = Union[str, bytes, "os.PathLike[str]", "os.PathLike[bytes]"]
+if TYPE_CHECKING:
+    from typing_extensions import Self
 
-OC = TypeVar("OC", bound="OpenClosable")
+AnyPath = Union[str, bytes, "os.PathLike[str]", "os.PathLike[bytes]"]
 
 
 class OpenClosable(ABC, BaseModel):
@@ -33,7 +34,7 @@ class OpenClosable(ABC, BaseModel):
     def close(self) -> None:
         ...
 
-    def __enter__(self: OC) -> OC:
+    def __enter__(self) -> Self:
         if self._context_depth == 0:
             self.open()
         self._context_depth += 1

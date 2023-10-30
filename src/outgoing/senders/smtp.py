@@ -3,8 +3,8 @@ from email.message import EmailMessage
 import logging
 import smtplib
 import sys
-from typing import Any, Optional
-from pydantic import Field, PrivateAttr, validator
+from typing import Optional
+from pydantic import Field, PrivateAttr, ValidationInfo, field_validator
 from ..config import NetrcConfig
 from ..util import OpenClosable
 
@@ -20,15 +20,14 @@ log = logging.getLogger(__name__)
 
 class SMTPSender(NetrcConfig, OpenClosable):
     ssl: Literal[False, True, "starttls"] = False
-    port: int = Field(0, ge=0)
+    port: int = Field(0, ge=0, validate_default=True)
     _client: Optional[smtplib.SMTP] = PrivateAttr(None)
 
-    @validator("port", always=True)
-    def _set_default_port(
-        cls, v: Any, values: dict[str, Any]  # noqa: B902, U100
-    ) -> Any:
+    @field_validator("port")
+    @classmethod
+    def _set_default_port(cls, v: int, info: ValidationInfo) -> int:
         if v == 0:
-            ssl = values.get("ssl")
+            ssl = info.data.get("ssl")
             if ssl is True:
                 return 465
             elif ssl == STARTTLS:

@@ -5,6 +5,7 @@ v0.6.0 (in development)
 - Always read files for the "file" password method using UTF-8 encoding
 - Support Python 3.12
 - Correct the default Linux config file location listed in the README
+- Update pydantic to v2.0
 
 v0.5.0 (2023-02-09)
 -------------------

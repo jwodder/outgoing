@@ -13,7 +13,7 @@ def test_command_construct_default(tmp_path: Path) -> None:
     sender = from_dict({"method": "command"}, configpath=tmp_path / "foo.toml")
     assert isinstance(sender, Sender)
     assert isinstance(sender, CommandSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.toml",
         "command": ["sendmail", "-i", "-t"],
     }
@@ -27,7 +27,7 @@ def test_command_construct(command: str | list[str], tmp_path: Path) -> None:
         {"method": "command", "command": command}, configpath=tmp_path / "foo.toml"
     )
     assert isinstance(sender, CommandSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.toml",
         "command": command,
     }

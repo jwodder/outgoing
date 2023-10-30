@@ -3,12 +3,10 @@ from abc import abstractmethod
 from email.message import EmailMessage
 import logging
 import mailbox
-from typing import List, Optional, TypeVar, Union
+from typing import List, Optional, Union
 from pydantic import PrivateAttr
 from ..config import Path
 from ..util import OpenClosable
-
-T = TypeVar("T", bound="MailboxSender")
 
 log = logging.getLogger(__name__)
 
