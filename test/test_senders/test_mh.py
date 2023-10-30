@@ -25,7 +25,7 @@ def test_mh_construct(
     )
     assert isinstance(sender, Sender)
     assert isinstance(sender, MHSender)
-    assert sender.dict() == {
+    assert sender.model_dump() == {
         "configpath": tmp_path / "foo.txt",
         "path": tmp_path / "inbox",
         "folder": folder,

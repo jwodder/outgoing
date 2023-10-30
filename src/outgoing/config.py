@@ -1,55 +1,43 @@
 from __future__ import annotations
 from collections.abc import Mapping
 import pathlib
+import sys
 from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union
 import pydantic
+from pydantic.functional_validators import AfterValidator
+from pydantic.types import PathType
+from pydantic_core import CoreSchema, core_schema
 from . import core
 from .errors import InvalidPasswordError
-from .util import AnyPath, resolve_path
+from .util import resolve_path
 
 if TYPE_CHECKING:
-    from pydantic.typing import CallableGenerator
+    from typing_extensions import Self
 
-    Path = pathlib.Path
-    FilePath = pathlib.Path
-    DirectoryPath = pathlib.Path
-
+if sys.version_info >= (3, 9):
+    from typing import Annotated
 else:
-
-    class Path(pathlib.Path):
-        """
-        Converts its input to `pathlib.Path` instances, including expanding
-        tildes.  If there is a field named ``configpath`` declared before the
-        `Path` field and its value is non-`None`, then the value of the `Path`
-        field will be resolved relative to the parent directory of the
-        ``configpath`` field; otherwise, it will be resolved relative to the
-        current directory.
-        """
-
-        @classmethod
-        def __get_validators__(cls) -> CallableGenerator:
-            yield path_resolve
-
-    class FilePath(pydantic.FilePath):
-        """Like `Path`, but the path must exist and be a file"""
-
-        @classmethod
-        def __get_validators__(cls) -> CallableGenerator:
-            yield path_resolve
-            yield from super().__get_validators__()
-
-    class DirectoryPath(pydantic.DirectoryPath):
-        """Like `Path`, but the path must exist and be a directory"""
-
-        @classmethod
-        def __get_validators__(cls) -> CallableGenerator:
-            yield path_resolve
-            yield from super().__get_validators__()
+    from typing_extensions import Annotated
 
 
-# We have to implement Password configuration via explicit subclassing as using
-# a function instead à la pydantic's conlist() leads to mypy errors; cf.
-# <https://github.com/samuelcolvin/pydantic/issues/975>
+def path_resolve(v: pathlib.Path, info: pydantic.ValidationInfo) -> pathlib.Path:
+    return resolve_path(v, info.data.get("configpath"))
+
+
+#: Converts its input to `pathlib.Path` instances, including expanding tildes.
+#: If there is a field named ``configpath`` declared before the `Path` field
+#: and its value is non-`None`, then the value of the `Path` field will be
+#: resolved relative to the parent directory of the ``configpath`` field;
+#: otherwise, it will be resolved relative to the current directory.
+Path = Annotated[pathlib.Path, AfterValidator(path_resolve)]
+
+#: Like `Path`, but the path must exist and be a file
+FilePath = Annotated[pathlib.Path, AfterValidator(path_resolve), PathType("file")]
+
+#: Like `Path`, but the path must exist and be a directory
+DirectoryPath = Annotated[pathlib.Path, AfterValidator(path_resolve), PathType("dir")]
+
+
 class Password(pydantic.SecretStr):
     """
     A subclass of `pydantic.SecretStr` that accepts ``outgoing`` password
@@ -103,7 +91,7 @@ class Password(pydantic.SecretStr):
     .. code:: python
 
         class MySender(pydantic.BaseModel):
-            configpath: Optional[outgoing.Path]
+            configpath: Optional[outgoing.Path] = None
             service: str
             password: MyPassword  # Must come after `configpath` and `service`!
             # ... other fields ...
@@ -153,24 +141,27 @@ class Password(pydantic.SecretStr):
             raise RuntimeError("Password.username must be a str, callable, or None")
 
     @classmethod
-    def __get_validators__(cls) -> CallableGenerator:
-        yield cls._resolve
-        yield from super().__get_validators__()
+    def __get_pydantic_core_schema__(
+        cls, source_type: Any, handler: pydantic.GetCoreSchemaHandler
+    ) -> CoreSchema:
+        return core_schema.with_info_before_validator_function(
+            cls._resolve, super().__get_pydantic_core_schema__(source_type, handler)
+        )
 
     @classmethod
-    def _resolve(cls, v: Any, values: dict[str, Any]) -> str:
+    def _resolve(cls, v: Any, info: pydantic.ValidationInfo) -> str:
         if not isinstance(v, (str, Mapping)):
             raise ValueError(
                 "Password must be either a string or an object with exactly one field"
             )
         if isinstance(cls.host, str):
             try:
-                host = values[cls.host]
+                host = info.data[cls.host]
             except KeyError:
                 raise ValueError("Insufficient data to determine password")
         elif callable(cls.host):
             try:
-                host = cls.host(values)
+                host = cls.host(info.data)
             except Exception:
                 raise ValueError("Insufficient data to determine password")
         else:
@@ -178,12 +169,12 @@ class Password(pydantic.SecretStr):
             host = None
         if isinstance(cls.username, str):
             try:
-                username = values[cls.username]
+                username = info.data[cls.username]
             except KeyError:
                 raise ValueError("Insufficient data to determine password")
         elif callable(cls.username):
             try:
-                username = cls.username(values)
+                username = cls.username(info.data)
             except Exception:
                 raise ValueError("Insufficient data to determine password")
         else:
@@ -194,14 +185,10 @@ class Password(pydantic.SecretStr):
                 v,
                 host=host,
                 username=username,
-                configpath=values.get("configpath"),
+                configpath=info.data.get("configpath"),
             )
         except InvalidPasswordError as e:
             raise ValueError(e.details)
-
-
-def path_resolve(v: AnyPath, values: dict[str, Any]) -> pathlib.Path:
-    return resolve_path(v, values.get("configpath"))
 
 
 class StandardPassword(Password):
@@ -236,33 +223,33 @@ class NetrcConfig(pydantic.BaseModel):
       file
     """
 
-    configpath: Optional[Path]
+    configpath: Optional[Path] = None
     netrc: Union[pydantic.StrictBool, FilePath] = False
     host: str
-    username: Optional[str]
-    password: Optional[StandardPassword]
+    username: Optional[str] = None
+    password: Optional[StandardPassword] = None
 
-    @pydantic.root_validator(skip_on_failure=True)
-    def _validate(cls, values: dict[str, Any]) -> dict[str, Any]:  # noqa: B902, U100
-        if values["password"] is not None:
-            if values["netrc"]:
+    @pydantic.model_validator(mode="after")
+    def _validate(self) -> Self:
+        if self.password is not None:
+            if self.netrc:
                 raise ValueError("netrc cannot be set when a password is present")
-            elif values["username"] is None:
+            elif self.username is None:
                 raise ValueError("Password cannot be given without username")
-        elif values["netrc"]:
+        elif self.netrc:
             path: Optional[Path]
-            if isinstance(values["netrc"], bool):
+            if isinstance(self.netrc, bool):
                 path = None
             else:
-                path = values["netrc"]
+                path = self.netrc
             try:
                 username, password = core.lookup_netrc(
-                    values["host"], username=values["username"], path=path
+                    self.host, username=self.username, path=path
                 )
             except Exception as e:
                 raise ValueError(f"Error retrieving password from netrc file: {e}")
-            values["username"] = username
-            values["password"] = StandardPassword(password)
-        elif values["username"] is not None:
+            self.username = username
+            self.password = StandardPassword(password)
+        elif self.username is not None:
             raise ValueError("Username cannot be given without netrc or password")
-        return values
+        return self

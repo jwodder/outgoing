@@ -15,7 +15,7 @@ class OpenCloser(OpenClosable):
 
 def test_openclosable() -> None:
     oc = OpenCloser()
-    assert oc.dict() == {"calls": []}
+    assert oc.model_dump() == {"calls": []}
     assert oc._context_depth == 0
     with oc as oc2:
         assert oc is oc2

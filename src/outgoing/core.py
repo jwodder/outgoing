@@ -8,7 +8,7 @@ import os
 from pathlib import Path
 import sys
 from types import TracebackType
-from typing import Any, Optional, TypeVar, cast
+from typing import TYPE_CHECKING, Any, Optional, cast
 from platformdirs import user_config_path
 from . import errors
 from .util import AnyPath
@@ -28,13 +28,14 @@ if sys.version_info[:2] >= (3, 8):
 else:
     from typing_extensions import Protocol, runtime_checkable
 
+if TYPE_CHECKING:
+    from typing_extensions import Self
+
 DEFAULT_CONFIG_SECTION = "outgoing"
 
 SENDER_GROUP = "outgoing.senders"
 
 PASSWORD_SCHEME_GROUP = "outgoing.password_schemes"
-
-S = TypeVar("S", bound="Sender")
 
 
 @runtime_checkable
@@ -50,7 +51,7 @@ class Sender(Protocol):
       email.message.EmailMessage)`` method sends the given e-mail.
     """
 
-    def __enter__(self: S) -> S:
+    def __enter__(self) -> Self:
         ...
 
     def __exit__(

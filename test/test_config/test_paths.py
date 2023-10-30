@@ -6,9 +6,9 @@ from outgoing.config import DirectoryPath, FilePath, Path
 
 
 class Paths(BaseModel):
-    path: Optional[Path]
-    filepath: Optional[FilePath]
-    dirpath: Optional[DirectoryPath]
+    path: Optional[Path] = None
+    filepath: Optional[FilePath] = None
+    dirpath: Optional[DirectoryPath] = None
 
 
 def test_path_expanduser(
@@ -58,15 +58,8 @@ def test_dirpath_not_directory(tmp_path: pathlib.Path) -> None:
         Paths(dirpath=tmp_path / "foo")
 
 
-def test_paths_schema_format() -> None:
-    schema = Paths.schema()
-    assert schema["properties"]["path"]["format"] == "path"
-    assert schema["properties"]["filepath"]["format"] == "file-path"
-    assert schema["properties"]["dirpath"]["format"] == "directory-path"
-
-
 class ResolvingPaths(BaseModel):
-    configpath: Optional[Path]
+    configpath: Optional[Path] = None
     path: Path
     filepath: FilePath
     dirpath: DirectoryPath

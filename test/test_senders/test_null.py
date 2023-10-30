@@ -10,7 +10,7 @@ def test_null_construct(tmp_path: Path) -> None:
     sender = from_dict({"method": "null"}, configpath=tmp_path / "foo.toml")
     assert isinstance(sender, Sender)
     assert isinstance(sender, NullSender)
-    assert sender.dict() == {"configpath": tmp_path / "foo.toml"}
+    assert sender.model_dump() == {"configpath": tmp_path / "foo.toml"}
 
 
 def test_null_send(caplog: pytest.LogCaptureFixture, test_email1: EmailMessage) -> None:

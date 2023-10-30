@@ -121,25 +121,24 @@ def test_dotenv_invalid_spec_type() -> None:
 def test_dotenv_no_key() -> None:
     with pytest.raises(InvalidPasswordError) as excinfo:
         resolve_password({"dotenv": {}})
-    assert str(excinfo.value) == (
+    assert (
         "Invalid password configuration: Invalid 'dotenv' password specifier: "
         "1 validation error for DotenvSpec\n"
         "key\n"
-        "  field required (type=value_error.missing)"
-    )
+        "  Field required"
+    ) in str(excinfo.value)
 
 
 def test_dotenv_nonexistent_file(tmp_path: Path) -> None:
     dotenv_path = tmp_path / "nowhere"
     with pytest.raises(InvalidPasswordError) as excinfo:
         resolve_password({"dotenv": {"key": "SECRET", "file": dotenv_path}})
-    assert str(excinfo.value) == (
+    assert (
         "Invalid password configuration: Invalid 'dotenv' password specifier:"
         " 1 validation error for DotenvSpec\n"
         "file\n"
-        f'  file or directory at path "{dotenv_path}" does not exist'
-        f" (type=value_error.path.not_exists; path={dotenv_path})"
-    )
+        "  Path does not point to a file"
+    ) in str(excinfo.value)
 
 
 def test_dotenv_password_configpath_relative_ignore_spec_configpath(

@@ -51,9 +51,9 @@ def base64_scheme(spec: Any) -> str:
 
 
 class DotenvSpec(BaseModel):
-    configpath: Optional[Path]
+    configpath: Optional[Path] = None
     key: str
-    file: Optional[FilePath]
+    file: Optional[FilePath] = None
 
 
 def dotenv_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
@@ -89,11 +89,11 @@ def dotenv_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
 
 
 class KeyringSpec(BaseModel):
-    configpath: Optional[Path]
+    configpath: Optional[Path] = None
     service: str
     username: str
-    backend: Optional[str]
-    keyring_path: Optional[DirectoryPath] = Field(alias="keyring-path")
+    backend: Optional[str] = None
+    keyring_path: Optional[DirectoryPath] = Field(None, alias="keyring-path")
 
 
 def keyring_scheme(
