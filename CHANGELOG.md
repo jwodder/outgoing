@@ -1,3 +1,7 @@
+v0.6.1 (in development)
+-----------------------
+- Support platformdirs v4.0
+
 v0.6.0 (2023-10-30)
 -------------------
 - Support python-dotenv v1.0
