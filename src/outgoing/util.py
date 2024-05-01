@@ -27,12 +27,10 @@ class OpenClosable(ABC, BaseModel):
     _context_depth: int = PrivateAttr(0)
 
     @abstractmethod
-    def open(self) -> None:
-        ...
+    def open(self) -> None: ...
 
     @abstractmethod
-    def close(self) -> None:
-        ...
+    def close(self) -> None: ...
 
     def __enter__(self) -> Self:
         if self._context_depth == 0:

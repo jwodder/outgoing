@@ -51,16 +51,14 @@ class Sender(Protocol):
       email.message.EmailMessage)`` method sends the given e-mail.
     """
 
-    def __enter__(self) -> Self:
-        ...
+    def __enter__(self) -> Self: ...
 
     def __exit__(
         self,
         exc_type: Optional[type[BaseException]],
         exc_val: Optional[BaseException],
         exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]:
-        ...
+    ) -> Optional[bool]: ...
 
     def send(self, msg: EmailMessage) -> Any:
         """Send ``msg`` or raise an exception if that's not possible"""

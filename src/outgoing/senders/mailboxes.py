@@ -15,12 +15,10 @@ class MailboxSender(OpenClosable):  # ABC inherited from OpenClosable
     _mbox: Optional[mailbox.Mailbox] = PrivateAttr(None)
 
     @abstractmethod
-    def _makebox(self) -> mailbox.Mailbox:
-        ...
+    def _makebox(self) -> mailbox.Mailbox: ...
 
     @abstractmethod
-    def _describe(self) -> str:
-        ...
+    def _describe(self) -> str: ...
 
     def open(self) -> None:
         log.debug("Opening %s", self._describe())
