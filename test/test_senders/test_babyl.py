@@ -54,18 +54,18 @@ def test_babyl_send_new_path(
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Opening Babyl mailbox at {tmp_path/'inbox'}",
+            f"Opening Babyl mailbox at {tmp_path / 'inbox'}",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.INFO,
             f"Adding e-mail {test_email1['Subject']!r} to Babyl mailbox at"
-            f" {tmp_path/'inbox'}",
+            f" {tmp_path / 'inbox'}",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Closing Babyl mailbox at {tmp_path/'inbox'}",
+            f"Closing Babyl mailbox at {tmp_path / 'inbox'}",
         ),
     ]
 

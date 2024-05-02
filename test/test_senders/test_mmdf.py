@@ -56,18 +56,18 @@ def test_mmdf_send_new_path(
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Opening MMDF mailbox at {tmp_path/'inbox'}",
+            f"Opening MMDF mailbox at {tmp_path / 'inbox'}",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.INFO,
             f"Adding e-mail {test_email1['Subject']!r} to MMDF mailbox at"
-            f" {tmp_path/'inbox'}",
+            f" {tmp_path / 'inbox'}",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Closing MMDF mailbox at {tmp_path/'inbox'}",
+            f"Closing MMDF mailbox at {tmp_path / 'inbox'}",
         ),
     ]
 

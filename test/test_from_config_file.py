@@ -54,7 +54,7 @@ def test_from_nonexistent_custom_config_file_no_fallback(tmp_home: Path) -> None
         from_config_file(tmp_home / "foo.toml", fallback=False)
     assert (
         str(excinfo.value)
-        == f"outgoing configuration not found in files: {tmp_home/'foo.toml'}"
+        == f"outgoing configuration not found in files: {tmp_home / 'foo.toml'}"
     )
 
 
@@ -64,7 +64,7 @@ def test_from_nonexistent_custom_config_file_no_default(tmp_home: Path) -> None:
         from_config_file(tmp_home / "foo.toml")
     assert (
         str(excinfo.value) == f"outgoing configuration not found in files: {defconf},"
-        f" {tmp_home/'foo.toml'}"
+        f" {tmp_home / 'foo.toml'}"
     )
 
 
@@ -103,7 +103,7 @@ def test_from_unknown_ext(tmp_path: Path) -> None:
         from_config_file(tmp_path / "foo.xyz")
     assert (
         str(excinfo.value)
-        == f"{tmp_path/'foo.xyz'}: Invalid configuration: Unsupported file extension"
+        == f"{tmp_path / 'foo.xyz'}: Invalid configuration: Unsupported file extension"
     )
 
 
@@ -170,7 +170,7 @@ def test_from_no_section_custom_config_file_no_fallback(tmp_home: Path) -> None:
         from_config_file(tmp_home / "foo.toml", fallback=False)
     assert (
         str(excinfo.value)
-        == f"outgoing configuration not found in files: {tmp_home/'foo.toml'}"
+        == f"outgoing configuration not found in files: {tmp_home / 'foo.toml'}"
     )
 
 
@@ -185,7 +185,7 @@ def test_from_no_section_in_custom_config_file_or_default(tmp_home: Path) -> Non
         from_config_file(tmp_home / "foo.toml")
     assert (
         str(excinfo.value) == f"outgoing configuration not found in files: {defconf},"
-        f" {tmp_home/'foo.toml'}"
+        f" {tmp_home / 'foo.toml'}"
     )
 
 
@@ -230,6 +230,6 @@ def test_section_not_dict(tmp_path: Path) -> None:
         from_config_file(tmp_path / "foo.toml")
     assert (
         str(excinfo.value)
-        == f"{tmp_path/'foo.toml'}: Invalid configuration: Section must be a"
+        == f"{tmp_path / 'foo.toml'}: Invalid configuration: Section must be a"
         " dict/object"
     )

@@ -92,7 +92,7 @@ def test_dotenv_password_not_in_file(tmp_path: Path) -> None:
         )
     assert (
         str(excinfo.value)
-        == f"Invalid password configuration: key 'HIDDEN' not in {tmp_path/'foo.txt'}"
+        == f"Invalid password configuration: key 'HIDDEN' not in {tmp_path / 'foo.txt'}"
     )
 
 
@@ -104,7 +104,7 @@ def test_dotenv_password_no_value(tmp_path: Path) -> None:
         )
     assert (
         str(excinfo.value) == "Invalid password configuration: key 'SECRET' in"
-        f" {tmp_path/'foo.txt'} does not have a value"
+        f" {tmp_path / 'foo.txt'} does not have a value"
     )
 
 

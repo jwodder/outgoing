@@ -56,18 +56,18 @@ def test_mbox_send_new_path(
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Opening mbox at {tmp_path/'inbox'}",
+            f"Opening mbox at {tmp_path / 'inbox'}",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.INFO,
             f"Adding e-mail {test_email1['Subject']!r} to mbox at"
-            f" {tmp_path/'inbox'}",
+            f" {tmp_path / 'inbox'}",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Closing mbox at {tmp_path/'inbox'}",
+            f"Closing mbox at {tmp_path / 'inbox'}",
         ),
     ]
 

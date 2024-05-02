@@ -60,18 +60,18 @@ def test_maildir_send_no_folder_new_path(
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Opening Maildir at {tmp_path/'inbox'}, root folder",
+            f"Opening Maildir at {tmp_path / 'inbox'}, root folder",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.INFO,
             f"Adding e-mail {test_email1['Subject']!r} to Maildir at"
-            f" {tmp_path/'inbox'}, root folder",
+            f" {tmp_path / 'inbox'}, root folder",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Closing Maildir at {tmp_path/'inbox'}, root folder",
+            f"Closing Maildir at {tmp_path / 'inbox'}, root folder",
         ),
     ]
 
@@ -104,18 +104,18 @@ def test_maildir_send_folder_new_path(
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Opening Maildir at {tmp_path/'inbox'}, folder 'work'",
+            f"Opening Maildir at {tmp_path / 'inbox'}, folder 'work'",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.INFO,
             f"Adding e-mail {test_email1['Subject']!r} to Maildir at"
-            f" {tmp_path/'inbox'}, folder 'work'",
+            f" {tmp_path / 'inbox'}, folder 'work'",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Closing Maildir at {tmp_path/'inbox'}, folder 'work'",
+            f"Closing Maildir at {tmp_path / 'inbox'}, folder 'work'",
         ),
     ]
 

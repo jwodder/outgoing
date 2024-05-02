@@ -60,18 +60,18 @@ def test_mh_send_no_folder_new_path(
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Opening MH mailbox at {tmp_path/'inbox'}, root folder",
+            f"Opening MH mailbox at {tmp_path / 'inbox'}, root folder",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.INFO,
             f"Adding e-mail {test_email1['Subject']!r} to MH mailbox at"
-            f" {tmp_path/'inbox'}, root folder",
+            f" {tmp_path / 'inbox'}, root folder",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Closing MH mailbox at {tmp_path/'inbox'}, root folder",
+            f"Closing MH mailbox at {tmp_path / 'inbox'}, root folder",
         ),
     ]
 
@@ -104,18 +104,18 @@ def test_mh_send_folder_str_new_path(
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Opening MH mailbox at {tmp_path/'inbox'}, folder 'work'",
+            f"Opening MH mailbox at {tmp_path / 'inbox'}, folder 'work'",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.INFO,
             f"Adding e-mail {test_email1['Subject']!r} to MH mailbox at"
-            f" {tmp_path/'inbox'}, folder 'work'",
+            f" {tmp_path / 'inbox'}, folder 'work'",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Closing MH mailbox at {tmp_path/'inbox'}, folder 'work'",
+            f"Closing MH mailbox at {tmp_path / 'inbox'}, folder 'work'",
         ),
     ]
 
@@ -150,18 +150,18 @@ def test_mh_send_folder_list_new_path(
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Opening MH mailbox at {tmp_path/'inbox'}, folder 'important'/'work'",
+            f"Opening MH mailbox at {tmp_path / 'inbox'}, folder 'important'/'work'",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.INFO,
             f"Adding e-mail {test_email1['Subject']!r} to MH mailbox at"
-            f" {tmp_path/'inbox'}, folder 'important'/'work'",
+            f" {tmp_path / 'inbox'}, folder 'important'/'work'",
         ),
         (
             "outgoing.senders.mailboxes",
             logging.DEBUG,
-            f"Closing MH mailbox at {tmp_path/'inbox'}, folder 'important'/'work'",
+            f"Closing MH mailbox at {tmp_path / 'inbox'}, folder 'important'/'work'",
         ),
     ]
 
