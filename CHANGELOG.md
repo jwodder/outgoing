@@ -2,6 +2,7 @@ v0.6.1 (in development)
 -----------------------
 - Support platformdirs v4.0
 - Migrated from setuptools to hatch
+- Drop support for Python 3.7
 
 v0.6.0 (2023-10-30)
 -------------------

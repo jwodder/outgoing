@@ -19,7 +19,6 @@ jobs:
       fail-fast: false
       matrix:
         python-version:
-          - '3.7'
           - '3.8'
           - '3.9'
           - '3.10'
@@ -30,9 +29,9 @@ jobs:
           - 'pypy-3.10'
         toxenv: [py]
         include:
-          - python-version: '3.7'
+          - python-version: '3.8'
             toxenv: lint
-          - python-version: '3.7'
+          - python-version: '3.8'
             toxenv: typing
     steps:
       - name: Check out repository
