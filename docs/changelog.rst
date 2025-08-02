@@ -3,9 +3,11 @@
 Changelog
 =========
 
-v0.7.0 (in development)
+v0.6.2 (in development)
 -----------------------
 - Support Python 3.13
+- Exclude click v8.2.2 from dependencies due to breakage caused by
+  <https://github.com/pallets/click/issues/3024>
 
 v0.6.1 (2024-05-08)
 -------------------
