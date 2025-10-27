@@ -19,6 +19,7 @@ class InvalidConfigError(Error):
         self.details: str = details
         #: The path to the config file containing the invalid configuration
         self.configpath: Optional[AnyPath] = configpath
+        super().__init__(details, configpath)
 
     def __str__(self) -> str:
         s = ""
@@ -50,6 +51,7 @@ class MissingConfigError(Error):
     def __init__(self, configpaths: Sequence[AnyPath]):
         #: Paths to the configfiles searched for configuration
         self.configpaths: list[AnyPath] = list(configpaths)
+        super().__init__(configpaths)
 
     def __str__(self) -> str:
         return "outgoing configuration not found in files: " + ", ".join(
