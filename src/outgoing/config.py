@@ -1,8 +1,7 @@
 from __future__ import annotations
 from collections.abc import Mapping
 import pathlib
-import sys
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar
 import pydantic
 from pydantic.functional_validators import AfterValidator
 from pydantic.types import PathType
@@ -13,11 +12,6 @@ from .util import resolve_path
 
 if TYPE_CHECKING:
     from typing_extensions import Self
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
 
 
 def path_resolve(v: pathlib.Path, info: pydantic.ValidationInfo) -> pathlib.Path:
@@ -91,7 +85,7 @@ class Password(pydantic.SecretStr):
     .. code:: python
 
         class MySender(pydantic.BaseModel):
-            configpath: Optional[outgoing.Path] = None
+            configpath: outgoing.Path | None = None
             service: str
             password: MyPassword  # Must come after `configpath` and `service`!
             # ... other fields ...
@@ -223,11 +217,11 @@ class NetrcConfig(pydantic.BaseModel):
       file
     """
 
-    configpath: Optional[Path] = None
-    netrc: Union[pydantic.StrictBool, FilePath] = False
+    configpath: Path | None = None
+    netrc: pydantic.StrictBool | FilePath = False
     host: str
-    username: Optional[str] = None
-    password: Optional[StandardPassword] = None
+    username: str | None = None
+    password: StandardPassword | None = None
 
     @pydantic.model_validator(mode="after")
     def _validate(self) -> Self:
@@ -237,7 +231,7 @@ class NetrcConfig(pydantic.BaseModel):
             elif self.username is None:
                 raise ValueError("Password cannot be given without username")
         elif self.netrc:
-            path: Optional[Path]
+            path: Path | None
             if isinstance(self.netrc, bool):
                 path = None
             else:

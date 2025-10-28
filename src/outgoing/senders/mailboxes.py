@@ -3,7 +3,6 @@ from abc import abstractmethod
 from email.message import EmailMessage
 import logging
 import mailbox
-from typing import List, Optional, Union
 from pydantic import PrivateAttr
 from ..config import Path
 from ..util import OpenClosable
@@ -12,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 class MailboxSender(OpenClosable):  # ABC inherited from OpenClosable
-    _mbox: Optional[mailbox.Mailbox] = PrivateAttr(None)
+    _mbox: mailbox.Mailbox | None = PrivateAttr(None)
 
     @abstractmethod
     def _makebox(self) -> mailbox.Mailbox: ...
@@ -45,10 +44,11 @@ class MailboxSender(OpenClosable):  # ABC inherited from OpenClosable
 
 
 class MboxSender(MailboxSender):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
 
-    def _makebox(self) -> mailbox.mbox:
+    # <https://github.com/python/typeshed/issues/14935>
+    def _makebox(self) -> mailbox.mbox:  # type: ignore[override]
         return mailbox.mbox(self.path)
 
     def _describe(self) -> str:
@@ -56,11 +56,12 @@ class MboxSender(MailboxSender):
 
 
 class MaildirSender(MailboxSender):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
-    folder: Optional[str] = None
+    folder: str | None = None
 
-    def _makebox(self) -> mailbox.Maildir:
+    # <https://github.com/python/typeshed/issues/14935>
+    def _makebox(self) -> mailbox.Maildir:  # type: ignore[override]
         box = mailbox.Maildir(self.path)
         if self.folder is not None:
             try:
@@ -78,11 +79,12 @@ class MaildirSender(MailboxSender):
 
 
 class MHSender(MailboxSender):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
-    folder: Union[str, List[str], None] = None
+    folder: str | list[str] | None = None
 
-    def _makebox(self) -> mailbox.MH:
+    # <https://github.com/python/typeshed/issues/14935>
+    def _makebox(self) -> mailbox.MH:  # type: ignore[override]
         box = mailbox.MH(self.path)
         if self.folder is not None:
             folders: list[str]
@@ -108,10 +110,11 @@ class MHSender(MailboxSender):
 
 
 class MMDFSender(MailboxSender):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
 
-    def _makebox(self) -> mailbox.MMDF:
+    # <https://github.com/python/typeshed/issues/14935>
+    def _makebox(self) -> mailbox.MMDF:  # type: ignore[override]
         return mailbox.MMDF(self.path)
 
     def _describe(self) -> str:
@@ -119,10 +122,11 @@ class MMDFSender(MailboxSender):
 
 
 class BabylSender(MailboxSender):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
 
-    def _makebox(self) -> mailbox.Babyl:
+    # <https://github.com/python/typeshed/issues/14935>
+    def _makebox(self) -> mailbox.Babyl:  # type: ignore[override]
         return mailbox.Babyl(self.path)
 
     def _describe(self) -> str:

@@ -1,10 +1,9 @@
-from typing import List
 from pydantic import Field
 from outgoing.util import OpenClosable
 
 
 class OpenCloser(OpenClosable):
-    calls: List[str] = Field(default_factory=list)
+    calls: list[str] = Field(default_factory=list)
 
     def open(self) -> None:
         self.calls.append("open")

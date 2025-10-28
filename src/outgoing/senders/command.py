@@ -1,7 +1,6 @@
 from email.message import EmailMessage
 import logging
 import subprocess
-from typing import List, Optional, Union
 from pydantic import Field
 from ..config import Path
 from ..util import OpenClosable
@@ -10,10 +9,8 @@ log = logging.getLogger(__name__)
 
 
 class CommandSender(OpenClosable):
-    configpath: Optional[Path] = None
-    command: Union[str, List[str]] = Field(
-        default_factory=lambda: ["sendmail", "-i", "-t"]
-    )
+    configpath: Path | None = None
+    command: str | list[str] = Field(default_factory=lambda: ["sendmail", "-i", "-t"])
 
     def open(self) -> None:
         pass

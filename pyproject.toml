@@ -7,7 +7,7 @@ name = "outgoing"
 dynamic = ["version"]
 description = "Common interface for multiple e-mail methods"
 readme = "README.rst"
-requires-python = ">=3.8"
+requires-python = ">=3.10"
 license = "MIT"
 license-files = ["LICENSE"]
 authors = [
@@ -27,12 +27,11 @@ keywords = [
 classifiers = [
     "Programming Language :: Python :: 3 :: Only",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
-    "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
     "Programming Language :: Python :: Implementation :: CPython",
     "Programming Language :: Python :: Implementation :: PyPy",
     "Intended Audience :: Developers",
@@ -45,14 +44,12 @@ classifiers = [
 dependencies = [
     "click          >= 8.0, != 8.2.2",
     "click-loglevel ~= 0.5",
-    "importlib-metadata >= 3.6; python_version < '3.10'",
     "keyring        >= 21.7",
     "morecontext    ~= 0.4",
     "platformdirs   >= 3.0, < 5.0",
     "pydantic       ~= 2.0",
     "python-dotenv  >= 0.11, < 2.0",
     "tomli          >= 1.2, < 3.0; python_version < '3.11'",
-    "typing_extensions; python_version < '3.9'",
 ]
 
 [project.scripts]

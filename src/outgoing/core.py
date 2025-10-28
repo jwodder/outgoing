@@ -1,6 +1,7 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from email.message import EmailMessage
+from importlib.metadata import entry_points
 import inspect
 import json
 from netrc import netrc
@@ -8,7 +9,7 @@ import os
 from pathlib import Path
 import sys
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, Protocol, cast, runtime_checkable
 from platformdirs import user_config_path
 from . import errors
 from .util import AnyPath
@@ -17,16 +18,6 @@ if sys.version_info[:2] >= (3, 11):
     from tomllib import load as toml_load
 else:
     from tomli import load as toml_load
-
-if sys.version_info[:2] >= (3, 10):
-    from importlib.metadata import entry_points
-else:
-    from importlib_metadata import entry_points
-
-if sys.version_info[:2] >= (3, 8):
-    from typing import Protocol, runtime_checkable
-else:
-    from typing_extensions import Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from typing_extensions import Self
@@ -55,10 +46,10 @@ class Sender(Protocol):
 
     def __exit__(
         self,
-        exc_type: Optional[type[BaseException]],
-        exc_val: Optional[BaseException],
-        exc_tb: Optional[TracebackType],
-    ) -> Optional[bool]: ...
+        exc_type: type[BaseException] | None,
+        exc_val: BaseException | None,
+        exc_tb: TracebackType | None,
+    ) -> bool | None: ...
 
     def send(self, msg: EmailMessage) -> Any:
         """Send ``msg`` or raise an exception if that's not possible"""
@@ -74,8 +65,8 @@ def get_default_configpath() -> Path:
 
 
 def from_config_file(
-    path: Optional[AnyPath] = None,
-    section: Optional[str] = DEFAULT_CONFIG_SECTION,
+    path: AnyPath | None = None,
+    section: str | None = DEFAULT_CONFIG_SECTION,
     fallback: bool = True,
 ) -> Sender:
     """
@@ -137,7 +128,7 @@ def from_config_file(
 
 def from_dict(
     data: Mapping[str, Any],
-    configpath: Optional[AnyPath] = None,
+    configpath: AnyPath | None = None,
 ) -> Sender:
     """
     Construct a sender object using the given ``data`` as the configuration.
@@ -181,8 +172,8 @@ def from_dict(
 
 def resolve_password(
     password: str | Mapping[str, Any],
-    host: Optional[str] = None,
-    username: Optional[str] = None,
+    host: str | None = None,
+    username: str | None = None,
     configpath: str | Path | None = None,
 ) -> str:
     """
@@ -241,7 +232,7 @@ def resolve_password(
 
 
 def lookup_netrc(
-    host: str, username: Optional[str] = None, path: Optional[AnyPath] = None
+    host: str, username: str | None = None, path: AnyPath | None = None
 ) -> tuple[str, str]:
     """
     Look up the entry for ``host`` in the netrc file at ``path`` (default:

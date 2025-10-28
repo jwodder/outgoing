@@ -2,16 +2,10 @@ from __future__ import annotations
 from email.message import EmailMessage
 import logging
 import smtplib
-import sys
-from typing import Optional
+from typing import Literal
 from pydantic import Field, PrivateAttr, ValidationInfo, field_validator
 from ..config import NetrcConfig
 from ..util import OpenClosable
-
-if sys.version_info[:2] >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
 
 STARTTLS = "starttls"
 
@@ -21,7 +15,7 @@ log = logging.getLogger(__name__)
 class SMTPSender(NetrcConfig, OpenClosable):
     ssl: Literal[False, True, "starttls"] = False
     port: int = Field(0, ge=0, validate_default=True)
-    _client: Optional[smtplib.SMTP] = PrivateAttr(None)
+    _client: smtplib.SMTP | None = PrivateAttr(None)
 
     @field_validator("port")
     @classmethod

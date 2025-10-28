@@ -3,13 +3,13 @@ from abc import ABC, abstractmethod
 import os
 from pathlib import Path
 from types import TracebackType
-from typing import TYPE_CHECKING, Optional, Union
+from typing import TYPE_CHECKING, TypeAlias
 from pydantic import BaseModel, PrivateAttr
 
 if TYPE_CHECKING:
     from typing_extensions import Self
 
-AnyPath = Union[str, bytes, "os.PathLike[str]", "os.PathLike[bytes]"]
+AnyPath: TypeAlias = str | bytes | os.PathLike[str] | os.PathLike[bytes]
 
 
 class OpenClosable(ABC, BaseModel):
@@ -40,16 +40,16 @@ class OpenClosable(ABC, BaseModel):
 
     def __exit__(
         self,
-        _exc_type: Optional[type[BaseException]],
-        _exc_val: Optional[BaseException],
-        _exc_tb: Optional[TracebackType],
+        _exc_type: type[BaseException] | None,
+        _exc_val: BaseException | None,
+        _exc_tb: TracebackType | None,
     ) -> None:
         self._context_depth -= 1
         if self._context_depth == 0:
             self.close()
 
 
-def resolve_path(path: AnyPath, basepath: Optional[AnyPath] = None) -> Path:
+def resolve_path(path: AnyPath, basepath: AnyPath | None = None) -> Path:
     """
     Convert a path to a `pathlib.Path` instance and resolve it using the same
     rules for as paths in ``outgoing`` configuration files: expand tildes by
