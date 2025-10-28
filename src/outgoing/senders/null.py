@@ -1,6 +1,5 @@
 from email.message import EmailMessage
 import logging
-from typing import Optional
 from ..config import Path
 from ..util import OpenClosable
 
@@ -8,7 +7,7 @@ log = logging.getLogger(__name__)
 
 
 class NullSender(OpenClosable):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
 
     def open(self) -> None:
         pass

@@ -3,7 +3,6 @@ from abc import abstractmethod
 from email.message import EmailMessage
 import logging
 import mailbox
-from typing import List, Optional, Union
 from pydantic import PrivateAttr
 from ..config import Path
 from ..util import OpenClosable
@@ -12,7 +11,7 @@ log = logging.getLogger(__name__)
 
 
 class MailboxSender(OpenClosable):  # ABC inherited from OpenClosable
-    _mbox: Optional[mailbox.Mailbox] = PrivateAttr(None)
+    _mbox: mailbox.Mailbox | None = PrivateAttr(None)
 
     @abstractmethod
     def _makebox(self) -> mailbox.Mailbox: ...
@@ -45,7 +44,7 @@ class MailboxSender(OpenClosable):  # ABC inherited from OpenClosable
 
 
 class MboxSender(MailboxSender):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
 
     def _makebox(self) -> mailbox.mbox:
@@ -56,9 +55,9 @@ class MboxSender(MailboxSender):
 
 
 class MaildirSender(MailboxSender):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
-    folder: Optional[str] = None
+    folder: str | None = None
 
     def _makebox(self) -> mailbox.Maildir:
         box = mailbox.Maildir(self.path)
@@ -78,9 +77,9 @@ class MaildirSender(MailboxSender):
 
 
 class MHSender(MailboxSender):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
-    folder: Union[str, List[str], None] = None
+    folder: str | list[str] | None = None
 
     def _makebox(self) -> mailbox.MH:
         box = mailbox.MH(self.path)
@@ -108,7 +107,7 @@ class MHSender(MailboxSender):
 
 
 class MMDFSender(MailboxSender):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
 
     def _makebox(self) -> mailbox.MMDF:
@@ -119,7 +118,7 @@ class MMDFSender(MailboxSender):
 
 
 class BabylSender(MailboxSender):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
 
     def _makebox(self) -> mailbox.Babyl:

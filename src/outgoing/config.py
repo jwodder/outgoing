@@ -85,7 +85,7 @@ class Password(pydantic.SecretStr):
     .. code:: python
 
         class MySender(pydantic.BaseModel):
-            configpath: Optional[outgoing.Path] = None
+            configpath: outgoing.Path | None = None
             service: str
             password: MyPassword  # Must come after `configpath` and `service`!
             # ... other fields ...
