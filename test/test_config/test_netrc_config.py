@@ -1,6 +1,5 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Optional
 from pydantic import SecretStr, ValidationError
 import pytest
 from pytest_mock import MockerFixture
@@ -32,7 +31,7 @@ def test_netrc_config_path(
     mocker: MockerFixture,
     monkeypatch: pytest.MonkeyPatch,
     tmp_path: Path,
-    username: Optional[str],
+    username: str | None,
 ) -> None:
     m = mocker.patch(
         "outgoing.core.lookup_netrc",
@@ -59,7 +58,7 @@ def test_netrc_config_path(
 
 @pytest.mark.parametrize("username", [None, "myname"])
 def test_netrc_config_path_expanduser(
-    mocker: MockerFixture, tmp_home: Path, username: Optional[str]
+    mocker: MockerFixture, tmp_home: Path, username: str | None
 ) -> None:
     m = mocker.patch(
         "outgoing.core.lookup_netrc",
@@ -85,7 +84,7 @@ def test_netrc_config_path_expanduser(
 
 @pytest.mark.parametrize("username", [None, "myname"])
 def test_netrc_config_path_configpath(
-    mocker: MockerFixture, tmp_path: Path, username: Optional[str]
+    mocker: MockerFixture, tmp_path: Path, username: str | None
 ) -> None:
     m = mocker.patch(
         "outgoing.core.lookup_netrc",
@@ -112,7 +111,7 @@ def test_netrc_config_path_configpath(
 
 @pytest.mark.parametrize("username", [None, "myname"])
 def test_netrc_config_no_such_path(
-    mocker: MockerFixture, tmp_path: Path, username: Optional[str]
+    mocker: MockerFixture, tmp_path: Path, username: str | None
 ) -> None:
     m = mocker.patch("outgoing.core.lookup_netrc")
     with pytest.raises(ValidationError):

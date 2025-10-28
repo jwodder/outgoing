@@ -3,7 +3,7 @@ from collections.abc import Mapping
 from contextlib import ExitStack
 import os
 import sys
-from typing import Any, Optional
+from typing import Any
 from dotenv import dotenv_values
 from keyring import get_keyring
 from keyring.backend import KeyringBackend
@@ -24,7 +24,7 @@ def env_scheme(spec: Any) -> str:
         raise InvalidPasswordError(f"Environment variable {spec!r} not set")
 
 
-def file_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
+def file_scheme(spec: Any, configpath: AnyPath | None = None) -> str:
     try:
         path = os.fsdecode(spec)
     except Exception:
@@ -51,12 +51,12 @@ def base64_scheme(spec: Any) -> str:
 
 
 class DotenvSpec(BaseModel):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     key: str
-    file: Optional[FilePath] = None
+    file: FilePath | None = None
 
 
-def dotenv_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
+def dotenv_scheme(spec: Any, configpath: AnyPath | None = None) -> str:
     if not isinstance(spec, Mapping):
         raise InvalidPasswordError(
             "'dotenv' password specifier must be an object", configpath=configpath
@@ -89,18 +89,18 @@ def dotenv_scheme(spec: Any, configpath: Optional[AnyPath] = None) -> str:
 
 
 class KeyringSpec(BaseModel):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     service: str
     username: str
-    backend: Optional[str] = None
-    keyring_path: Optional[DirectoryPath] = Field(None, alias="keyring-path")
+    backend: str | None = None
+    keyring_path: DirectoryPath | None = Field(None, alias="keyring-path")
 
 
 def keyring_scheme(
     spec: Any,
-    host: Optional[str],
-    username: Optional[str],
-    configpath: Optional[AnyPath] = None,
+    host: str | None,
+    username: str | None,
+    configpath: AnyPath | None = None,
 ) -> str:
     if not isinstance(spec, Mapping):
         raise InvalidPasswordError(

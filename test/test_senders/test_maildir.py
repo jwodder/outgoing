@@ -3,7 +3,6 @@ import logging
 from mailbox import Maildir
 from operator import itemgetter
 from pathlib import Path
-from typing import Optional
 from mailbits import email2dict
 import pytest
 from outgoing import Sender, from_dict
@@ -12,7 +11,7 @@ from outgoing.senders.mailboxes import MaildirSender
 
 @pytest.mark.parametrize("folder", [None, "work"])
 def test_maildir_construct(
-    folder: Optional[str], monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+    folder: str | None, monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     monkeypatch.chdir(tmp_path)
     sender = from_dict(

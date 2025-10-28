@@ -1,10 +1,9 @@
-from typing import Optional
 from jaraco.classes import properties
 from keyring.backend import KeyringBackend
 
 
 class Keyring(KeyringBackend):
-    def get_password(self, service: str, username: str) -> Optional[str]:
+    def get_password(self, service: str, username: str) -> str | None:
         if service == "api.example.com" and username == "luser":
             return "hunter2"
         else:

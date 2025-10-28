@@ -1,14 +1,13 @@
 import pathlib
-from typing import Optional
 from pydantic import BaseModel, ValidationError
 import pytest
 from outgoing.config import DirectoryPath, FilePath, Path
 
 
 class Paths(BaseModel):
-    path: Optional[Path] = None
-    filepath: Optional[FilePath] = None
-    dirpath: Optional[DirectoryPath] = None
+    path: Path | None = None
+    filepath: FilePath | None = None
+    dirpath: DirectoryPath | None = None
 
 
 def test_path_expanduser(
@@ -59,7 +58,7 @@ def test_dirpath_not_directory(tmp_path: pathlib.Path) -> None:
 
 
 class ResolvingPaths(BaseModel):
-    configpath: Optional[Path] = None
+    configpath: Path | None = None
     path: Path
     filepath: FilePath
     dirpath: DirectoryPath

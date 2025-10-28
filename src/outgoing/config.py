@@ -1,7 +1,7 @@
 from __future__ import annotations
 from collections.abc import Mapping
 import pathlib
-from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar
 import pydantic
 from pydantic.functional_validators import AfterValidator
 from pydantic.types import PathType
@@ -217,11 +217,11 @@ class NetrcConfig(pydantic.BaseModel):
       file
     """
 
-    configpath: Optional[Path] = None
-    netrc: Union[pydantic.StrictBool, FilePath] = False
+    configpath: Path | None = None
+    netrc: pydantic.StrictBool | FilePath = False
     host: str
-    username: Optional[str] = None
-    password: Optional[StandardPassword] = None
+    username: str | None = None
+    password: StandardPassword | None = None
 
     @pydantic.model_validator(mode="after")
     def _validate(self) -> Self:
@@ -231,7 +231,7 @@ class NetrcConfig(pydantic.BaseModel):
             elif self.username is None:
                 raise ValueError("Password cannot be given without username")
         elif self.netrc:
-            path: Optional[Path]
+            path: Path | None
             if isinstance(self.netrc, bool):
                 path = None
             else:

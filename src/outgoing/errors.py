@@ -1,7 +1,6 @@
 from __future__ import annotations
 from collections.abc import Sequence
 import os
-from typing import Optional
 from .util import AnyPath
 
 
@@ -14,11 +13,11 @@ class Error(Exception):
 class InvalidConfigError(Error):
     """Raised on encountering an invalid configuration structure"""
 
-    def __init__(self, details: str, configpath: Optional[AnyPath] = None):
+    def __init__(self, details: str, configpath: AnyPath | None = None):
         #: A message about the error
         self.details: str = details
         #: The path to the config file containing the invalid configuration
-        self.configpath: Optional[AnyPath] = configpath
+        self.configpath: AnyPath | None = configpath
         super().__init__(details, configpath)
 
     def __str__(self) -> str:

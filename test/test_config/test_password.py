@@ -1,6 +1,6 @@
 from __future__ import annotations
 from pathlib import Path
-from typing import Any, Optional
+from typing import Any
 from pydantic import BaseModel, SecretStr, ValidationError
 import pytest
 from pytest_mock import MockerFixture
@@ -244,7 +244,7 @@ class OptionalPasswordConfig(BaseModel):
     configpath: Path
     host: str
     username: str
-    password: Optional[StandardPassword] = None
+    password: StandardPassword | None = None
 
 
 def test_none_optional_password(mocker: MockerFixture) -> None:
