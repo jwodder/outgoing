@@ -1,8 +1,7 @@
 from __future__ import annotations
 from collections.abc import Mapping
 import pathlib
-import sys
-from typing import TYPE_CHECKING, Any, ClassVar, Optional, Union
+from typing import TYPE_CHECKING, Annotated, Any, ClassVar, Optional, Union
 import pydantic
 from pydantic.functional_validators import AfterValidator
 from pydantic.types import PathType
@@ -13,11 +12,6 @@ from .util import resolve_path
 
 if TYPE_CHECKING:
     from typing_extensions import Self
-
-if sys.version_info >= (3, 9):
-    from typing import Annotated
-else:
-    from typing_extensions import Annotated
 
 
 def path_resolve(v: pathlib.Path, info: pydantic.ValidationInfo) -> pathlib.Path:

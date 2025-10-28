@@ -1,6 +1,7 @@
 from __future__ import annotations
 from collections.abc import Mapping
 from email.message import EmailMessage
+from importlib.metadata import entry_points
 import inspect
 import json
 from netrc import netrc
@@ -8,7 +9,7 @@ import os
 from pathlib import Path
 import sys
 from types import TracebackType
-from typing import TYPE_CHECKING, Any, Optional, cast
+from typing import TYPE_CHECKING, Any, Optional, Protocol, cast, runtime_checkable
 from platformdirs import user_config_path
 from . import errors
 from .util import AnyPath
@@ -17,16 +18,6 @@ if sys.version_info[:2] >= (3, 11):
     from tomllib import load as toml_load
 else:
     from tomli import load as toml_load
-
-if sys.version_info[:2] >= (3, 10):
-    from importlib.metadata import entry_points
-else:
-    from importlib_metadata import entry_points
-
-if sys.version_info[:2] >= (3, 8):
-    from typing import Protocol, runtime_checkable
-else:
-    from typing_extensions import Protocol, runtime_checkable
 
 if TYPE_CHECKING:
     from typing_extensions import Self

@@ -2,16 +2,10 @@ from __future__ import annotations
 from email.message import EmailMessage
 import logging
 import smtplib
-import sys
-from typing import Optional
+from typing import Literal, Optional
 from pydantic import Field, PrivateAttr, ValidationInfo, field_validator
 from ..config import NetrcConfig
 from ..util import OpenClosable
-
-if sys.version_info[:2] >= (3, 8):
-    from typing import Literal
-else:
-    from typing_extensions import Literal
 
 STARTTLS = "starttls"
 
