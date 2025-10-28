@@ -47,7 +47,8 @@ class MboxSender(MailboxSender):
     configpath: Path | None = None
     path: Path
 
-    def _makebox(self) -> mailbox.mbox:
+    # <https://github.com/python/typeshed/issues/14935>
+    def _makebox(self) -> mailbox.mbox:  # type: ignore[override]
         return mailbox.mbox(self.path)
 
     def _describe(self) -> str:
@@ -59,7 +60,8 @@ class MaildirSender(MailboxSender):
     path: Path
     folder: str | None = None
 
-    def _makebox(self) -> mailbox.Maildir:
+    # <https://github.com/python/typeshed/issues/14935>
+    def _makebox(self) -> mailbox.Maildir:  # type: ignore[override]
         box = mailbox.Maildir(self.path)
         if self.folder is not None:
             try:
@@ -81,7 +83,8 @@ class MHSender(MailboxSender):
     path: Path
     folder: str | list[str] | None = None
 
-    def _makebox(self) -> mailbox.MH:
+    # <https://github.com/python/typeshed/issues/14935>
+    def _makebox(self) -> mailbox.MH:  # type: ignore[override]
         box = mailbox.MH(self.path)
         if self.folder is not None:
             folders: list[str]
@@ -110,7 +113,8 @@ class MMDFSender(MailboxSender):
     configpath: Path | None = None
     path: Path
 
-    def _makebox(self) -> mailbox.MMDF:
+    # <https://github.com/python/typeshed/issues/14935>
+    def _makebox(self) -> mailbox.MMDF:  # type: ignore[override]
         return mailbox.MMDF(self.path)
 
     def _describe(self) -> str:
@@ -121,7 +125,8 @@ class BabylSender(MailboxSender):
     configpath: Path | None = None
     path: Path
 
-    def _makebox(self) -> mailbox.Babyl:
+    # <https://github.com/python/typeshed/issues/14935>
+    def _makebox(self) -> mailbox.Babyl:  # type: ignore[override]
         return mailbox.Babyl(self.path)
 
     def _describe(self) -> str:
