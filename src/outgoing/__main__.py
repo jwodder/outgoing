@@ -117,8 +117,7 @@ class Command:
                     else:
                         fp = open(path, "rb")
                     with fp:
-                        # <https://github.com/python/typeshed/issues/13273>
-                        msg = message_from_binary_file(fp, policy=policy.default)  # type: ignore[arg-type]
+                        msg = message_from_binary_file(fp, policy=policy.default)
                     assert isinstance(msg, EmailMessage)
                     sender.send(msg)
         except Error as e:
