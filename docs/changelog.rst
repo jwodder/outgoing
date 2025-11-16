@@ -7,6 +7,7 @@ v0.7.0 (in development)
 -----------------------
 - Support Python 3.14
 - Drop support for Python 3.8 and 3.9
+- Drop ``click`` and ``click-loglevel`` dependencies
 
 v0.6.2 (2025-08-02)
 -------------------
