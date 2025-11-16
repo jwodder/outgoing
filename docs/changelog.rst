@@ -3,8 +3,8 @@
 Changelog
 =========
 
-v0.7.0 (in development)
------------------------
+v0.6.3 (2025-11-16)
+-------------------
 - Support Python 3.14
 - Drop support for Python 3.8 and 3.9
 - Drop ``click`` and ``click-loglevel`` dependencies
