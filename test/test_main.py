@@ -2,7 +2,6 @@ from email.message import EmailMessage
 from io import BytesIO
 import logging
 from pathlib import Path
-import sys
 from mailbits import email2dict
 import pytest
 from pytest_mock import MockerFixture
@@ -69,11 +68,6 @@ def test_parse_args(argv: list[str], cmd: Command) -> None:
     assert Command.from_args(argv) == cmd
 
 
-class MockStdin:
-    def __init__(self, content: bytes) -> None:
-        self.buffer = BytesIO(content)
-
-
 def test_main_stdin(
     capsys: pytest.CaptureFixture[str],
     mocker: MockerFixture,
@@ -82,8 +76,8 @@ def test_main_stdin(
     tmp_path: Path,
 ) -> None:
     m = mocker.patch("outgoing.senders.null.NullSender", autospec=True)
+    mocker.patch("sys.stdin", buffer=BytesIO(bytes(test_email1)))
     monkeypatch.chdir(tmp_path)
-    monkeypatch.setattr(sys, "stdin", MockStdin(bytes(test_email1)))
     Path("cfg.toml").write_text('[outgoing]\nmethod = "null"\n')
     assert main(["--config", "cfg.toml"]) == 0
     out, err = capsys.readouterr()
