@@ -21,12 +21,12 @@ Options
 
 .. program:: outgoing
 
-.. option:: -c <file>, --config <file>
+.. option:: -c FILE, --config FILE
 
     Specify a :ref:`configuration file <configfile>` to use instead of the
     default configuration file
 
-.. option:: -E <file>, --env <file>
+.. option:: -E FILE, --env FILE
 
     .. versionadded:: 0.2.0
 
@@ -35,7 +35,7 @@ Options
     the first file named ":file:`.env`" found by searching from the current
     directory upwards.
 
-.. option:: -l <level>, --log-level <level>
+.. option:: -l LEVEL, --log-level LEVEL
 
     .. versionadded:: 0.2.0
 
@@ -45,7 +45,7 @@ Options
     .. _logging level: https://docs.python.org/3/library/logging.html
                        #logging-levels
 
-.. option:: -s <key>, --section <key>
+.. option:: -s KEY, --section KEY
 
     .. versionadded:: 0.2.0
 
